@@ -1,0 +1,1146 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ROJJJO TCG · Duel des champions</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+:root{--bg:#121419;--panel:#1b1e25;--panel2:#242832;--line:#323745;--text:#eceef3;--muted:#98a0ae;--accent:#ffc94a;--good:#45d483;--bad:#ff5c5c;--atk:#ff8f6b;--def:#6fb6ff}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button{font:inherit;color:inherit;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
+button:hover:not(:disabled){border-color:#5a6480}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.primary{background:var(--accent);color:#1a1400;border-color:var(--accent);font-weight:700}
+button.ghost{background:transparent}
+input,select,textarea{font:inherit;color:inherit;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+header{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:18px;padding:10px 18px;background:#0d0f13;border-bottom:1px solid var(--line)}
+header h1{margin:0;font-size:17px;letter-spacing:3px}
+header h1 span{color:var(--accent)}
+.tabs{display:flex;gap:6px}
+.tabs button{border-radius:999px;padding:6px 18px}
+.tabs button.on{background:var(--text);color:var(--bg);border-color:var(--text);font-weight:700}
+.ver{margin-left:auto;color:var(--muted);font-size:12px}
+.page{max-width:1200px;margin:0 auto;padding:18px}
+.muted{color:var(--muted)}
+h3{margin:22px 0 10px;font-size:15px}
+
+/* cartes */
+.card{--tc:#888;position:relative;width:128px;min-height:168px;border-radius:10px;background:linear-gradient(180deg,color-mix(in srgb,var(--tc) 24%,var(--panel2)) 0,var(--panel2) 48%);border:2px solid var(--tc);padding:6px 7px;display:flex;flex-direction:column;gap:3px;transition:transform .15s,opacity .15s,box-shadow .15s;user-select:none}
+.card .top{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.card .top b{color:var(--text);font-size:12px}
+.card .nm{font-weight:750;font-size:13.5px;line-height:1.15}
+.card .band{height:3px;background:var(--tc);border-radius:2px;margin:1px 0 2px}
+.card .kind{font-size:10.5px;color:var(--muted)}
+.card .tal{font-size:11px;color:var(--accent);font-weight:600}
+.card .txt{font-size:11px;color:#c9ced8;line-height:1.3}
+.card .stats{margin-top:auto;display:flex;justify-content:space-between;font-weight:800;font-size:17px}
+.card .stats .atk{color:var(--atk)} .card .stats .def{color:var(--def)}
+.card .stats .up{text-decoration:underline;filter:brightness(1.25)}
+.card .stats .hurt{color:var(--bad)}
+.card .cnt{position:absolute;top:-9px;right:-9px;background:var(--text);color:var(--bg);font-weight:800;border-radius:999px;padding:1px 7px;font-size:12px}
+.card .tags{display:flex;flex-wrap:wrap;gap:3px}
+.tag{font-size:10px;background:#0007;border-radius:4px;padding:1px 5px;color:#dfe3ea}
+.tag.eq{background:#2bb3a333;color:#7fe6da}
+.tag.st{background:#ffc94a22;color:var(--accent)}
+.card.click{cursor:pointer}
+.card.click:hover{transform:translateY(-3px)}
+.card.target{cursor:pointer;box-shadow:0 0 0 3px var(--accent)}
+.card.target:hover{transform:translateY(-3px)}
+.card.sel{box-shadow:0 0 0 3px var(--good)}
+.card.dim{opacity:.55}
+.card.big{width:210px;min-height:260px;padding:10px 12px}
+.card.big .nm{font-size:20px}.card.big .stats{font-size:26px}.card.big .txt{font-size:13px}
+.card.back{background:repeating-linear-gradient(45deg,#2a2f3b 0 8px,#222631 8px 16px);border-color:#454b5a;width:70px;min-height:96px}
+.card.back.full{width:128px;min-height:168px}
+
+/* decks */
+.dtiles{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.dtile{--tc:#888;text-align:left;padding:14px;border:2px solid var(--line);border-radius:14px;background:linear-gradient(160deg,color-mix(in srgb,var(--tc) 30%,var(--panel)) 0,var(--panel) 70%)}
+.dtile.on{border-color:var(--tc);box-shadow:0 0 0 2px var(--tc)}
+.dt-name{font-size:20px;font-weight:800}
+.dt-sub{font-size:12px;color:var(--muted);margin:4px 0}
+.deckhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:14px;margin-top:22px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.deckhead h2{margin:0}
+.grid{display:flex;flex-wrap:wrap;gap:14px}
+.seg{display:inline-flex;gap:4px;margin-top:14px}
+.seg button.on{background:var(--text);color:var(--bg);font-weight:700}
+
+/* modale */
+.modal-bg{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;max-width:780px;width:100%;max-height:90vh;overflow:auto}
+.mrow{display:flex;gap:20px;flex-wrap:wrap}
+.minfo{flex:1;min-width:240px}
+.minfo dt{color:var(--muted);font-size:12px;margin-top:10px}
+.minfo dd{margin:2px 0 0}
+.chain{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+.chain .arr{color:var(--muted);font-size:20px}
+.mclose{float:right}
+
+/* préparation */
+.setup{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.box h3{margin-top:0}
+.dpick{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.dchip{--tc:#888;border:2px solid var(--line)}
+.dchip.on{border-color:var(--tc);background:color-mix(in srgb,var(--tc) 35%,var(--panel2));font-weight:700}
+.opts label{display:flex;gap:8px;align-items:flex-start;margin:8px 0}
+.duels{display:flex;flex-wrap:wrap;gap:8px}
+
+/* table */
+.arena{display:grid;grid-template-columns:1fr 340px;gap:12px;padding:12px;align-items:start}
+.table{display:flex;flex-direction:column;gap:10px;min-width:0}
+.player{background:var(--panel);border-radius:14px;padding:10px 12px;border:2px solid transparent}
+.player.active{border-color:var(--accent)}
+.pinfo{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.pname{font-weight:800;font-size:16px}
+.badge{font-size:11px;background:var(--accent);color:#1a1400;border-radius:4px;padding:1px 6px;font-weight:800}
+.badge.dim{background:var(--line);color:var(--muted)}
+.chip{--tc:#888;font-size:12px;border:1px solid var(--tc);color:var(--tc);border-radius:999px;padding:1px 9px;font-weight:700}
+.wins{color:var(--accent);letter-spacing:2px}
+.troph{font-size:24px;font-weight:850}
+.troph small{font-size:12px;color:var(--muted);font-weight:600}
+.flag{font-size:11px;background:#ffc94a22;color:var(--accent);border-radius:4px;padding:2px 6px;font-weight:700}
+.field{display:flex;gap:18px;flex-wrap:wrap;padding:8px 2px;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);margin:6px 0}
+.slotz{display:flex;flex-direction:column;gap:4px}
+.slotz .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.slotz .row{display:flex;gap:10px;align-items:flex-start;min-height:170px}
+.emptyslot{width:128px;min-height:168px;border:2px dashed var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px}
+.zone{display:flex;flex-wrap:wrap;gap:10px;padding:8px 2px;min-height:60px;align-items:flex-start}
+.empty{color:var(--muted);font-style:italic;align-self:center}
+.hcard{display:flex;flex-direction:column;gap:4px;width:128px}
+.hcard button{font-size:11.5px;padding:4px 6px}
+.mid{background:#191c22;border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.midtxt{flex:1;min-width:260px}
+.midbtns{display:flex;gap:8px;flex-wrap:wrap}
+.counter{display:inline-block;font-size:12px;background:var(--panel2);border-radius:6px;padding:1px 7px;margin-left:6px}
+.counter.hot{background:var(--accent);color:#1a1400;font-weight:800}
+.pend{margin-top:6px;color:var(--accent)}
+.prev{font-size:12.5px;color:var(--muted);margin-top:4px}
+.side{display:flex;flex-direction:column;gap:12px;position:sticky;top:62px}
+.side .box{padding:12px}
+.log{max-height:320px;overflow:auto;font-size:12.5px;display:flex;flex-direction:column;gap:3px}
+.log .l.head{font-weight:800;color:var(--accent);margin-top:4px}
+.log .l.turn{font-weight:700;color:#cfd5e0;border-top:1px solid var(--line);padding-top:3px}
+.log .l.good{color:var(--good)} .log .l.bad{color:var(--bad)} .log .l.sys{color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{border-bottom:1px solid var(--line);padding:4px 5px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+.reg input{width:100%;font-size:12px;padding:3px 5px}
+.handoff{position:fixed;inset:0;z-index:40;background:#0d0f13f2;display:flex;align-items:center;justify-content:center;text-align:center}
+.handoff h2{font-size:34px;margin:6px 0 18px}
+.banner{font-size:16px}
+details summary{cursor:pointer;font-weight:700}
+.pop{position:fixed;z-index:70;width:290px;background:#0d0f13;border:1px solid #5a6480;border-radius:12px;padding:12px 14px;box-shadow:0 10px 30px #000a;font-size:13px;pointer-events:none}
+.pop h4{margin:0 0 2px;font-size:16px}.pop .sub{color:var(--muted);font-size:12px;margin-bottom:8px}
+.pop dl{margin:0}.pop dt{color:var(--muted);font-size:11.5px;margin-top:7px}.pop dd{margin:1px 0 0}
+.pop .ab{color:var(--accent);font-weight:700}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--good);color:#04210f;padding:8px 16px;border-radius:8px;font-weight:700;z-index:60}
+@media (max-width:1050px){.arena{grid-template-columns:1fr}.side{position:static}.setup{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>ROJJJO <span>TCG</span></h1>
+  <nav class="tabs">
+    <button data-a="tab:decks" data-tab="decks">Decks</button>
+    <button data-a="tab:combat" data-tab="combat">Combat</button>
+  </nav>
+  <span class="ver">Duel des champions · manuel officiel du 22/10/2026</span>
+</header>
+<main id="app"></main>
+<div id="modal"></div>
+<div id="toast"></div>
+<div id="pop" class="pop" hidden></div>
+
+<script>
+/* =========================================================
+   RÉGLAGES (section 2 des règles) — à modifier ici
+   ========================================================= */
+const CONFIG = {
+  actionsPerTurn: 3,
+  startHand: 6,
+  maxHand: null,           // pas de limite de main en fin de tour (manuel officiel)
+  maxStarters: 3,          // combattants ✯ posés à la préparation : 1 champion + jusqu'à 2 sur le banc
+  benchSlots: 2,
+  weakBonus: 1,            // bonus de faiblesse
+  poseCost: {P:1, M:2, G:3},
+  spellCost: 1, itemCost: 1,
+  swapSameType: 1,         // échange de champion entre deux créatures du même type
+  swapDiffType: 2,         // échange entre deux types différents
+  evoOnlyForLineage: true, // niveaux 2 et 3 d'une lignée : uniquement par évolution
+  evolveCost: 1,           // par niveau
+  heal: 4,                 // Soin
+  frappe: 3,               // Frappe
+  piedFerme: 2,
+  elan: 2, epee: 1, plastron: 2,
+  mulliganGift: 1,         // pour chaque mulligan, l'adversaire pioche 1 carte
+  attackCost: 0,           // l'attaque est gratuite (pas une action) et termine le tour
+  firstPlayerAttacksT1: false
+};
+// Conditions de victoire (section 2 + variantes C et C' de l'annexe B)
+const VARIANTS = {
+  std: {label:'6 étoiles (✯ 1 · ✯✯ 2 · ✯✯✯ 3)', win:6, tro:{P:1,M:2,G:3}}
+
+};
+
+/* =========================================================
+   CARTES (section 9) — modifier ici
+   ========================================================= */
+const TYPES = {
+  feu:        {name:'Feu',        color:'#e5484d'},
+  eau:        {name:'Eau',        color:'#3b8ff0'},
+  roche:      {name:'Roche',      color:'#a08560'},
+  electrique: {name:'Électrique', color:'#e6bb12'}
+};
+const ABIL = {
+  eclaireur:   {name:'Éclaireur',   text:()=>'Quand vous posez ce combattant (depuis la main, par évolution ou par Renfort), piochez 1 carte.'},
+  soigneuse:   {name:'Soigneuse',   text:()=>'Tant que ce combattant est sur votre banc, votre champion récupère 1 DEF au début de votre tour. L\'effet est cumulable, sans dépasser la DEF maximale.'},
+  embrasement: {name:'Embrasement', text:x=>`Quand ce combattant est vaincu, il inflige ${x} dégât${x>1?'s':''} direct${x>1?'s':''} au champion du joueur qui l'a vaincu (sans faiblesse).`},
+  eruption:    {name:'Éruption',    text:x=>`Quand vous posez ce combattant (depuis la main ou par évolution), il inflige ${x} dégâts directs à un combattant adverse de votre choix (champion ou banc), sans faiblesse.`}
+};
+const CARDS = {};
+const LV = {P:1,M:2,G:3};
+const STARS={P:'✯',M:'✯✯',G:'✯✯✯'};
+
+// [id, nom, taille, atk, def, faiblesse, capacité, X, lignée]
+function creatures(type, rows){
+  rows.forEach(([id,name,size,atk,def,weak,ab,x,line])=>{
+    CARDS[id]={id,name,cat:'creature',type,size,level:LV[size],atk,def,weak,ab:ab||null,abX:x||0,line:line||null};
+  });
+}
+// Livret des decks de test (22/10/2026)
+// [id, nom, taille, atk, def, faiblesse, capacité, X, lignée]
+creatures('eau',[
+  ['murene','Murène','P',2,5,'feu',null,0,'A'],
+  ['vigie','Vigie des récifs','P',2,4,'feu','eclaireur',0,'B'],
+  ['oursin','Oursin piquant','P',2,4,'feu','embrasement',1,'C'],
+  ['sirene','Sirène guérisseuse','P',1,5,'electrique','soigneuse'],
+  ['crabe','Crabe cuirassé','P',3,4,'electrique'],
+  ['bernard','Bernard-l\'ermite','P',2,5,'feu'],
+  ['kraken','Kraken','M',3,8,'electrique',null,0,'A'],
+  ['tortue','Tortue des marées','M',4,7,'feu','soigneuse',0,'B'],
+  ['hydre','Hydre','M',4,6,'feu','embrasement',2,'C'],
+  ['leviathan','Léviathan','G',6,10,'electrique',null,0,'A'],
+  ['maitre_marees','Maître des marées','G',6,9,'feu','eruption',2,'B']
+]);
+creatures('feu',[
+  ['salamandre','Salamandre','P',2,5,'eau',null,0,'A'],
+  ['guetteur','Guetteur de flamme','P',2,4,'eau','eclaireur',0,'B'],
+  ['imp','Imp explosif','P',2,4,'eau','embrasement',1,'C'],
+  ['veilleur','Veilleur de cendres','P',1,5,'roche','soigneuse'],
+  ['chien_braise','Chien de braise','P',3,4,'roche'],
+  ['garde_lave','Garde de lave','P',2,5,'eau'],
+  ['phenix','Phénix','M',5,6,'eau',null,0,'A'],
+  ['pyromancien','Pyromancien','M',2,9,'roche','soigneuse',0,'B'],
+  ['demon','Démon incandescent','M',4,6,'eau','embrasement',2,'C'],
+  ['dragon_lave','Dragon de lave','G',8,8,'eau',null,0,'A'],
+  ['titan_volcan','Titan du volcan','G',4,11,'roche','eruption',2,'B']
+]);
+function nc(id,name,cat,text){CARDS[id]={id,name,cat,text};}
+nc('frappe','Frappe','sort','Inflige 3 dégâts directs à un combattant adverse (champion ou banc), sans tenir compte de la faiblesse ni des réductions de dégâts.');
+nc('soin','Soin','sort','Redonne 4 DEF à n\'importe lequel de vos combattants, champion ou banc, sans dépasser sa DEF maximale.');
+nc('elan','Élan','sort','+2 ATK pour votre champion jusqu\'à la fin du tour.');
+nc('echange_force','Échange forcé','sort','Oblige l\'adversaire à changer de champion : vous choisissez le combattant de son banc qui prend la place ; l\'ancien champion va au banc.');
+nc('pioche','Pioche','sort','Piochez 2 cartes.');
+nc('renfort','Renfort','sort','Cherchez un combattant ✯ dans votre deck et posez-le sur votre banc (il faut une place libre), puis mélangez votre deck. Il compte comme posé depuis la main. Jouable même s\'il n\'y a plus de ✯ dans le deck : vous mélangez alors simplement le deck.');
+nc('plastron','Plastron','objet',`+${CONFIG.plastron} DEF tant que le combattant est en jeu : sa DEF de départ et sa DEF restante augmentent chacune de ${CONFIG.plastron}.`);
+nc('epee','Épée','objet',`+${CONFIG.epee} ATK tant que le combattant est en jeu.`);
+// liens d'évolution
+Object.values(CARDS).forEach(c=>{ if(c.cat==='creature'&&c.line){
+  c.from=(Object.values(CARDS).find(x=>x.cat==='creature'&&x.type===c.type&&x.line===c.line&&x.level===c.level-1)||{}).id||null;
+  c.next=(Object.values(CARDS).find(x=>x.cat==='creature'&&x.type===c.type&&x.line===c.line&&x.level===c.level+1)||{}).id||null;
+}});
+
+/* =========================================================
+   DECKS DE TEST OFFICIELS (livret du 22/10/2026)
+   ========================================================= */
+const ATOUTS = [['frappe',2],['soin',2],['elan',1],['echange_force',1],['pioche',1],['renfort',1],['plastron',1],['epee',1]];
+const DECKS = {
+  eau: {name:'Deck A', list:[['murene',3],['vigie',3],['oursin',2],['sirene',1],['crabe',2],['bernard',2],['kraken',2],['tortue',2],['hydre',1],['leviathan',1],['maitre_marees',1],...ATOUTS]},
+  feu: {name:'Deck B', list:[['salamandre',3],['guetteur',3],['imp',2],['veilleur',1],['chien_braise',2],['garde_lave',2],['phenix',2],['pyromancien',2],['demon',1],['dragon_lave',1],['titan_volcan',1],...ATOUTS]}
+};
+const DECK_ORDER = ['eau','feu'];
+function deckLabel(k){return `${DECKS[k].name} (${TYPES[k].name})`;}
+
+/* =========================================================
+   OUTILS
+   ========================================================= */
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function expand(list){const r=[];list.forEach(([id,n])=>{for(let i=0;i<n;i++)r.push(id);});return r;}
+function coin(){return Math.random()<.5;}
+const C = id=>CARDS[id];
+const s_ = n=>n>1?'s':'';
+function abLabel(c){return c.ab?`${ABIL[c.ab].name}${c.abX?' '+c.abX:''}`:'';}
+function lineLabel(c){return c.line?`Lignée ${c.line}${c.level}`:'Hors lignée';}
+function cardColor(c){return c.cat==='creature'?TYPES[c.type].color:c.cat==='sort'?'#a970ff':'#2bb3a3';}
+function tip(c){
+  if(c.cat!=='creature') return `${c.name} · ${c.cat==='sort'?'Atout':'Objet'} (1 action)\n${c.text}`;
+  let t=`${c.name} · ${TYPES[c.type].name} ${c.size} · ATK ${c.atk} / DEF ${c.def}\nFaiblesse : ${TYPES[c.weak].name} · ${lineLabel(c)}\nPose : ${CONFIG.poseCost[c.size]} action${s_(CONFIG.poseCost[c.size])}`;
+  if(c.ab) t+=`\n✦ ${abLabel(c)} : ${ABIL[c.ab].text(c.abX)}`;
+  return t;
+}
+function cardHTML(id,o={}){
+  const c=C(id); let top,body='';
+  if(c.cat==='creature'){
+    top=`<span>${TYPES[c.type].name}</span><b>${STARS[c.size]}</b>`;
+    if(c.ab) body+=`<div class="tal">✦ ${abLabel(c)}</div>`;
+    body+=`<div class="kind">Faible : ${TYPES[c.weak].name}<br>${lineLabel(c)}</div>`;
+    const s=o.stats||{atk:c.atk,def:c.def};
+    body+=`<div class="stats"><span class="atk ${s.ac||''}">⚔ ${s.atk}</span><span class="def ${s.dc||''}">🛡 ${s.def}</span></div>`;
+  } else {
+    top=`<span>${c.cat==='sort'?'Atout':'Objet'}</span><span></span>`;
+    body+=`<div class="txt">${esc(c.text)}</div>`;
+  }
+  return `<div class="card ${o.cls||''}" style="--tc:${cardColor(c)}" ${o.attrs||''} data-card="${id}"${o.uid?` data-uid="${o.uid}"`:''}>
+    <div class="top">${top}</div><div class="nm">${esc(c.name)}</div><div class="band"></div>${o.extra||''}${body}
+    ${o.count?`<div class="cnt">×${o.count}</div>`:''}</div>`;
+}
+
+/* =========================================================
+   ÉTAT
+   ========================================================= */
+const UI = {tab:'decks', deck:'eau', deckEvo:true, detail:null, exportText:null, confirmQuit:false,
+  play:'local', joinCode:'', names:['Joueur A','Joueur B'], pick:['eau','feu'], mode:'match', hideHands:false};
+let G=null, UNDO=[], HIST=[];
+let MY_SEAT=null;   // en ligne : 0 = hôte (arbitre), 1 = invité ; null = un seul écran
+let ACT_SEAT=null;  // siège du joueur dont l'action est en cours d'exécution (hôte)
+
+/* =========================================================
+   MOTEUR
+   ========================================================= */
+function nu(){return G.uid++;}
+function PL(p){return G.players[p];}
+function cp(){return G.players[G.cur];}
+function op(){return G.players[1-G.cur];}
+function log(m,c){G.log.push({msg:m,cls:c||''});}
+function mine(p){const P=PL(p);return [P.champion,...P.bench].filter(Boolean);}
+function findC(p,uid){return mine(p).find(c=>c.uid===uid);}
+function ownerOf(uid){return findC(0,uid)?0:findC(1,uid)?1:-1;}
+function maxDef(c){return C(c.id).def+(c.item==='plastron'?CONFIG.plastron:0);}
+function curDef(c){return maxDef(c)-c.dmg;}
+function baseAtk(c){return C(c.id).atk+(c.item==='epee'?CONFIG.epee:0);}
+function reduction(p,c){return armor(c)+(PL(p).champion===c&&PL(p).piedFerme?CONFIG.piedFerme:0);}
+function armor(c){return C(c.id).ab==='armure'?C(c.id).abX:0;}
+function makeC(id,start){return {uid:nu(),id,dmg:0,item:null,start:!!start,placedTurn:G?G.turn:0};}
+function nm(c){return C(c.id).name;}
+function deckList(k){return DECKS[k].list;}
+function isOver(){return G.phase==='roundover'||G.phase==='matchover';}
+
+function newMatch(o){
+  const v=VARIANTS[o.variant];
+  G={uid:1,online:!!o.online,mode:o.mode,target:o.mode==='blitz'?1:3,variant:o.variant,win:v.win,tro:v.tro,noEvo:o.noEvo,hide:o.online?false:o.hideHands,
+     levM:!!o.levM,levAtk:!!o.levAtk,names:o.names.slice(),decks:o.decks.slice(),wins:[0,0],round:0,log:[],players:[null,null],histCount:HIST.length};
+  UNDO=[];
+  G.first=coin()?0:1;
+  log(`${o.mode==='blitz'?'Partie Blitz (1 manche)':'Match (3 manches gagnantes)'} : ${G.names[0]} (${deckLabel(G.decks[0])}) contre ${G.names[1]} (${deckLabel(G.decks[1])}) · victoire à ${v.win} étoiles.`,'sys');
+  log(`Pile ou face : ${G.names[G.first]} commence.`,'sys');
+  startRound();
+}
+function startRound(){
+  G.round++; G.turn=0; G.pturns=[0,0]; G.phase='setup'; G.mull=[0,0]; G.evoCount=0; G.start=Date.now();
+  G.pending=[]; G.after=null; G.revealed=false; G.setupSel=[[],[]];
+  log(`Manche ${G.round} · premier joueur : ${G.names[G.first]}`,'head');
+  for(let p=0;p<2;p++){
+    const P={deck:shuffle(expand(deckList(G.decks[p]))),hand:[],champion:null,bench:[],discard:[],trophies:0,piedFerme:false,elan:false};
+    G.players[p]=P;
+    const deal=()=>{for(let i=0;i<CONFIG.startHand;i++)P.hand.push({uid:nu(),id:P.deck.pop()});};
+    deal();
+    let g=0;
+    while(!P.hand.some(h=>C(h.id).size==='P')&&g++<100){P.deck.push(...P.hand.map(h=>h.id));P.hand=[];shuffle(P.deck);deal();G.mull[p]++;}
+    if(G.mull[p]) log(`${G.names[p]} : main noire ×${G.mull[p]} (aucun combattant ✯ en main).`,'sys');
+  }
+  for(let p=0;p<2;p++){const n=G.mull[1-p]*CONFIG.mulliganGift;
+    for(let i=0;i<n;i++) G.players[p].hand.push({uid:nu(),id:G.players[p].deck.pop()});
+    if(n) log(`${G.names[p]} pioche ${n} carte${s_(n)} grâce à la main noire adverse.`,'sys');}
+  G.cur=G.first; G.handoff=G.hide;
+}
+function seatOfHand(uid){return PL(0).hand.some(h=>h.uid===uid)?0:PL(1).hand.some(h=>h.uid===uid)?1:-1;}
+function setupToggle(uid){
+  const seat=seatOfHand(uid); if(seat<0||PL(seat).champion) return;
+  const h=PL(seat).hand.find(x=>x.uid===uid); if(C(h.id).cat!=='creature'||C(h.id).size!=='P') return;
+  const sel=G.setupSel[seat], i=sel.indexOf(uid);
+  if(i>=0) sel.splice(i,1); else if(sel.length<CONFIG.maxStarters) sel.push(uid);
+}
+function setupConfirm(seat){
+  if(seat==null) seat=G.cur;
+  const P=PL(seat), sel=G.setupSel[seat];
+  const ids=sel.map(u=>{const i=P.hand.findIndex(h=>h.uid===u);return P.hand.splice(i,1)[0].id;});
+  P.champion=makeC(ids[0],true); P.bench=ids.slice(1).map(id=>makeC(id,true));
+  log(`${G.names[seat]} pose ${ids.length} combattant${s_(ids.length)} face cachée.`,'sys');
+  if(!PL(1-seat).champion){ if(!G.online){G.cur=1-seat;G.handoff=G.hide;} return; }
+  G.revealed=true;
+  [0,1].forEach(p=>{const P=PL(p);log(`Révélation · ${G.names[p]} : champion ${nm(P.champion)}${P.bench.length?`, banc ${P.bench.map(nm).join(' et ')}`:', banc vide'}.`);});
+  G.cur=G.first; startTurn();
+}
+function drawCard(p){const P=PL(p);if(!P.deck.length)return false;P.hand.push({uid:nu(),id:P.deck.pop()});return true;}
+function lose(p,reason){if(!isOver()) endRound(1-p,reason);}
+function startTurn(){
+  G.turn++; G.pturns[G.cur]++;
+  const P=cp();
+  P.piedFerme=false;
+  G.actions=CONFIG.actionsPerTurn; G.evolved=[]; G.phase='actions'; G.after=null;
+  log(`Tour ${G.turn} · ${G.names[G.cur]}`,'turn');
+  if(!drawCard(G.cur)) return lose(G.cur,'deck vide');
+  const n=P.bench.filter(b=>C(b.id).ab==='soigneuse').length;
+  if(n&&P.champion){const g=heal(P.champion,n);if(g)log(`Soigneuse${s_(n)} : ${nm(P.champion)} récupère ${g} DEF (${curDef(P.champion)}/${maxDef(P.champion)}).`,'good');}
+  G.handoff=G.hide;
+}
+function heal(c,n){const b=curDef(c);c.dmg=Math.max(0,c.dmg-n);return curDef(c)-b;}
+function damage(p,c,n,src,label){
+  c.dmg+=n;
+  log(`${label?label+' : ':''}${nm(c)} (${G.names[p]}) subit ${n} dégât${s_(n)} → ${Math.max(0,curDef(c))}/${maxDef(c)} DEF.`, n?'bad':'');
+  if(curDef(c)<=0) vanquish(p,c,src);
+}
+function vanquish(p,c,killer){
+  const P=PL(p);
+  if(P.champion===c) P.champion=null; else P.bench.splice(P.bench.indexOf(c),1);
+  P.discard.push(c.id); if(c.item) P.discard.push(c.item);
+  const card=C(c.id), t=G.tro[card.size];
+  PL(killer).trophies+=t;
+  log(`☠ ${card.name} est vaincu : ${G.names[killer]} récupère ${t} étoile${s_(t)} (${PL(killer).trophies}/${G.win}).`,'good');
+  if(card.ab==='embrasement'){
+    const kc=PL(killer).champion;
+    if(kc) damage(killer,kc,Math.max(0,card.abX-reduction(killer,kc)),p,`✦ Embrasement ${card.abX}`);
+    else log('✦ Embrasement : aucun champion à toucher.','sys');
+  }
+}
+// Fin de résolution : victoire, remplacement, défaite (section 6.3)
+function aftermath(){
+  if(isOver()) return;
+  const t=G.players.map(x=>x.trophies), def=1-G.cur;
+  const r=[0,1].filter(i=>t[i]>=G.win);
+  if(r.length===2) return endRound(t[0]>t[1]?0:t[1]>t[0]?1:def,'étoiles (les deux joueurs)');
+  if(r.length===1) return endRound(r[0],`${G.win} étoiles`);
+  const dead=[0,1].filter(i=>!PL(i).champion), lost=dead.filter(i=>!PL(i).bench.length);
+  if(lost.length===2) return endRound(def,'deux champions vaincus, bancs vides');
+  if(lost.length===1) return endRound(1-lost[0],'champion vaincu, banc vide');
+  dead.forEach(i=>{
+    const P=PL(i);
+    if(P.bench.length===1) promote(i,P.bench[0].uid);
+    else G.pending.push({kind:'replace',p:i,options:P.bench.map(b=>b.uid)});
+  });
+}
+function promote(p,uid){
+  const P=PL(p), c=P.bench.find(b=>b.uid===uid);
+  P.bench.splice(P.bench.indexOf(c),1); P.champion=c;
+  log(`${G.names[p]} : ${nm(c)} devient champion (remplacement).`);
+}
+function swap(p,uid,how){
+  const P=PL(p), b=P.bench.find(x=>x.uid===uid), i=P.bench.indexOf(b), old=P.champion;
+  P.bench[i]=old; P.champion=b;
+  log(`${how} : ${nm(b)} devient champion de ${G.names[p]}, ${nm(old)} va au banc.`);
+  const cb=C(b.id);
+  if(cb.ab==='reflux'){const g=heal(b,cb.abX);log(`✦ Reflux : ${cb.name} récupère ${g} DEF (${curDef(b)}/${maxDef(b)}).`,'good');}
+}
+function onEnter(p,c){
+  const card=C(c.id);
+  if(card.ab==='eclaireur'){ if(!drawCard(p)) return lose(p,'deck vide (Éclaireur)'); log(`✦ Éclaireur : ${G.names[p]} pioche 1 carte.`,'good'); }
+  if(card.ab==='eruption'){
+    const t=mine(1-p).map(x=>x.uid);
+    if(t.length===1) eruption(p,c.uid,t[0]);
+    else G.pending.push({kind:'target',what:'eruption',p,src:c.uid,options:t});
+  }
+}
+function eruption(p,srcUid,tUid){
+  const src=findC(p,srcUid)||{id:'titan_volcan'}, x=C(src.id).abX||2;
+  const t=findC(1-p,tUid); damage(1-p,t,Math.max(0,x-reduction(1-p,t)),p,`✦ Éruption ${x}`);
+  aftermath();
+}
+function canEvolve(c,card){
+  const k=C(c.id);
+  return k.type===card.type&&k.line&&k.line===card.line&&k.level===card.level-1
+    &&c.placedTurn<G.turn&&!G.evolved.includes(c.uid)&&!(c.start&&G.pturns[G.cur]===1);
+}
+function evoOnly(c){return CONFIG.evoOnlyForLineage&&!(G&&G.noEvo)&&!!c.from&&!(G&&G.levM&&c.size==='M');}
+function atkCost(){return G&&G.levAtk?0:CONFIG.attackCost;}
+function takeHand(uid){const P=cp(),i=P.hand.findIndex(h=>h.uid===uid);return P.hand.splice(i,1)[0];}
+
+/* ---- ce que permet une carte de la main ---- */
+function handActions(h){
+  if(!G||G.phase!=='actions'||G.pending.length||G.handoff) return [];
+  const p=G.cur,P=cp(),O=op(),c=C(h.id),A=G.actions,out=[];
+  const noA=n=>`Il faut ${n} action${s_(n)} (il en reste ${A})`;
+  if(c.cat==='creature'){
+    const cost=CONFIG.poseCost[c.size];
+    if(!evoOnly(c)){
+      const why=A<cost?noA(cost):P.bench.length>=CONFIG.benchSlots?'Banc plein':'';
+      out.push({key:'pose',label:`Poser sur le banc (${cost})`,ok:!why,why});
+    }
+    if(!G.noEvo&&c.from){
+      const t=mine(p).filter(x=>canEvolve(x,c)).map(x=>x.uid);
+      let w='';
+      if(A<CONFIG.evolveCost) w=noA(CONFIG.evolveCost);
+      else if(!t.length){
+        const any=mine(p).some(x=>x.id===c.from);
+        w=!any?`Nécessite ${C(c.from).name} en jeu`
+          :mine(p).some(x=>x.id===c.from&&x.start&&G.pturns[G.cur]===1)?'Les combattants posés à la préparation n\'évoluent pas pendant votre premier tour'
+          :mine(p).some(x=>x.id===c.from&&x.placedTurn===G.turn)?'Posée ce tour : elle doit être en jeu au début du tour pour évoluer'
+          :'Déjà évoluée ce tour';
+      }
+      out.push({key:'evolve',label:`Évoluer (${CONFIG.evolveCost})`,ok:!w,why:w,targets:t});
+    }
+    return out;
+  }
+  const cost=c.cat==='sort'?CONFIG.spellCost:CONFIG.itemCost;
+  let why=A<cost?noA(cost):'', t=null;
+  if(!why){
+    if(c.id==='soin') t=mine(p).map(x=>x.uid);
+    else if(c.id==='frappe') t=mine(1-p).map(x=>x.uid);
+    else if(c.id==='echange_force'){t=O.bench.map(x=>x.uid);if(!t.length)why='Banc adverse vide';}
+    else if(c.id==='renfort'){if(P.bench.length>=CONFIG.benchSlots)why='Banc plein';else t='deck';}
+    else if(c.cat==='objet'){t=mine(p).filter(x=>!x.item).map(x=>x.uid);if(!t.length)why='Tous vos combattants ont déjà un objet';}
+    else if(c.id==='pied_ferme'&&P.piedFerme) why='Déjà actif';
+    else if(c.id==='elan'&&P.elan) why='Déjà actif ce tour';
+  }
+  out.push({key:c.cat==='objet'?'item':'spell',label:`${c.cat==='objet'?'Équiper':'Jouer'} (${cost})`,ok:!why,why,targets:t});
+  return out;
+}
+function swapCost(b){return C(b.id).type===C(cp().champion.id).type?CONFIG.swapSameType:CONFIG.swapDiffType;}
+
+/* ---- exécution ---- */
+function doPose(uid){
+  const h=takeHand(uid),c=makeC(h.id),cost=CONFIG.poseCost[C(h.id).size];
+  cp().bench.push(c); G.actions-=cost;
+  log(`${G.names[G.cur]} pose ${C(h.id).name} sur le banc (${cost} action${s_(cost)}).`);
+  onEnter(G.cur,c);
+}
+function doEvolve(uid,tUid){
+  const h=takeHand(uid), c=findC(G.cur,tUid), old=nm(c);
+  cp().discard.push(c.id); c.id=h.id; G.actions-=CONFIG.evolveCost; G.evolved.push(c.uid); G.evoCount++;
+  log(`${G.names[G.cur]} fait évoluer ${old} en ${nm(c)} (${curDef(c)}/${maxDef(c)} DEF).`);
+  onEnter(G.cur,c);
+}
+function doSpell(uid,tUid){
+  const h=takeHand(uid),c=C(h.id),p=G.cur,P=cp(),n=G.names[p];
+  P.discard.push(h.id); G.actions-=CONFIG.spellCost;
+  if(c.id==='soin'){const t=findC(p,tUid),g=heal(t,CONFIG.heal);log(`${n} joue Soin : ${nm(t)} récupère ${g} DEF (${curDef(t)}/${maxDef(t)}).`,'good');}
+  else if(c.id==='frappe'){const t=findC(1-p,tUid);log(`${n} joue Frappe sur ${nm(t)}.`);damage(1-p,t,CONFIG.frappe,p,'Frappe');aftermath();}
+  else if(c.id==='echange_force'){log(`${n} joue Échange forcé.`);swap(1-p,tUid,'Échange forcé');}
+  else if(c.id==='pied_ferme'){P.piedFerme=true;log(`${n} joue Pied ferme : son champion subira ${CONFIG.piedFerme} dégâts de moins par coup jusqu'à son prochain tour.`);}
+  else if(c.id==='elan'){P.elan=true;log(`${n} joue Élan : +${CONFIG.elan} ATK à son champion ce tour.`);}
+  else if(c.id==='pioche'){log(`${n} joue Pioche.`);for(let i=0;i<2;i++)if(!drawCard(p))return lose(p,'deck vide (Pioche)');}
+}
+function doRenfort(uid,cardId){
+  const h=takeHand(uid),P=cp();
+  P.discard.push(h.id); G.actions-=CONFIG.spellCost;
+  if(!cardId){shuffle(P.deck);log(`${G.names[G.cur]} joue Renfort : aucun combattant ✯ dans le deck, l'atout est sans effet (deck mélangé).`,'sys');return;}
+  P.deck.splice(P.deck.indexOf(cardId),1); shuffle(P.deck);
+  const c=makeC(cardId); P.bench.push(c);
+  log(`${G.names[G.cur]} joue Renfort : ${C(cardId).name} est posée sur le banc depuis le deck (deck mélangé).`);
+  onEnter(G.cur,c);
+}
+function doItem(uid,tUid){
+  const h=takeHand(uid),t=findC(G.cur,tUid);
+  t.item=h.id; G.actions-=CONFIG.itemCost;
+  log(`${G.names[G.cur]} équipe ${nm(t)} de ${C(h.id).name}${h.id==='plastron'?` (${curDef(t)}/${maxDef(t)} DEF)`:''}.`);
+}
+function doSwap(uid){
+  const b=findC(G.cur,uid),cost=swapCost(b);
+  G.actions-=cost;
+  swap(G.cur,uid,`Échange (${cost} action${s_(cost)})`);
+}
+function attackCalc(){
+  const A=cp(),D=op(),a=A.champion,d=D.champion;
+  let atk=baseAtk(a)+(A.elan?CONFIG.elan:0);
+  const parts=[`ATK ${atk}`];
+  const weak=C(d.id).weak===C(a.id).type;
+  if(weak) parts.push(`+${CONFIG.weakBonus} faiblesse`);
+  const red=armor(d)+(D.piedFerme?CONFIG.piedFerme:0);
+  if(armor(d)) parts.push(`−${armor(d)} Armure`);
+  if(D.piedFerme) parts.push(`−${CONFIG.piedFerme} Pied ferme`);
+  const dmg=Math.max(0,atk+(weak?CONFIG.weakBonus:0)-red);
+  return {dmg,txt:parts.join(' ')+` = ${dmg}`,kills:dmg>=curDef(d)};
+}
+function canAttack(){
+  if(G.phase!=='actions'||G.pending.length) return false;
+  if(!CONFIG.firstPlayerAttacksT1&&G.cur===G.first&&G.pturns[G.cur]===1) return false;
+  if(G.actions<atkCost()) return false;
+  return !!(cp().champion&&op().champion);
+}
+function doAttack(){
+  const A=cp(),D=op(),a=A.champion,d=D.champion,k=attackCalc();
+  G.actions-=atkCost();
+  log(`⚔ ${nm(a)} attaque ${nm(d)}${atkCost()?` (${atkCost()} action)`:''} : ${k.txt}.`);
+  damage(1-G.cur,d,k.dmg,G.cur);
+  G.after='end'; aftermath(); flow();
+}
+function endTurnNoAttack(){log(`${G.names[G.cur]} termine son tour sans attaquer.`,'sys');G.after='end';flow();}
+function flow(){
+  while(!isOver()&&!G.pending.length&&G.after){
+    const a=G.after; G.after=null;
+    if(a==='end'){
+      const x=CONFIG.maxHand==null?0:cp().hand.length-CONFIG.maxHand;
+      if(x>0) G.pending.push({kind:'discard',p:G.cur,n:x,chosen:[]});
+      G.after='switch';
+    } else if(a==='switch'){ cp().elan=false; G.cur=1-G.cur; startTurn(); }
+  }
+}
+function endRound(w,reason){
+  G.phase='roundover'; G.handoff=false; G.pending=[]; G.after=null;
+  G.wins[w]++; G.lastWinner=w;
+  HIST.push({round:G.round,decks:`${DECKS[G.decks[0]].name} (${G.names[0]}) contre ${DECKS[G.decks[1]].name} (${G.names[1]})${G.mode==='blitz'?' · Blitz':''}`,
+    j1:G.names[G.first],winner:G.names[w],tours:G.turn,duree:((Date.now()-G.start)/60000).toFixed(1),
+    troph:`${PL(0).trophies}–${PL(1).trophies}`,evos:G.evoCount,mull:`${G.mull[0]}/${G.mull[1]}`,reason,notes:''});
+  G.histCount=HIST.length;
+  log(`🏆 ${G.names[w]} remporte la manche ${G.round} (${reason}). Score ${G.wins[0]}–${G.wins[1]}.`,'good');
+  if(G.wins[w]>=G.target){G.phase='matchover';if(G.mode!=='blitz')log(`${G.names[w]} remporte le match !`,'good');}
+}
+function nextRound(){G.first=1-G.lastWinner;startRound();}
+
+/* =========================================================
+   RENDU
+   ========================================================= */
+function render(){
+  if(typeof hidePop==='function') hidePop();
+  document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===UI.tab));
+  $('#app').innerHTML = UI.tab==='decks'?renderDecks():renderCombat();
+  $('#modal').innerHTML = UI.detail?renderDetail(UI.detail):UI.exportText!==null?renderExport():'';
+  if(NET.role==='host'&&G&&G.online) netBroadcast();
+}
+
+/* ---- onglet Decks ---- */
+function renderDecks(){
+  const tiles=DECK_ORDER.map(k=>`<button class="dtile ${UI.deck===k?'on':''}" style="--tc:${TYPES[k].color}" data-a="deck:${k}">
+      <div class="dt-name">${DECKS[k].name} · ${TYPES[k].name}</div><div class="dt-sub">${expand(DECKS[k].list).length} cartes · ${expand(DECKS[k].list).filter(id=>C(id).cat==='creature').length} combattants · ${expand(DECKS[k].list).filter(id=>C(id).cat!=='creature').length} atouts et objets</div></button>`).join('');
+  const list=DECKS[UI.deck].list;
+  const groups=[['Combattants ✯',id=>C(id).size==='P'],['Combattants ✯✯',id=>C(id).size==='M'],['Combattants ✯✯✯',id=>C(id).size==='G'],
+    ['Atouts',id=>C(id).cat==='sort'],['Objets',id=>C(id).cat==='objet']];
+  const sections=groups.map(([title,f])=>{
+    const items=list.filter(([id])=>f(id)); const n=items.reduce((s,[,c])=>s+c,0);
+    if(!items.length) return '';
+    return `<h3>${title} <span class="muted">(${n})</span></h3><div class="grid">${items.map(([id,c])=>cardHTML(id,{count:c,cls:'click',attrs:`data-a="detail:${id}"`})).join('')}</div>`;
+  }).join('');
+  const tot=list.reduce((s,[,c])=>s+c,0);
+  return `<div class="page">
+    <div class="dtiles">${tiles}</div>
+    <div class="deckhead"><h2 style="color:${TYPES[UI.deck].color}">${deckLabel(UI.deck)}</h2>
+      <span class="muted">${tot} cartes · cliquez sur une carte pour le détail</span></div>
+    ${sections}</div>`;
+}
+function renderDetail(id){
+  const c=C(id); let info='<dl>';
+  if(c.cat==='creature'){
+    info+=`<dt>Type et étoiles</dt><dd>${TYPES[c.type].name} · ${STARS[c.size]} · ATK ${c.atk} / DEF ${c.def}</dd>`;
+    info+=`<dt>Faiblesse</dt><dd>${TYPES[c.weak].name} : +${CONFIG.weakBonus} dégât quand un combattant ${TYPES[c.weak].name} l'attaque</dd>`;
+    info+=`<dt>Entrée en jeu</dt><dd>${c.from?`Uniquement par évolution depuis ${C(c.from).name} (${CONFIG.evolveCost} action, sur un combattant en jeu au début du tour). Jamais posé directement depuis la main.`:`Pose sur le banc : ${CONFIG.poseCost[c.size]} action${s_(CONFIG.poseCost[c.size])}`}</dd>`;
+    info+=`<dt>Étoiles données si vaincu</dt><dd>${G?G.tro[c.size]:VARIANTS.std.tro[c.size]}</dd>`;
+    if(c.ab) info+=`<dt>Capacité ✦ ${abLabel(c)}</dt><dd>${esc(ABIL[c.ab].text(c.abX))}</dd>`;
+    info+=`<dt>Lignée</dt><dd>${lineLabel(c)}</dd>`;
+  } else info+=`<dt>${c.cat==='sort'?'Atout':'Objet'} · 1 action</dt><dd>${esc(c.text)}</dd>`;
+  const inDecks=DECK_ORDER.map(k=>{const e=DECKS[k].list.find(([x])=>x===id);return e?`${DECKS[k].name} ×${e[1]}`:null;}).filter(Boolean);
+  info+=`<dt>Présente dans</dt><dd>${inDecks.join(' · ')||'—'}</dd></dl>`;
+  let chain='';
+  if(c.cat==='creature'&&c.line){
+    let first=c; while(first.from) first=C(first.from);
+    const ids=[]; for(let x=first;x;x=x.next?C(x.next):null) ids.push(x.id);
+    chain=`<h3>Lignée ${c.line}</h3><div class="chain">${ids.map(x=>cardHTML(x,{cls:'click'+(x===id?' sel':''),attrs:`data-a="detail:${x}"`})).join('<span class="arr">→</span>')}</div>`;
+  }
+  return `<div class="modal-bg" data-a="close"><div class="modal"><button class="mclose ghost" data-a="close">✕</button>
+    <div class="mrow">${cardHTML(id,{cls:'big'})}<div class="minfo"><h2 style="margin:0">${esc(c.name)}</h2>${info}</div></div>${chain}</div></div>`;
+}
+
+/* ---- Combat : préparation ---- */
+function renderSetup(){
+  if(UI.play==='online') return renderOnlineSetup();
+  const col=i=>`<div class="box"><h3>Joueur ${i?'B':'A'}</h3>
+    <label>Nom <input id="nm${i}" value="${esc(UI.names[i])}"></label>
+    <div class="dpick">${DECK_ORDER.map(k=>`<button class="dchip ${UI.pick[i]===k?'on':''}" style="--tc:${TYPES[k].color}" data-a="pick:${i}:${k}">${deckLabel(k)}</button>`).join('')}</div></div>`;
+  const chip=(key,val,label)=>`<button class="dchip ${UI[key]===val?'on':''}" style="--tc:var(--accent)" data-a="set:${key}:${val}">${label}</button>`;
+  return `<div class="page">
+    ${playModeChips()}
+    <div class="setup">${col(0)}${col(1)}</div>
+    <div class="box" style="margin-top:16px"><h3>Mode de jeu</h3><div class="duels">
+      ${chip('mode','match','Match · 3 manches gagnantes')}${chip('mode','blitz','Blitz · 1 seule manche')}</div></div>
+    <div class="box opts" style="margin-top:16px"><h3>Affichage</h3>
+      <label><input type="checkbox" ${UI.hideHands?'checked':''} data-opt="hideHands"> <span>Écran partagé : masquer la main entre les tours (écran « passez à… »)</span></label>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
+      <button class="primary" data-a="start">${UI.mode==='blitz'?'Lancer la partie Blitz':'Lancer le match'}</button>
+      <span class="muted">Le premier joueur est tiré à pile ou face.</span></div>
+    ${HIST.length?`<div class="box" style="margin-top:16px">${registryHTML()}</div>`:''}
+  </div>`;
+}
+
+function playModeChips(){
+  return `<div class="duels" style="margin-bottom:16px"><button class="dchip ${UI.play!=='online'?'on':''}" style="--tc:var(--accent)" data-a="set:play:local">Sur ce seul écran</button><button class="dchip ${UI.play==='online'?'on':''}" style="--tc:var(--accent)" data-a="set:play:online">En ligne · 2 appareils</button></div>`;
+}
+function renderOnlineSetup(){
+  const chip=(key,val,label)=>`<button class="dchip ${UI[key]===val?'on':''}" style="--tc:var(--accent)" data-a="set:${key}:${val}">${label}</button>`;
+  const saved=netSaved();
+  let body;
+  if(NET.role==='host'&&!G){
+    body=`<div class="box" style="text-align:center"><p class="muted" style="margin:0">Code de la partie</p>
+      <div style="font-size:54px;font-weight:900;letter-spacing:10px;margin:6px 0">${NET.code||'…'}</div>
+      <p>${esc(NET.status||'')}</p><p class="muted">Donnez ce code à votre adversaire : il choisit « Rejoindre » sur son appareil.</p>
+      <button data-a="netcancel">Annuler</button></div>`;
+  } else if(NET.role==='guest'&&!G){
+    body=`<div class="box" style="text-align:center"><p>${esc(NET.status||'Connexion…')}</p><button data-a="netcancel">Annuler</button></div>`;
+  } else {
+    body=`<div class="setup">
+      <div class="box"><h3>Créer une partie</h3><p class="muted" style="margin-top:0">Votre appareil sera l'arbitre : il doit rester ouvert pendant toute la partie.</p>
+        <div class="duels">${chip('mode','match','Match · 3 manches gagnantes')}${chip('mode','blitz','Blitz · 1 seule manche')}</div>
+        <div style="margin-top:12px"><button class="primary" data-a="nethost">Créer et obtenir un code</button></div>
+        ${saved?`<div style="margin-top:12px"><button data-a="netresume">Reprendre la partie en cours (code ${esc(saved.code)})</button></div>`:''}</div>
+      <div class="box"><h3>Rejoindre une partie</h3>
+        <label>Code <input id="netcode" maxlength="4" style="text-transform:uppercase;width:110px;font-size:20px;letter-spacing:4px" value="${esc(UI.joinCode||'')}"></label>
+        <div style="margin-top:12px"><button class="primary" data-a="netjoin">Rejoindre</button></div></div>
+    </div>`;
+  }
+  return `<div class="page">${playModeChips()}
+    <div class="box" style="margin-bottom:16px"><h3>Vous</h3>
+      <label>Nom <input id="nm0" value="${esc(UI.names[0])}"></label>
+      <div class="dpick">${DECK_ORDER.map(k=>`<button class="dchip ${UI.pick[0]===k?'on':''}" style="--tc:${TYPES[k].color}" data-a="pick:0:${k}">${deckLabel(k)}</button>`).join('')}</div></div>
+    ${NET.err?`<div class="box" style="border-color:var(--bad);margin-bottom:16px;color:#ffb3b3">${esc(NET.err)}</div>`:''}
+    ${body}
+    ${HIST.length?`<div class="box" style="margin-top:16px">${registryHTML()}</div>`:''}</div>`;
+}
+function netBanner(){
+  if(!G||!G.online) return '';
+  let msg='',btn='';
+  if(NET.role==='host'&&!NET.conn) msg=`Adversaire déconnecté. Il peut revenir avec le code <b>${esc(NET.code)}</b> (« Rejoindre »).`;
+  if(NET.role==='guest'&&NET.lost){msg='Connexion avec l\'arbitre perdue.';btn='<button class="primary" data-a="netretry">Se reconnecter</button>';}
+  if(!msg) return `<div class="muted" style="padding:6px 14px 0;font-size:12px">En ligne · code ${esc(NET.code||'')} · ${NET.role==='host'?'vous êtes l\'arbitre':'connecté à l\'arbitre'}</div>`;
+  return `<div class="box" style="margin:12px 12px 0;border-color:var(--accent);display:flex;gap:12px;align-items:center;justify-content:space-between"><span>⚠ ${msg}</span>${btn}</div>`;
+}
+
+/* ---- Combat : table ---- */
+function actingPlayer(){return G.pending.length?G.pending[0].p:G.cur;}
+function mine_(p){return !G.online||p===MY_SEAT;}
+function undoAllowed(seat){
+  if(!UNDO.length) return false;
+  if(!G.online) return true;
+  try{const prev=JSON.parse(UNDO[UNDO.length-1]);
+    return G.phase==='actions'&&prev.phase==='actions'&&prev.cur===seat&&G.cur===seat&&prev.turn===G.turn&&actingPlayer()===seat;}catch(e){return false;}
+}
+function renderCombat(){
+  if(!G) return renderSetup();
+  const ho=G.handoff?`<div class="handoff"><div><p class="muted">Passez l'écran à</p><h2>${esc(G.names[G.cur])}</h2><button class="primary" data-a="ready">Je suis prêt</button></div></div>`:'';
+  const me=G.online?MY_SEAT:0;
+  return `${netBanner()}<div class="arena"><div class="table">${playerPanel(1-me,true)}${midBar()}${playerPanel(me,false)}</div><aside class="side">${sidePanel()}</aside></div>${ho}`;
+}
+function playerPanel(p,top){
+  const P=PL(p),k=G.decks[p],active=G.cur===p&&!isOver();
+  const info=`<div class="pinfo">
+    <span class="pname">${esc(G.names[p])}${G.online&&p===MY_SEAT?' <span class="muted">(vous)</span>':''}</span>${p===G.first?'<span class="badge">1er</span>':'<span class="badge dim">2e</span>'}
+    <span class="chip" style="--tc:${TYPES[k].color}">${deckLabel(k)}</span>
+    ${G.target>1?`<span class="wins" title="Manches gagnées">${'●'.repeat(G.wins[p])}${'○'.repeat(Math.max(0,G.target-G.wins[p]))}</span>`:''}
+    <span class="troph" title="Étoiles">✯ ${P.trophies}<small> / ${G.win}</small></span>
+    ${P.piedFerme?'<span class="flag">Pied ferme −2</span>':''}${P.elan?'<span class="flag">Élan +2</span>':''}
+    <span class="muted">Deck ${P.deck.length} · Main ${P.hand.length} · Défausse ${P.discard.length}</span></div>`;
+  const hidden=G.phase==='setup'&&!G.revealed;
+  const champ=P.champion?(hidden?`<div class="card back full"></div>`:boardCard(p,P.champion,true)):`<div class="emptyslot">vide</div>`;
+  const bench=[0,1].slice(0,CONFIG.benchSlots).map(i=>P.bench[i]?(hidden?`<div class="card back full"></div>`:boardCard(p,P.bench[i],false)):`<div class="emptyslot">place libre</div>`).join('');
+  const field=`<div class="field"><div class="slotz"><span class="lbl">Arène · champion</span><div class="row">${champ}</div></div>
+    <div class="slotz"><span class="lbl">Banc</span><div class="row">${bench}</div></div></div>`;
+  const hand=`<div class="zone">${handHTML(p)}</div>`;
+  return `<section class="player ${active?'active':''}">${top?info+hand+field:field+hand+info}</section>`;
+}
+function handVisible(p){
+  if(G.online) return p===MY_SEAT;
+  if(!G.hide||isOver()) return true;
+  return p===actingPlayer()&&!G.handoff;
+}
+function handHTML(p){
+  const P=PL(p);
+  if(!P.hand.length) return '<span class="empty">Main vide</span>';
+  if(!handVisible(p)) return P.hand.map(()=>`<div class="card back"></div>`).join('');
+  const pd=G.pending[0];
+  return P.hand.map(h=>{
+    let btns='',cls='',attrs='';
+    if(G.phase==='setup'&&!P.champion&&(G.online?p===MY_SEAT:(p===G.cur&&!G.handoff))){
+      if(C(h.id).cat==='creature'&&C(h.id).size==='P'){
+        const k=G.setupSel[p].indexOf(h.uid);
+        cls='target'+(k>=0?' sel':''); attrs=`data-a="ssel:${h.uid}"`;
+        btns=k<0?'':`<button disabled>${k===0?'Champion':'Banc '+k}</button>`;
+      } else cls='dim';
+    } else if(pd&&pd.kind==='discard'&&pd.p===p){
+      cls='target'+(pd.chosen.includes(h.uid)?' sel':''); attrs=`data-a="pk:${h.uid}"`;
+    } else {
+      const acts=handActions(h);
+      btns=acts.map(a=>`<button data-a="play:${h.uid}:${a.key}" ${a.ok?'':'disabled'} title="${esc(a.why||'')}">${a.label}</button>`).join('');
+      if(p===G.cur&&G.phase==='actions'&&!pd&&!acts.some(a=>a.ok)) cls='dim';
+    }
+    return `<div class="hcard">${cardHTML(h.id,{cls,attrs})}${btns}</div>`;
+  }).join('');
+}
+function boardCard(p,c,isChamp){
+  const card=C(c.id), P=PL(p);
+  const atk=baseAtk(c)+(isChamp&&P.elan?CONFIG.elan:0);
+  const stats={atk,def:`${curDef(c)}/${maxDef(c)}`,ac:atk>card.atk?'up':'',dc:c.dmg?'hurt':(maxDef(c)>card.def?'up':'')};
+  let tags='';
+  if(c.item) tags+=`<span class="tag eq">${esc(C(c.item).name)}</span>`;
+  if(G.evolved&&G.evolved.includes(c.uid)&&G.phase==='actions') tags+='<span class="tag st">Évoluée ce tour</span>';
+  if(c.start&&G.pturns[p]<=1) tags+='<span class="tag">Départ</span>';
+  if(c.placedTurn===G.turn&&G.phase==='actions'&&!c.start) tags+='<span class="tag">Posée ce tour</span>';
+  let cls='',attrs='';
+  const pd=G.pending[0];
+  if(pd&&pd.options&&pd.options.includes(c.uid)&&mine_(pd.p)){cls='target';attrs=`data-a="pk:${c.uid}"`;}
+  let btn='';
+  if(!isChamp&&p===G.cur&&mine_(p)&&G.phase==='actions'&&!G.pending.length&&!G.handoff){
+    const cost=swapCost(c);
+    btn=`<button data-a="swap:${c.uid}" ${G.actions>=cost?'':'disabled'} title="${cost===CONFIG.swapSameType?'Même type':'Types différents'} : ${cost} action${s_(cost)}${G.actions<cost?' (pas assez d\'actions)':''}">Échanger (${cost})</button>`;
+  }
+  return `<div class="hcard">${cardHTML(c.id,{cls,attrs,stats,uid:c.uid,extra:tags?`<div class="tags">${tags}</div>`:''})}${btn}</div>`;
+}
+function pendingText(pd){
+  const n=esc(G.names[pd.p]);
+  if(pd.kind==='deckpick') return `Renfort : choisissez le combattant ✯ de votre deck à poser sur le banc.`;
+  if(pd.kind==='replace') return `${n} : choisissez sur votre banc le nouveau champion.`;
+  if(pd.kind==='discard') return `${n} : main de plus de ${CONFIG.maxHand} cartes, choisissez ${pd.n} carte${s_(pd.n)} à défausser (${pd.chosen.length}/${pd.n}).`;
+  const w=pd.what;
+  if(w==='eruption') return `✦ Éruption : choisissez le combattant adverse touché (champion ou banc).`;
+  if(w==='evolve') return `Choisissez le combattant qui évolue en ${C(pd.cardId).name}.`;
+  if(w==='item') return `Choisissez le combattant qui reçoit ${C(pd.cardId).name}.`;
+  return `${C(pd.cardId).name} : choisissez la cible.`;
+}
+function midBar(){
+  const n=esc(G.names[G.cur]); let main='',btns='';
+  const canUndo=G.online?(MY_SEAT===0?undoAllowed(0):!!G.undoOk):UNDO.length>0;
+  const undo=canUndo?`<button class="ghost" data-a="undo" title="Revenir à l'état précédent (pendant votre tour)">↶ Annuler</button>`:'';
+  if(G.phase==='setup'){
+    const seat=G.online?MY_SEAT:G.cur, k=G.setupSel[seat].length;
+    if(G.online&&PL(seat).champion) main=`<b>Manche ${G.round} · préparation</b><br>Vos combattants sont posés. En attente de ${esc(G.names[1-seat])}…`;
+    else {
+      main=`<b>Manche ${G.round} · préparation</b><br>${G.online?'Vous':esc(G.names[seat])} : cliquez de 1 à ${CONFIG.maxStarters} combattants ✯ de votre main, posés face cachée. Le premier choisi est le champion, les suivants vont sur le banc.`;
+      if(!G.handoff) btns=`<button class="primary" data-a="setupok" ${k?'':'disabled'}>Valider (${k} combattant${s_(k)})</button>`;
+    }
+  }
+  else if(G.phase==='actions'){
+    main=`<b>${G.mode==='blitz'?'Blitz':'Manche '+G.round} · Tour ${G.turn}</b> · au tour de <b>${n}</b>
+      <span class="counter ${G.actions?'hot':''}">Actions ${G.actions}/${CONFIG.actionsPerTurn}</span>`;
+    const pd=G.pending[0];
+    if(G.online&&actingPlayer()!==MY_SEAT){
+      main+=`<div class="prev">En attente de ${esc(G.names[actingPlayer()])}…${pd?' ('+pendingText(pd)+')':''}</div>`;
+    } else if(pd){
+      const cancel=(pd.kind==='target'&&pd.what!=='eruption')||pd.kind==='deckpick';
+      main+=`<div class="pend">${pendingText(pd)} ${cancel?'<button class="ghost" data-a="cancel">Annuler</button>':''}</div>`;
+      if(pd.kind==='deckpick'&&!pd.cards.length) main+=`<div class="midbtns" style="margin-top:6px"><span>Aucun combattant ✯ dans votre deck.</span><button class="primary" data-a="rf:none">Mélanger le deck (Renfort sans effet)</button></div>`;
+      else if(pd.kind==='deckpick'){const P=cp();main+=`<div class="midbtns" style="margin-top:6px">${pd.cards.map(id=>`<button data-a="rf:${id}" data-card="${id}">${esc(C(id).name)} ×${P.deck.filter(x=>x===id).length}${C(id).ab?' · ✦ '+abLabel(C(id)):''}</button>`).join('')}</div>`;}
+    } else {
+      const ok=canAttack();
+      const why=G.cur===G.first&&G.pturns[G.cur]===1?'le premier joueur n\'attaque pas à son premier tour':G.actions<atkCost()?`il faut ${atkCost()} action pour attaquer`:'';
+      if(!ok&&why) main+=`<div class="prev">Attaque impossible : ${why}.</div>`;
+      if(ok){const k=attackCalc();main+=`<div class="prev">Attaque : ${esc(nm(cp().champion))} → ${esc(nm(op().champion))} · ${k.txt}${k.kills?' · <b style="color:var(--good)">vaincu</b>':''}</div>`;}
+      btns=`<button class="primary" data-a="attack" ${ok?'':'disabled'} title="${ok?'L\'attaque termine le tour':why}">⚔ Attaquer (${atkCost()?atkCost()+' action, ':''}fin du tour)</button>
+        <button data-a="endturn">Terminer sans attaquer</button>`;
+    }
+  }
+  else if(G.phase==='roundover'){
+    main=`<span class="banner">🏆 <b>${esc(G.names[G.lastWinner])}</b> remporte la manche ${G.round}. Score ${G.wins[0]}–${G.wins[1]}.</span>`;
+    btns=`<button class="primary" data-a="nextround">Manche suivante (${esc(G.names[1-G.lastWinner])} commence)</button>`;
+  }
+  else if(G.phase==='matchover'){
+    main=`<span class="banner">🏆 <b>${esc(G.names[G.lastWinner])}</b> ${G.mode==='blitz'?'remporte la partie Blitz !':`remporte le match ${G.wins[0]}–${G.wins[1]} !`}</span>`;
+    btns=`<button class="primary" data-a="rematch">Rejouer ce duel</button><button data-a="newmatch">${G.online?'Quitter la partie':'Changer de decks'}</button>`;
+  }
+  return `<div class="mid"><div class="midtxt">${main}</div><div class="midbtns">${btns}${undo}</div></div>`;
+}
+function sidePanel(){
+  const logHTML=G.log.slice(-250).reverse().map(l=>`<div class="l ${l.cls}">${esc(l.msg)}</div>`).join('');
+  return `<div class="box"><h3 style="margin:0 0 8px">Journal</h3><div class="log">${logHTML}</div></div>
+    <div class="box"><details open><summary>Rappel du tour</summary><ol style="padding-left:18px;margin:8px 0 0;font-size:12.5px">
+      <li>Début : pioche 1 carte, puis effets de début de tour (Soigneuse : +1 DEF au champion), automatiques.</li>
+      <li>${CONFIG.actionsPerTurn} actions : poser un ✯ (1), évoluer (1, les ✯✯ et ✯✯✯ n'arrivent que par évolution), atout ou objet (1), échange de champion (1 même type, 2 types différents).</li>
+      <li>Attaque du champion (facultative, ${atkCost()?atkCost()+' action':'gratuite'}) : elle termine le tour.</li>
+      <li>Fin : les effets « jusqu'à la fin du tour » (Élan) s'arrêtent.</li></ol>
+      <p class="muted" style="font-size:12px;margin:8px 0 0">Coup = ATK (+Épée, +Élan) +${CONFIG.weakBonus} si faiblesse, moins les réductions de dégâts éventuelles (minimum 0). Le défenseur ne riposte jamais. Frappe, Éruption et Embrasement infligent des dégâts directs, sans faiblesse.</p></details></div>
+    <div class="box"><details><summary>Capacités</summary><ul style="padding-left:18px;margin:8px 0 0;font-size:12.5px">
+      ${Object.values(ABIL).map(a=>`<li><b>${a.name}</b> : ${esc(a.text('X'))}</li>`).join('')}</ul></details></div>
+    <div class="box">${registryHTML()}</div>
+    <div class="box">${UI.confirmQuit?`Abandonner ? <button class="primary" data-a="newmatch">Oui, revenir au choix des decks</button> <button data-a="stayin">Non</button>`:`<button data-a="newmatch" class="ghost">⟲ ${G.online?'Quitter la partie en ligne':'Abandonner et revenir au choix des decks'}</button>`}</div>`;
+}
+function registryHTML(){
+  if(!HIST.length) return `<h3 style="margin:0">Registre</h3><p class="muted" style="margin:6px 0 0">Les manches terminées s'inscrivent ici automatiquement.</p>`;
+  return `<h3 style="margin:0 0 8px">Registre (${HIST.length} manche${s_(HIST.length)})</h3>
+    <table class="reg"><tr><th>#</th><th>Decks</th><th>1er</th><th>Vainqueur</th><th>Tours</th><th>Min</th><th>Étoiles</th><th>Évo</th></tr>
+    ${HIST.map((h,i)=>`<tr><td>${i+1}</td><td>${esc(h.decks)}</td><td>${esc(h.j1)}</td><td>${esc(h.winner)}<br><span class="muted">${esc(h.reason)}</span></td><td>${h.tours}</td><td>${h.duree}</td><td>${h.troph}</td><td>${h.evos}</td></tr>
+      <tr><td></td><td colspan="7"><input data-note="${i}" value="${esc(h.notes)}" placeholder="Problèmes ou remarques…"></td></tr>`).join('')}
+    </table><div style="margin-top:8px"><button data-a="copyreg">Copier le registre</button></div>`;
+}
+function registryText(){
+  const rows=HIST.map((h,i)=>`| ${i+1} | ${h.decks} | ${h.j1} | ${h.winner} | ${h.reason} | ${h.tours} | ${h.duree} | ${h.troph} | ${h.evos} | ${h.mull} | ${(h.notes||'').replace(/\|/g,'/')} |`);
+  return ['| Manche | Decks | Premier joueur | Vainqueur | Fin | Tours | Durée (min) | Étoiles | Évolutions | Mains noires | Remarques |','| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |',...rows].join('\n');
+}
+function renderExport(){
+  return `<div class="modal-bg" data-a="closeexp"><div class="modal"><button class="mclose ghost" data-a="closeexp">✕</button>
+    <h3 style="margin-top:0">Registre à copier</h3><textarea style="width:100%;height:240px" readonly onfocus="this.select()">${esc(UI.exportText)}</textarea></div></div>`;
+}
+function toast(m){const t=$('#toast');t.innerHTML=`<div class="toast">${esc(m)}</div>`;setTimeout(()=>t.innerHTML='',1800);}
+
+/* ---- fiche au survol ---- */
+function popHTML(id,uid){
+  const c=C(id); const o=uid&&G?ownerOf(uid):-1; const inst=o>=0?findC(o,uid):null;
+  if(c.cat!=='creature') return `<h4>${esc(c.name)}</h4><div class="sub">${c.cat==='sort'?'Atout':'Objet'} · ${c.cat==='sort'?CONFIG.spellCost:CONFIG.itemCost} action</div><div>${esc(c.text)}</div>`;
+  let h=`<h4>${esc(c.name)}</h4><div class="sub">${TYPES[c.type].name} · ${STARS[c.size]} · ATK ${c.atk} / DEF ${c.def}</div><dl>`;
+  if(inst){
+    const champ=PL(o).champion===inst, atk=baseAtk(inst)+(champ&&PL(o).elan?CONFIG.elan:0);
+    h+=`<dt>En jeu (${esc(G.names[o])}, ${champ?'champion':'banc'})</dt><dd>ATK ${atk} · DEF ${curDef(inst)}/${maxDef(inst)}${inst.dmg?` (${inst.dmg} dégât${s_(inst.dmg)} subi${s_(inst.dmg)})`:''}</dd>`;
+    if(inst.item) h+=`<dt>Objet : ${esc(C(inst.item).name)}</dt><dd>${esc(C(inst.item).text)}</dd>`;
+    if(champ&&PL(o).piedFerme) h+=`<dt>Pied ferme actif</dt><dd>−${CONFIG.piedFerme} dégâts par coup jusqu'au prochain tour de ${esc(G.names[o])}.</dd>`;
+  }
+  if(c.ab) h+=`<dt>Capacité</dt><dd><span class="ab">✦ ${abLabel(c)}</span> : ${esc(ABIL[c.ab].text(c.abX))}</dd>`;
+  else h+=`<dt>Capacité</dt><dd>aucune</dd>`;
+  h+=`<dt>Faiblesse</dt><dd>${TYPES[c.weak].name} : +${CONFIG.weakBonus} dégât si un combattant ${TYPES[c.weak].name} l'attaque</dd>`;
+  h+=`<dt>Entrée en jeu · étoiles données si vaincu</dt><dd>${evoOnly(c)||(!G&&c.from)?`par évolution (${CONFIG.evolveCost} action)`:`pose ${CONFIG.poseCost[c.size]} action${s_(CONFIG.poseCost[c.size])}`} · ${(G?G.tro:VARIANTS.std.tro)[c.size]} étoile${s_((G?G.tro:VARIANTS.std.tro)[c.size])}</dd>`;
+  if(c.line) h+=`<dt>${lineLabel(c)}</dt><dd>${c.from?`Évolue depuis ${esc(C(c.from).name)}`:'Base de la lignée'}${c.next?` · évolue en ${esc(C(c.next).name)}`:' · dernier niveau'}</dd>`;
+  else h+=`<dt>Lignée</dt><dd>hors lignée (n'évolue pas)</dd>`;
+  return h+'</dl>';
+}
+const POP={el:null,timer:null,x:0,y:0};
+function hidePop(){clearTimeout(POP.timer);POP.timer=null;POP.el=null;const p=$('#pop');if(p)p.hidden=true;}
+function showPop(el){
+  const p=$('#pop'); p.innerHTML=popHTML(el.dataset.card,el.dataset.uid?+el.dataset.uid:null); p.hidden=false;
+  const r=el.getBoundingClientRect(), w=290, h=p.offsetHeight;
+  let x=r.right+10; if(x+w>innerWidth-8) x=Math.max(8,r.left-w-10);
+  let y=Math.min(Math.max(8,r.top),innerHeight-h-8);
+  p.style.left=x+'px'; p.style.top=y+'px';
+}
+document.addEventListener('mouseover',e=>{
+  const el=e.target.closest('[data-card]');
+  if(el===POP.el) return;
+  hidePop();
+  if(!el||el.classList.contains('back')||el.classList.contains('big')) return;
+  POP.el=el; POP.timer=setTimeout(()=>{if(POP.el===el&&document.body.contains(el))showPop(el);},1000);
+});
+document.addEventListener('mousedown',hidePop);
+document.addEventListener('scroll',hidePop,true);
+
+/* =========================================================
+   INTERACTIONS
+   ========================================================= */
+function act(fn){UNDO.push(JSON.stringify(G));if(UNDO.length>300)UNDO.shift();fn();if(!isOver()&&G.phase==='actions')flow();render();}
+function saveNames(){[0,1].forEach(i=>{const el=$('#nm'+i);if(el)UI.names[i]=el.value.trim()||(i?'Joueur B':'Joueur A');});}
+const H = {
+  tab(t){UI.tab=t;render();},
+  deck(k){UI.deck=k;render();},
+  detail(id){UI.detail=id;render();},
+  close(_,e,el){if(el.classList.contains('modal-bg')&&e.target!==el)return;UI.detail=null;render();},
+  closeexp(_,e,el){if(el.classList.contains('modal-bg')&&e.target!==el)return;UI.exportText=null;render();},
+  pick(i,k){saveNames();UI.pick[+i]=k;render();},
+  nethost(){saveNames();netHost();},
+  netresume(){saveNames();netHost(netSaved());},
+  netjoin(){saveNames();const el=$('#netcode');UI.joinCode=(el?el.value:'').trim().toUpperCase();if(UI.joinCode.length!==4){NET.err='Le code fait 4 caractères.';render();return;}netJoin(UI.joinCode);},
+  netcancel(){netLeave();render();},
+  netretry(){netJoin(NET.code);},
+  set(key,val){saveNames();UI[key]=val;render();},
+  start(){saveNames();UI.confirmQuit=false;newMatch({decks:UI.pick,names:UI.names,mode:UI.mode,variant:'std',hideHands:UI.hideHands});render();},
+  ready(){G.handoff=false;render();},
+  ssel(uid){setupToggle(+uid);render();},
+  setupok(){const seat=ACT_SEAT!=null?ACT_SEAT:G.cur;if(G.setupSel[seat].length&&!PL(seat).champion)act(()=>setupConfirm(seat));},
+  play(uid,key){
+    const h=cp().hand.find(x=>x.uid===+uid); if(!h) return;
+    const a=handActions(h).find(x=>x.key===key); if(!a||!a.ok) return;
+    const id=h.id;
+    if(key==='pose') return act(()=>doPose(h.uid));
+    if(!a.targets) return act(()=>doSpell(h.uid,null));
+    if(a.targets==='deck'){const opts=[...new Set(cp().deck.filter(x=>C(x).cat==='creature'&&C(x).size==='P'))];
+      G.pending.push({kind:'deckpick',p:G.cur,handUid:h.uid,cardId:id,cards:opts});return render();}
+    const what=key==='evolve'?'evolve':key==='item'?'item':id;
+    if(a.targets.length===1) return act(()=>execTarget({what,handUid:h.uid},a.targets[0]));
+    G.pending.push({kind:'target',what,p:G.cur,handUid:h.uid,cardId:id,options:a.targets});render();
+  },
+  rf(id){const pd=G.pending[0];if(!pd||pd.kind!=='deckpick')return;if(id==='none')id=null;else if(!pd.cards.includes(id))return;act(()=>{G.pending.shift();doRenfort(pd.handUid,id);});},
+  pk(uid){
+    uid=+uid; const pd=G.pending[0]; if(!pd) return;
+    if(pd.kind==='discard'){
+      const i=pd.chosen.indexOf(uid); if(i>=0)pd.chosen.splice(i,1); else pd.chosen.push(uid);
+      if(pd.chosen.length<pd.n) return render();
+      const ch=[...pd.chosen];
+      return act(()=>{G.pending.shift();const P=PL(pd.p);ch.forEach(u=>{const k=P.hand.findIndex(x=>x.uid===u);P.discard.push(P.hand.splice(k,1)[0].id);});
+        log(`${G.names[pd.p]} défausse ${ch.length} carte${s_(ch.length)} (main limitée à ${CONFIG.maxHand}).`,'sys');});
+    }
+    if(pd.kind==='replace') return act(()=>{G.pending.shift();promote(pd.p,uid);});
+    act(()=>{G.pending.shift();execTarget(pd,uid);});
+  },
+  cancel(){const pd=G.pending[0];if(pd&&((pd.kind==='target'&&pd.what!=='eruption')||pd.kind==='deckpick')){G.pending.shift();render();}},
+  swap(uid){act(()=>doSwap(+uid));},
+  attack(){if(canAttack())act(doAttack);},
+  endturn(){act(endTurnNoAttack);},
+  nextround(){act(nextRound);},
+  rematch(){const g=G;newMatch({decks:g.decks,names:g.names,mode:g.mode,variant:'std',hideHands:g.hide,online:g.online});render();},
+  newmatch(){if(G&&G.phase!=='matchover'&&!UI.confirmQuit){UI.confirmQuit=true;render();return;}UI.confirmQuit=false;if(G&&G.online)netLeave();G=null;UNDO=[];render();},
+  stayin(){UI.confirmQuit=false;render();},
+  undo(){if(!UNDO.length)return;if(G.online&&!undoAllowed(ACT_SEAT!=null?ACT_SEAT:0))return;G=JSON.parse(UNDO.pop());G.handoff=false;if(HIST.length>G.histCount)HIST.length=G.histCount;render();},
+  copyreg(){
+    const txt=registryText(), fb=()=>{UI.exportText=txt;render();};
+    if(navigator.clipboard&&window.isSecureContext) navigator.clipboard.writeText(txt).then(()=>toast('Registre copié (tableau Markdown)'),fb); else fb();
+  }
+};
+function execTarget(pd,uid){
+  const w=pd.what;
+  if(w==='eruption') return eruption(pd.p,pd.src,uid);
+  if(w==='evolve') return doEvolve(pd.handUid,uid);
+  if(w==='item') return doItem(pd.handUid,uid);
+  return doSpell(pd.handUid,uid);
+}
+const GAME_ACTIONS=new Set(['ssel','setupok','play','pk','rf','swap','attack','endturn','cancel','undo','nextround','rematch']);
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-a]'); if(!el||el.disabled) return;
+  const [a,...args]=el.dataset.a.split(':');
+  if(G&&G.online&&GAME_ACTIONS.has(a)){
+    if(NET.role==='guest'){ if(NET.conn&&NET.conn.open) NET.conn.send({t:'act',a,args}); return; }
+    if(NET.role==='host'){ hostExec(0,a,args); return; }
+  }
+  if(H[a]) H[a](...(args.length?args:[undefined]),e,el);
+});
+document.addEventListener('change',e=>{const o=e.target.closest('[data-opt]');if(o)UI[o.dataset.opt]=o.checked;});
+document.addEventListener('input',e=>{const n=e.target.closest('[data-note]');if(n&&HIST[+n.dataset.note])HIST[+n.dataset.note].notes=n.value;});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(UI.detail||UI.exportText!==null)){UI.detail=null;UI.exportText=null;render();}});
+/* =========================================================
+   RÉSEAU (en ligne, 2 appareils) — PeerJS, l'hôte est l'arbitre
+   ========================================================= */
+const NET={role:null,peer:null,conn:null,code:'',status:'',err:'',lost:false};
+const PEER_PREFIX='rojjjo-tcg-';
+function peerOptions(){
+  // ?peer=hote:port pour utiliser votre propre serveur PeerJS (tests) ; sinon le service gratuit PeerJS
+  const q=new URLSearchParams(location.search).get('peer');
+  if(!q) return {debug:0};
+  const [host,port]=q.split(':'); return {host,port:+port||9000,path:'/',secure:false,debug:0};
+}
+function newCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let c='';for(let i=0;i<4;i++)c+=A[Math.floor(Math.random()*A.length)];return c;}
+function netErr(err){
+  const t=err&&err.type;
+  return t==='peer-unavailable'?'Aucune partie trouvée avec ce code (vérifiez-le, et que l\'appareil de l\'arbitre est bien ouvert).'
+    :t==='network'||t==='server-error'||t==='socket-error'||t==='socket-closed'?'Service de connexion injoignable. Vérifiez votre connexion Internet et réessayez.'
+    :t==='browser-incompatible'?'Ce navigateur ne permet pas le jeu en ligne.'
+    :'Erreur de connexion'+(t?` (${t})`:'')+'.';
+}
+function netSaved(){try{const x=JSON.parse(localStorage.getItem('rojjjo-online-host')||'null');return x&&x.G?x:null;}catch(e){return null;}}
+function netSave(){try{localStorage.setItem('rojjjo-online-host',JSON.stringify({code:NET.code,G,HIST}));}catch(e){}}
+function netForget(){try{localStorage.removeItem('rojjjo-online-host');}catch(e){}}
+function netLeave(){
+  try{if(NET.conn&&NET.conn.open)NET.conn.send({t:'bye'});}catch(e){}
+  try{if(NET.peer)NET.peer.destroy();}catch(e){}
+  if(NET.role==='host') netForget();
+  Object.assign(NET,{role:null,peer:null,conn:null,code:'',status:'',err:'',lost:false});
+  MY_SEAT=null; if(G&&G.online){G=null;UNDO=[];}
+}
+function netHost(saved){
+  if(typeof Peer==='undefined'){NET.err='Bibliothèque de connexion non chargée : il faut être connecté à Internet.';render();return;}
+  try{if(NET.peer)NET.peer.destroy();}catch(e){}
+  Object.assign(NET,{role:'host',conn:null,err:'',lost:false,code:saved?saved.code:newCode(),status:'Ouverture de la partie…'});
+  if(saved){G=saved.G;HIST.splice(0,HIST.length,...(saved.HIST||[]));UNDO=[];MY_SEAT=0;UI.tab='combat';}
+  const peer=new Peer(PEER_PREFIX+NET.code,peerOptions()); NET.peer=peer;
+  peer.on('open',()=>{NET.status='En attente de votre adversaire…';render();});
+  peer.on('error',err=>{
+    if(err.type==='unavailable-id'&&!saved){netHost();return;}
+    NET.err=err.type==='unavailable-id'?'Ce code est encore occupé : réessayez dans une minute.':netErr(err);render();
+  });
+  peer.on('disconnected',()=>{try{peer.reconnect();}catch(e){}});
+  peer.on('connection',conn=>{
+    conn.on('data',msg=>hostOnData(conn,msg));
+    conn.on('close',()=>{if(NET.conn===conn){NET.conn=null;if(G)log('Adversaire déconnecté.','sys');render();}});
+  });
+  render();
+}
+function hostOnData(conn,msg){
+  if(!msg||typeof msg!=='object') return;
+  if(msg.t==='hello'){
+    if(NET.conn&&NET.conn!==conn&&NET.conn.open){
+      // même joueur qui revient (ancienne connexion pas encore détectée comme coupée) : on bascule ; sinon partie complète
+      if(G&&String(msg.name||'')===G.names[1]){try{NET.conn.close();}catch(e){}}
+      else {conn.send({t:'full'});setTimeout(()=>conn.close(),500);return;}
+    }
+    NET.conn=conn; NET.lastSeen=Date.now();
+    if(!G){
+      MY_SEAT=0; UI.tab='combat';
+      const deck=DECK_ORDER.includes(msg.deck)?msg.deck:DECK_ORDER[1];
+      const name=String(msg.name||'Invité').slice(0,24);
+      newMatch({decks:[UI.pick[0],deck],names:[UI.names[0],name],mode:UI.mode,variant:'std',hideHands:false,online:true});
+      log(`${name} a rejoint la partie.`,'sys');
+    } else log(`${G.names[1]} est de retour.`,'sys');
+    render(); return;
+  }
+  if(conn!==NET.conn) return;
+  NET.lastSeen=Date.now();
+  if(msg.t==='ping') return;
+  if(msg.t==='act'&&GAME_ACTIONS.has(msg.a)&&Array.isArray(msg.args)) hostExec(1,msg.a,msg.args.map(String));
+  if(msg.t==='bye'){NET.conn=null;if(G)log(`${G.names[1]} a quitté la partie.`,'sys');render();}
+}
+function hostAllowed(seat,a,args){
+  if(!G) return false;
+  if(a==='nextround'||a==='rematch') return isOver();
+  if(G.phase==='setup'){
+    if(a==='ssel') return seatOfHand(+args[0])===seat;
+    if(a==='setupok') return !PL(seat).champion;
+    return false;
+  }
+  if(G.phase!=='actions') return false;
+  if(a==='undo') return undoAllowed(seat);
+  return actingPlayer()===seat;
+}
+function hostExec(seat,a,args){
+  if(!hostAllowed(seat,a,args)||!H[a]) return;
+  ACT_SEAT=seat;
+  try{ H[a](...(args.length?args:[undefined])); } finally { ACT_SEAT=null; }
+  render();
+}
+function viewFor(seat){
+  const v=JSON.parse(JSON.stringify(G));
+  v.players.forEach((P,i)=>{
+    if(i===seat){P.deck=[...P.deck].sort();return;}
+    P.deck=P.deck.map(()=>null);
+    P.hand=P.hand.map(h=>({uid:h.uid,id:null}));
+    if(!v.revealed){if(P.champion)P.champion.id=null;P.bench.forEach(b=>b.id=null);}
+    v.setupSel[i]=[];
+  });
+  v.undoOk=undoAllowed(seat);
+  return v;
+}
+// PeerJS refuse les messages JSON de plus de ~16 Ko : l'état est envoyé en morceaux de 4000 caractères
+const CHUNK=4000; let SEND_SEQ=0;
+function netSend(conn,obj){
+  const str=JSON.stringify(obj), id=++SEND_SEQ, n=Math.max(1,Math.ceil(str.length/CHUNK));
+  for(let i=0;i<n;i++) conn.send({t:'part',id,i,n,d:str.slice(i*CHUNK,(i+1)*CHUNK)});
+}
+const PARTS={id:0,got:[],count:0};
+function netReceivePart(msg){
+  if(msg.id<PARTS.id) return null;
+  if(msg.id!==PARTS.id){PARTS.id=msg.id;PARTS.got=new Array(msg.n);PARTS.count=0;}
+  if(PARTS.got[msg.i]==null){PARTS.got[msg.i]=msg.d;PARTS.count++;}
+  if(PARTS.count<msg.n) return null;
+  try{return JSON.parse(PARTS.got.join(''));}catch(e){return null;}
+}
+function netBroadcast(){
+  netSave();
+  if(NET.conn&&NET.conn.open){try{const v=viewFor(1);v.log=v.log.slice(-250);netSend(NET.conn,{t:'state',G:v,HIST,code:NET.code});}catch(e){}}
+}
+function netJoin(code){
+  if(typeof Peer==='undefined'){NET.err='Bibliothèque de connexion non chargée : il faut être connecté à Internet.';render();return;}
+  try{if(NET.peer)NET.peer.destroy();}catch(e){}
+  Object.assign(NET,{role:'guest',code,conn:null,err:'',lost:false,status:'Connexion à la partie '+code+'…'});
+  const peer=new Peer(undefined,peerOptions()); NET.peer=peer;
+  peer.on('error',err=>{NET.err=netErr(err);if(!G){NET.role=null;}else NET.lost=true;render();});
+  peer.on('open',()=>{
+    const conn=peer.connect(PEER_PREFIX+code,{reliable:true,serialization:'json'}); NET.conn=conn;
+    conn.on('open',()=>{NET.lost=false;NET.lastSeen=Date.now();NET.status='Connecté, en attente de l\'arbitre…';conn.send({t:'hello',name:UI.names[0],deck:UI.pick[0]});render();});
+    conn.on('data',raw=>{
+      if(!raw||typeof raw!=='object') return;
+      NET.lastSeen=Date.now(); if(NET.lost){NET.lost=false;render();}
+      const msg=raw.t==='part'?netReceivePart(raw):raw; if(!msg) return;
+      if(msg.t==='full'){netLeave();NET.err='Cette partie a déjà deux joueurs.';render();return;}
+      if(msg.t==='bye'){netLeave();NET.err='L\'arbitre a quitté la partie.';render();return;}
+      if(msg.t==='state'){G=msg.G;HIST.splice(0,HIST.length,...(msg.HIST||[]));MY_SEAT=1;UNDO=[];NET.err='';if(UI.tab!=='decks')UI.tab='combat';render();}
+    });
+    conn.on('close',()=>{if(NET.role==='guest'){NET.lost=true;render();}});
+  });
+  render();
+}
+
+// Battement de cœur : détecte un appareil qui a disparu sans prévenir (écran verrouillé, réseau coupé)
+setInterval(()=>{
+  if(!NET.role||!NET.conn) return;
+  if(NET.conn.open){try{NET.conn.send({t:'ping'});}catch(e){}}
+  const silent=Date.now()-(NET.lastSeen||0)>10000;
+  if(NET.role==='host'&&silent&&G){try{NET.conn.close();}catch(e){}NET.conn=null;log('Adversaire déconnecté.','sys');render();}
+  if(NET.role==='guest'&&silent&&G&&!NET.lost){NET.lost=true;render();}
+},3000);
+
+render();
+</script>
+</body>
+</html>
