@@ -2,20 +2,31 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ROJJJO TCG · Duel des champions</title>
+<!-- Application web : s'ouvre en plein écran depuis l'écran d'accueil -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ROJJJO">
+<meta name="theme-color" content="#0d0f13">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
 :root{--bg:#121419;--panel:#1b1e25;--panel2:#242832;--line:#323745;--text:#eceef3;--muted:#98a0ae;--accent:#ffc94a;--good:#45d483;--bad:#ff5c5c;--atk:#ff8f6b;--def:#6fb6ff}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+html,body{margin:0;background:var(--bg);overscroll-behavior:none;-webkit-tap-highlight-color:transparent;}
+body{padding-bottom:env(safe-area-inset-bottom);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+html,body{color:var(--text);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 button{font:inherit;color:inherit;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
 button:hover:not(:disabled){border-color:#5a6480}
 button:disabled{opacity:.4;cursor:not-allowed}
 button.primary{background:var(--accent);color:#1a1400;border-color:var(--accent);font-weight:700}
 button.ghost{background:transparent}
 input,select,textarea{font:inherit;color:inherit;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
-header{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:18px;padding:10px 18px;background:#0d0f13;border-bottom:1px solid var(--line)}
+header{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:18px;padding:calc(10px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right)) 10px calc(18px + env(safe-area-inset-left));background:#0d0f13;border-bottom:1px solid var(--line)}
 header h1{margin:0;font-size:17px;letter-spacing:3px}
 header h1 span{color:var(--accent)}
 .tabs{display:flex;gap:6px}
@@ -136,20 +147,34 @@ details summary{cursor:pointer;font-weight:700}
 .pop h4{margin:0 0 2px;font-size:16px}.pop .sub{color:var(--muted);font-size:12px;margin-bottom:8px}
 .pop dl{margin:0}.pop dt{color:var(--muted);font-size:11.5px;margin-top:7px}.pop dd{margin:1px 0 0}
 .pop .ab{color:var(--accent);font-weight:700}
+.bottombar{position:fixed;left:0;right:0;bottom:0;z-index:35;display:flex;background:#0d0f13;border-top:1px solid var(--line);padding:6px calc(8px + env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-left))}
+.bottombar button{flex:1;border:0;background:transparent;border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;color:var(--muted);font-size:12.5px}
+.bottombar button .ic{font-size:20px;line-height:1}
+.bottombar button.on{color:var(--text);background:var(--panel2);font-weight:700}
+#app{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+.menu{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.menu button{text-align:left;padding:22px 20px;border:2px solid var(--line);border-radius:14px;background:var(--panel);font-size:18px;font-weight:800;min-height:96px}
+.menu button small{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin-top:6px}
+.menu button:disabled small{color:var(--muted)}
+.navhead{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.navhead h2{margin:0;font-size:20px}
+.rules h3{margin:22px 0 8px}.rules p,.rules li{line-height:1.55}.rules table{margin:8px 0;max-width:640px}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--good);color:#04210f;padding:8px 16px;border-radius:8px;font-weight:700;z-index:60}
+.bottombar~#toast{}
 @media (max-width:1050px){.arena{grid-template-columns:1fr}.side{position:static}.setup{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <header>
   <h1>ROJJJO <span>TCG</span></h1>
-  <nav class="tabs">
-    <button data-a="tab:decks" data-tab="decks">Decks</button>
-    <button data-a="tab:combat" data-tab="combat">Combat</button>
-  </nav>
   <span class="ver">Duel des champions · manuel officiel du 22/10/2026</span>
 </header>
 <main id="app"></main>
+<nav class="bottombar">
+  <button data-a="tab:combat" data-tab="combat"><span class="ic">⚔</span>Combat</button>
+  <button data-a="tab:cartes" data-tab="cartes"><span class="ic">🂠</span>Cartes</button>
+  <button data-a="tab:params" data-tab="params"><span class="ic">⚙</span>Paramètres</button>
+</nav>
 <div id="modal"></div>
 <div id="toast"></div>
 <div id="pop" class="pop" hidden></div>
@@ -303,7 +328,7 @@ function cardHTML(id,o={}){
 /* =========================================================
    ÉTAT
    ========================================================= */
-const UI = {tab:'decks', deck:'eau', deckEvo:true, detail:null, exportText:null, confirmQuit:false,
+const UI = {tab:'combat', nav:{combat:[],cartes:[],params:[]}, rand:[false,false], deck:'eau', deckEvo:true, detail:null, exportText:null, confirmQuit:false,
   play:'local', joinCode:'', names:['Joueur A','Joueur B'], pick:['eau','feu'], mode:'match', hideHands:false};
 let G=null, UNDO=[], HIST=[];
 let MY_SEAT=null;   // en ligne : 0 = hôte (arbitre), 1 = invité ; null = un seul écran
@@ -332,11 +357,11 @@ function isOver(){return G.phase==='roundover'||G.phase==='matchover';}
 
 function newMatch(o){
   const v=VARIANTS[o.variant];
-  G={uid:1,online:!!o.online,mode:o.mode,target:o.mode==='blitz'?1:3,variant:o.variant,win:v.win,tro:v.tro,noEvo:o.noEvo,hide:o.online?false:o.hideHands,
+  G={uid:1,online:!!o.online,mode:o.mode,target:o.mode==='blitz'?1:2,variant:o.variant,win:v.win,tro:v.tro,noEvo:o.noEvo,hide:o.online?false:o.hideHands,
      levM:!!o.levM,levAtk:!!o.levAtk,names:o.names.slice(),decks:o.decks.slice(),wins:[0,0],round:0,log:[],players:[null,null],histCount:HIST.length};
   UNDO=[];
   G.first=coin()?0:1;
-  log(`${o.mode==='blitz'?'Partie Blitz (1 manche)':'Match (3 manches gagnantes)'} : ${G.names[0]} (${deckLabel(G.decks[0])}) contre ${G.names[1]} (${deckLabel(G.decks[1])}) · victoire à ${v.win} étoiles.`,'sys');
+  log(`${o.mode==='blitz'?'Partie Blitz (1 manche)':'Match (2 manches gagnantes)'} : ${G.names[0]} (${deckLabel(G.decks[0])}) contre ${G.names[1]} (${deckLabel(G.decks[1])}) · victoire à ${v.win} étoiles.`,'sys');
   log(`Pile ou face : ${G.names[G.first]} commence.`,'sys');
   startRound();
 }
@@ -597,30 +622,124 @@ function nextRound(){G.first=1-G.lastWinner;startRound();}
 function render(){
   if(typeof hidePop==='function') hidePop();
   document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===UI.tab));
-  $('#app').innerHTML = UI.tab==='decks'?renderDecks():renderCombat();
+  $('#app').innerHTML = UI.tab==='cartes'?renderCartes():UI.tab==='params'?renderParams():renderCombat();
   $('#modal').innerHTML = UI.detail?renderDetail(UI.detail):UI.exportText!==null?renderExport():'';
   if(NET.role==='host'&&G&&G.online) netBroadcast();
 }
 
 /* ---- onglet Decks ---- */
-function renderDecks(){
-  const tiles=DECK_ORDER.map(k=>`<button class="dtile ${UI.deck===k?'on':''}" style="--tc:${TYPES[k].color}" data-a="deck:${k}">
+function navHead(tab,title){
+  return `<div class="navhead"><button class="ghost" data-a="back:${tab}">← Retour</button><h2>${title}</h2></div>`;
+}
+function menu(items){
+  return `<div class="menu">${items.map(([a,label,sub,dis])=>`<button data-a="${a}" ${dis?'disabled':''}>${label}<small>${dis?'Bientôt disponible':sub||''}</small></button>`).join('')}</div>`;
+}
+function renderCartes(){
+  const nav=UI.nav.cartes;
+  if(!nav.length) return `<div class="page"><h2 style="margin-top:0">Cartes</h2>${menu([['go:cartes:collection','Collection','Toutes les cartes du jeu'],['go:cartes:decks','Decks','Les decks et leur composition']])}</div>`;
+  if(nav[0]==='collection'){
+    const all=Object.values(CARDS);
+    const groups=[...DECK_ORDER.map(k=>[`Combattants ${TYPES[k].name}`,all.filter(c=>c.cat==='creature'&&c.type===k).sort((x,y)=>x.level-y.level||String(x.line||'Z').localeCompare(String(y.line||'Z')))]),
+      ['Atouts',all.filter(c=>c.cat==='sort')],['Objets',all.filter(c=>c.cat==='objet')]];
+    return `<div class="page">${navHead('cartes','Collection')}
+      ${groups.map(([t,cs])=>`<h3>${t} <span class="muted">(${cs.length})</span></h3><div class="grid">${cs.map(c=>cardHTML(c.id,{cls:'click',attrs:`data-a="detail:${c.id}"`})).join('')}</div>`).join('')}</div>`;
+  }
+  if(nav[0]==='decks'&&nav.length===1){
+    const tiles=DECK_ORDER.map(k=>`<button class="dtile" style="--tc:${TYPES[k].color}" data-a="go:cartes:decks:${k}">
       <div class="dt-name">${DECKS[k].name} · ${TYPES[k].name}</div><div class="dt-sub">${expand(DECKS[k].list).length} cartes · ${expand(DECKS[k].list).filter(id=>C(id).cat==='creature').length} combattants · ${expand(DECKS[k].list).filter(id=>C(id).cat!=='creature').length} atouts et objets</div></button>`).join('');
-  const list=DECKS[UI.deck].list;
+    return `<div class="page">${navHead('cartes','Decks')}<div class="dtiles">${tiles}</div></div>`;
+  }
+  const k=nav[1], list=DECKS[k].list;
   const groups=[['Combattants ✯',id=>C(id).size==='P'],['Combattants ✯✯',id=>C(id).size==='M'],['Combattants ✯✯✯',id=>C(id).size==='G'],
     ['Atouts',id=>C(id).cat==='sort'],['Objets',id=>C(id).cat==='objet']];
   const sections=groups.map(([title,f])=>{
-    const items=list.filter(([id])=>f(id)); const n=items.reduce((s,[,c])=>s+c,0);
+    const items=list.filter(([id])=>C(id).cat==='creature'?f(id)&&C(id).cat==='creature':f(id)); const n=items.reduce((t,[,c])=>t+c,0);
     if(!items.length) return '';
     return `<h3>${title} <span class="muted">(${n})</span></h3><div class="grid">${items.map(([id,c])=>cardHTML(id,{count:c,cls:'click',attrs:`data-a="detail:${id}"`})).join('')}</div>`;
   }).join('');
-  const tot=list.reduce((s,[,c])=>s+c,0);
-  return `<div class="page">
-    <div class="dtiles">${tiles}</div>
-    <div class="deckhead"><h2 style="color:${TYPES[UI.deck].color}">${deckLabel(UI.deck)}</h2>
-      <span class="muted">${tot} cartes · cliquez sur une carte pour le détail</span></div>
-    ${sections}</div>`;
+  const tot=list.reduce((t,[,c])=>t+c,0);
+  return `<div class="page">${navHead('cartes',`<span style="color:${TYPES[k].color}">${deckLabel(k)}</span>`)}
+    <p class="muted" style="margin-top:0">${tot} cartes · cliquez sur une carte pour le détail</p>${sections}</div>`;
 }
+
+/* ---- onglet Paramètres ---- */
+function renderParams(){
+  const nav=UI.nav.params;
+  if(!nav.length) return `<div class="page"><h2 style="margin-top:0">Paramètres</h2>${menu([['go:params:compte','Compte','',true],['go:params:regles','Règles du jeu','Le manuel officiel']])}</div>`;
+  return `<div class="page rules">${navHead('params','Règles du jeu')}${RULES_HTML}</div>`;
+}
+const RULES_HTML=`
+<p class="muted">Manuel des règles · Duel des champions · 22 octobre 2026</p>
+<h3>1. But du jeu</h3>
+<p><b>Le premier joueur qui récupère 6 étoiles gagne la partie.</b> Chaque joueur a <b>un champion</b> qui se bat et jusqu'à <b>deux remplaçants</b> sur le banc. Chaque fois que vous vainquez un combattant adverse, vous récupérez son nombre d'étoiles. L'arène est la zone de jeu : le champion et le banc de chaque joueur.</p>
+<p>Vous perdez aussi la partie si vous n'avez plus de combattant disponible (champion vaincu et banc vide), ou si vous devez piocher alors que votre deck est vide.</p>
+<h3>2. Les cartes</h3>
+<p>Trois sortes de cartes : les <b>combattants</b>, les <b>atouts</b> et les <b>objets</b>.</p>
+<p>Un combattant a un <b>type</b> (Eau, Feu, Combat, Roche, Électrique ou Neutre), un <b>nombre d'étoiles</b> (✯ petit, ✯✯ moyen, ✯✯✯ grand), une <b>ATK</b> (les dégâts qu'il inflige), une <b>DEF</b> (qui sert aussi de points de vie : les dégâts sont retirés de la DEF restante), une <b>faiblesse</b> et parfois une <b>capacité</b>.</p>
+<table><tr><th>Étoiles</th><th>Coût de pose</th><th>Étoiles données</th></tr><tr><td>✯</td><td>1 action</td><td>1</td></tr><tr><td>✯✯</td><td>2 actions</td><td>2</td></tr><tr><td>✯✯✯</td><td>3 actions</td><td>3</td></tr></table>
+<p>Les ✯✯ et ✯✯✯ d'une <b>lignée d'évolution</b> ne se posent pas directement : ils arrivent par évolution (section 8).</p>
+<p>Un <b>atout</b> produit un effet immédiat, puis il est défaussé. Un <b>objet</b> se fixe à l'un de vos combattants (champion ou banc), un seul par combattant, et il est défaussé avec lui.</p>
+<p>Un deck contient <b>30 cartes</b>, 3 exemplaires maximum d'une même carte.</p>
+<h3>3. Préparer une partie</h3>
+<ol><li>Mélangez votre deck et piochez <b>6 cartes</b>.</li>
+<li><b>Main noire</b> : sans combattant ✯ en main, remettez la main dans le deck, mélangez et repiochez 6 cartes, autant de fois que nécessaire. À chaque main noire, votre adversaire pioche 1 carte de plus.</li>
+<li>Posez face cachée de <b>1 à 3 combattants ✯</b> de votre main, sans payer d'action : le premier est le champion, les suivants vont sur le banc. Les deux joueurs révèlent en même temps.</li>
+<li>Pile ou face pour désigner le premier joueur. Les compteurs d'étoiles démarrent à 0.</li></ol>
+<h3>4. Le tour de jeu</h3>
+<ol><li><b>Début de tour</b> : piochez 1 carte (deck vide : vous perdez), puis les effets de début de tour s'appliquent.</li>
+<li><b>Actions</b> : 3 actions, dans l'ordre que vous voulez.</li>
+<li><b>Attaque</b> (facultative et gratuite) : votre champion peut attaquer. L'attaque termine votre tour.</li>
+<li><b>Fin de tour</b> : les effets « jusqu'à la fin du tour » s'arrêtent.</li></ol>
+<table><tr><th>Action</th><th>Coût</th></tr>
+<tr><td>Poser un combattant de la main sur le banc</td><td>1 (✯), 2 (✯✯) ou 3 (✯✯✯)</td></tr>
+<tr><td>Jouer un atout</td><td>1</td></tr><tr><td>Poser un objet</td><td>1</td></tr>
+<tr><td>Échanger le champion avec un combattant du banc du même type</td><td>1</td></tr>
+<tr><td>Échanger le champion avec un combattant du banc d'un type différent</td><td>2</td></tr>
+<tr><td>Faire évoluer un combattant en jeu</td><td>1</td></tr></table>
+<ul><li>L'attaque n'est pas une action : vous pouvez dépenser vos 3 actions puis attaquer.</li>
+<li>Les actions non utilisées sont perdues. Vous pouvez jouer plusieurs atouts dans le même tour.</li>
+<li>Le banc a 2 places. Les combattants se posent toujours sur le banc ; le champion change par échange ou après une défaite.</li>
+<li>Le premier joueur n'attaque pas lors de son premier tour.</li></ul>
+<h3>5. Le combat</h3>
+<p>Votre champion attaque le champion adverse. Dégâts = <b>ATK</b> de votre champion + ses bonus d'ATK, <b>+1</b> si son type est la faiblesse de la cible, moins les réductions de dégâts de la cible (le coup peut tomber à 0). Les dégâts sont retirés de la DEF restante et <b>restent d'un tour à l'autre</b>.</p>
+<h3>6. Combattant vaincu, remplacement et fin de partie</h3>
+<p>Un combattant dont la DEF restante tombe à 0 ou moins est vaincu : il est défaussé avec son objet, puis l'adversaire récupère ses étoiles (1, 2 ou 3).</p>
+<p>Quand l'attaque ou l'atout est entièrement résolu, on vérifie :</p>
+<ol><li><b>Victoire</b> : un joueur à 6 étoiles ou plus gagne. Si les deux y arrivent, celui qui en a le plus gagne ; en cas d'égalité, le défenseur gagne.</li>
+<li><b>Remplacement</b> : le joueur dont le champion est vaincu choisit un combattant de son banc, qui devient champion gratuitement.</li>
+<li><b>Défaite</b> : sans combattant sur son banc, ce joueur perd. Si les deux perdent en même temps, le défenseur gagne.</li></ol>
+<p>Si votre champion est vaincu par un atout, le remplacement a lieu après la résolution de l'atout.</p>
+<h3>7. Atouts et objets</h3>
+<p>Chaque atout ou objet joué coûte 1 action.</p>
+<table><tr><th>Carte</th><th>Effet</th></tr>
+<tr><td><b>Soin</b></td><td>Un de vos combattants récupère 4 DEF, sans dépasser sa DEF maximale.</td></tr>
+<tr><td><b>Frappe</b></td><td>3 dégâts à un combattant adverse (champion ou banc), sans faiblesse ni réductions de dégâts.</td></tr>
+<tr><td><b>Échange forcé</b></td><td>Vous choisissez le combattant du banc adverse qui devient son champion ; l'ancien champion va au banc.</td></tr>
+<tr><td><b>Élan</b></td><td>+2 ATK à votre champion jusqu'à la fin du tour.</td></tr>
+<tr><td><b>Pioche</b></td><td>Piochez 2 cartes.</td></tr>
+<tr><td><b>Renfort</b></td><td>Cherchez un combattant ✯ dans votre deck et posez-le sur votre banc (place libre nécessaire), puis mélangez. Il compte comme posé depuis la main. Jouable même sans ✯ dans le deck : vous mélangez simplement.</td></tr>
+<tr><td><b>Épée</b></td><td>+1 ATK tant que le combattant est en jeu.</td></tr>
+<tr><td><b>Plastron</b></td><td>+2 DEF tant que le combattant est en jeu (DEF de départ et DEF restante).</td></tr></table>
+<p>Frappe et Échange forcé ne se jouent que s'il existe une cible valide.</p>
+<h3>8. L'évolution</h3>
+<p>Une lignée va d'un ✯ à un ✯✯, puis éventuellement à un ✯✯✯. Les ✯✯ et ✯✯✯ d'une lignée ne se posent jamais depuis la main ; un combattant hors lignée se pose normalement.</p>
+<ol><li>Évoluer coûte <b>1 action</b>, une étape à la fois.</li>
+<li>Jouez la carte suivante de la lignée sur un de vos combattants en jeu de la même lignée (champion ou banc). L'ancienne carte est défaussée sans donner d'étoile.</li>
+<li>Le combattant garde sa place, son objet et ses dégâts.</li>
+<li>Il ne peut évoluer que s'il était <b>déjà en jeu au début de votre tour</b> (pas d'évolution le tour de la pose, ni deux fois par tour).</li>
+<li>La carte jouée compte comme posée depuis la main et utilise sa propre capacité et sa propre faiblesse.</li>
+<li>Vaincue plus tard, elle rapporte les étoiles de sa nouvelle carte.</li></ol>
+<p>Les combattants posés à la préparation ne peuvent pas évoluer pendant le premier tour de leur propriétaire.</p>
+<h3>9. Capacités des decks de test</h3>
+<table><tr><th>Capacité</th><th>Effet</th></tr>
+<tr><td><b>Éclaireur</b></td><td>Quand vous posez ce combattant, piochez 1 carte.</td></tr>
+<tr><td><b>Soigneuse</b></td><td>Tant qu'il est sur votre banc, votre champion récupère 1 DEF au début de votre tour (cumulable, sans dépasser la DEF maximale).</td></tr>
+<tr><td><b>Embrasement X</b></td><td>Quand ce combattant est vaincu, il inflige X dégâts directs au champion de celui qui l'a vaincu (après le décompte des étoiles ; peut s'enchaîner).</td></tr>
+<tr><td><b>Éruption X</b></td><td>Quand vous posez ce combattant (y compris par évolution), il inflige X dégâts directs à un combattant adverse de votre choix.</td></tr></table>
+<p>Les effets « quand vous posez » se déclenchent à la pose depuis la main, par évolution ou par Renfort, jamais après un échange ou un remplacement. Les dégâts directs ne tiennent pas compte de la faiblesse.</p>
+<h3>10. Précisions</h3>
+<ul><li>Seule votre main reste cachée : champion, banc, objets, étoiles, DEF restantes et défausse sont visibles par les deux joueurs.</li>
+<li>Les objets restent attachés au combattant quand il change de place.</li></ul>`;
 function renderDetail(id){
   const c=C(id); let info='<dl>';
   if(c.cat==='creature'){
@@ -643,60 +762,52 @@ function renderDetail(id){
     <div class="mrow">${cardHTML(id,{cls:'big'})}<div class="minfo"><h2 style="margin:0">${esc(c.name)}</h2>${info}</div></div>${chain}</div></div>`;
 }
 
-/* ---- Combat : préparation ---- */
+/* ---- Combat : menus ---- */
+function deckPick(i,withRandom){
+  return `<div class="dpick">${DECK_ORDER.map(k=>`<button class="dchip ${!UI.rand[i]&&UI.pick[i]===k?'on':''}" style="--tc:${TYPES[k].color}" data-a="pick:${i}:${k}">${deckLabel(k)}</button>`).join('')}${withRandom?`<button class="dchip ${UI.rand[i]?'on':''}" style="--tc:var(--accent)" data-a="pickrand:${i}">🎲 Aléatoire</button>`:''}</div>`;
+}
+function modeChips(){
+  const chip=(val,label)=>`<button class="dchip ${UI.mode===val?'on':''}" style="--tc:var(--accent)" data-a="set:mode:${val}">${label}</button>`;
+  return `<div class="duels">${chip('match','Match · 2 manches gagnantes')}${chip('blitz','Blitz · 1 manche')}</div>`;
+}
 function renderSetup(){
-  if(UI.play==='online') return renderOnlineSetup();
-  const col=i=>`<div class="box"><h3>Joueur ${i?'B':'A'}</h3>
-    <label>Nom <input id="nm${i}" value="${esc(UI.names[i])}"></label>
-    <div class="dpick">${DECK_ORDER.map(k=>`<button class="dchip ${UI.pick[i]===k?'on':''}" style="--tc:${TYPES[k].color}" data-a="pick:${i}:${k}">${deckLabel(k)}</button>`).join('')}</div></div>`;
-  const chip=(key,val,label)=>`<button class="dchip ${UI[key]===val?'on':''}" style="--tc:var(--accent)" data-a="set:${key}:${val}">${label}</button>`;
-  return `<div class="page">
-    ${playModeChips()}
-    <div class="setup">${col(0)}${col(1)}</div>
-    <div class="box" style="margin-top:16px"><h3>Mode de jeu</h3><div class="duels">
-      ${chip('mode','match','Match · 3 manches gagnantes')}${chip('mode','blitz','Blitz · 1 seule manche')}</div></div>
-    <div class="box opts" style="margin-top:16px"><h3>Affichage</h3>
-      <label><input type="checkbox" ${UI.hideHands?'checked':''} data-opt="hideHands"> <span>Écran partagé : masquer la main entre les tours (écran « passez à… »)</span></label>
-    </div>
-    <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
-      <button class="primary" data-a="start">${UI.mode==='blitz'?'Lancer la partie Blitz':'Lancer le match'}</button>
-      <span class="muted">Le premier joueur est tiré à pile ou face.</span></div>
-    ${HIST.length?`<div class="box" style="margin-top:16px">${registryHTML()}</div>`:''}
-  </div>`;
-}
-
-function playModeChips(){
-  return `<div class="duels" style="margin-bottom:16px"><button class="dchip ${UI.play!=='online'?'on':''}" style="--tc:var(--accent)" data-a="set:play:local">Sur ce seul écran</button><button class="dchip ${UI.play==='online'?'on':''}" style="--tc:var(--accent)" data-a="set:play:online">En ligne · 2 appareils</button></div>`;
-}
-function renderOnlineSetup(){
-  const chip=(key,val,label)=>`<button class="dchip ${UI[key]===val?'on':''}" style="--tc:var(--accent)" data-a="set:${key}:${val}">${label}</button>`;
-  const saved=netSaved();
-  let body;
-  if(NET.role==='host'&&!G){
-    body=`<div class="box" style="text-align:center"><p class="muted" style="margin:0">Code de la partie</p>
+  const nav=UI.nav.combat, err=NET.err?`<div class="box" style="border-color:var(--bad);margin-bottom:16px;color:#ffb3b3">${esc(NET.err)}</div>`:'';
+  const reg=HIST.length?`<div class="box" style="margin-top:16px">${registryHTML()}</div>`:'';
+  // écrans d'attente du jeu en ligne
+  if(NET.role==='host') return `<div class="page">${err}<div class="box" style="text-align:center"><p class="muted" style="margin:0">Code du match</p>
       <div style="font-size:54px;font-weight:900;letter-spacing:10px;margin:6px 0">${NET.code||'…'}</div>
-      <p>${esc(NET.status||'')}</p><p class="muted">Donnez ce code à votre adversaire : il choisit « Rejoindre » sur son appareil.</p>
-      <button data-a="netcancel">Annuler</button></div>`;
-  } else if(NET.role==='guest'&&!G){
-    body=`<div class="box" style="text-align:center"><p>${esc(NET.status||'Connexion…')}</p><button data-a="netcancel">Annuler</button></div>`;
-  } else {
-    body=`<div class="setup">
-      <div class="box"><h3>Créer une partie</h3><p class="muted" style="margin-top:0">Votre appareil sera l'arbitre : il doit rester ouvert pendant toute la partie.</p>
-        <div class="duels">${chip('mode','match','Match · 3 manches gagnantes')}${chip('mode','blitz','Blitz · 1 seule manche')}</div>
-        <div style="margin-top:12px"><button class="primary" data-a="nethost">Créer et obtenir un code</button></div>
-        ${saved?`<div style="margin-top:12px"><button data-a="netresume">Reprendre la partie en cours (code ${esc(saved.code)})</button></div>`:''}</div>
-      <div class="box"><h3>Rejoindre une partie</h3>
-        <label>Code <input id="netcode" maxlength="4" style="text-transform:uppercase;width:110px;font-size:20px;letter-spacing:4px" value="${esc(UI.joinCode||'')}"></label>
-        <div style="margin-top:12px"><button class="primary" data-a="netjoin">Rejoindre</button></div></div>
-    </div>`;
+      <p>${esc(NET.status||'')}</p><p class="muted">Donnez ce code à votre adversaire : il choisit « Rejoindre un match » sur son appareil.</p>
+      <button data-a="netcancel">Annuler</button></div></div>`;
+  if(NET.role==='guest') return `<div class="page">${err}<div class="box" style="text-align:center"><p>${esc(NET.status||'Connexion…')}</p><button data-a="netcancel">Annuler</button></div></div>`;
+  const path=nav.join('/');
+  if(path==='') return `<div class="page"><h2 style="margin-top:0">Combat</h2>${err}${menu([['go:combat:versus','Versus','Contre un autre joueur, sur deux appareils'],['go:combat:solo','Solo','Seul ou à deux sur un écran']])}${reg}</div>`;
+  if(path==='versus') return `<div class="page">${navHead('combat','Versus')}${err}${menu([['go:combat:versus:prive','Privé','Avec un code à partager'],['go:combat:versus:alea','Aléatoire','',true]])}</div>`;
+  if(path==='versus/prive') return `<div class="page">${navHead('combat','Privé')}${err}${menu([['go:combat:versus:prive:creer','Créer un match','Obtenir un code'],['go:combat:versus:prive:rejoindre','Rejoindre un match','Entrer un code']])}</div>`;
+  if(path==='versus/prive/creer'){
+    const saved=netSaved();
+    return `<div class="page">${navHead('combat','Créer un match')}${err}
+      <div class="box"><h3>Paramètres du match</h3>${modeChips()}</div>
+      <div class="box" style="margin-top:16px"><h3>Votre deck</h3><label>Nom <input id="nm0" value="${esc(UI.names[0])}"></label>${deckPick(0,false)}</div>
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap"><button class="primary" data-a="nethost">Créer le match et obtenir le code</button>
+      ${saved?`<button data-a="netresume">Reprendre le match en cours (code ${esc(saved.code)})</button>`:''}</div>
+      <p class="muted">Votre appareil sera l'arbitre : il doit rester ouvert pendant tout le match.</p></div>`;
   }
-  return `<div class="page">${playModeChips()}
-    <div class="box" style="margin-bottom:16px"><h3>Vous</h3>
-      <label>Nom <input id="nm0" value="${esc(UI.names[0])}"></label>
-      <div class="dpick">${DECK_ORDER.map(k=>`<button class="dchip ${UI.pick[0]===k?'on':''}" style="--tc:${TYPES[k].color}" data-a="pick:0:${k}">${deckLabel(k)}</button>`).join('')}</div></div>
-    ${NET.err?`<div class="box" style="border-color:var(--bad);margin-bottom:16px;color:#ffb3b3">${esc(NET.err)}</div>`:''}
-    ${body}
-    ${HIST.length?`<div class="box" style="margin-top:16px">${registryHTML()}</div>`:''}</div>`;
+  if(path==='versus/prive/rejoindre') return `<div class="page">${navHead('combat','Rejoindre un match')}${err}
+      <div class="box"><h3>Votre deck</h3><label>Nom <input id="nm0" value="${esc(UI.names[0])}"></label>${deckPick(0,false)}</div>
+      <div class="box" style="margin-top:16px"><h3>Code du match</h3>
+        <input id="netcode" maxlength="4" style="text-transform:uppercase;width:130px;font-size:22px;letter-spacing:4px" value="${esc(UI.joinCode||'')}">
+        <div style="margin-top:12px"><button class="primary" data-a="netjoin">Rejoindre le match</button></div></div></div>`;
+  if(path==='solo') return `<div class="page">${navHead('combat','Solo')}${menu([['go:combat:solo:event','Événement','',true],['go:combat:solo:ecran','1 écran','Deux joueurs sur le même appareil']])}${reg}</div>`;
+  if(path==='solo/ecran'){
+    const col=i=>`<div class="box"><h3>Joueur ${i?'B':'A'}</h3><label>Nom <input id="nm${i}" value="${esc(UI.names[i])}"></label>${deckPick(i,true)}</div>`;
+    return `<div class="page">${navHead('combat','1 écran')}
+      <div class="box opts"><h3>Paramètres du match</h3>${modeChips()}
+        <label style="margin-top:12px"><input type="checkbox" ${UI.hideHands?'checked':''} data-opt="hideHands"> <span>Main cachée : masquer la main entre les tours (écran « passez à… »)</span></label></div>
+      <div class="setup" style="margin-top:16px">${col(0)}${col(1)}</div>
+      <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
+        <button class="primary" data-a="start">Lancer le match</button><span class="muted">Le premier joueur est tiré à pile ou face.</span></div>${reg}</div>`;
+  }
+  UI.nav.combat=[]; return renderSetup();
 }
 function netBanner(){
   if(!G||!G.online) return '';
@@ -915,19 +1026,23 @@ document.addEventListener('scroll',hidePop,true);
 function act(fn){UNDO.push(JSON.stringify(G));if(UNDO.length>300)UNDO.shift();fn();if(!isOver()&&G.phase==='actions')flow();render();}
 function saveNames(){[0,1].forEach(i=>{const el=$('#nm'+i);if(el)UI.names[i]=el.value.trim()||(i?'Joueur B':'Joueur A');});}
 const H = {
-  tab(t){UI.tab=t;render();},
+  tab(t){if(UI.tab===t&&!(t==='combat'&&G))UI.nav[t]=[];UI.tab=t;window.scrollTo(0,0);render();},
+  go(tab,...path){path=path.filter(x=>x&&typeof x==='string');saveNames();NET.err='';UI.nav[tab]=path;window.scrollTo(0,0);render();},
+  back(tab){saveNames();NET.err='';UI.nav[tab].pop();window.scrollTo(0,0);render();},
+  pickrand(i){saveNames();UI.rand[+i]=!UI.rand[+i];render();},
   deck(k){UI.deck=k;render();},
   detail(id){UI.detail=id;render();},
   close(_,e,el){if(el.classList.contains('modal-bg')&&e.target!==el)return;UI.detail=null;render();},
   closeexp(_,e,el){if(el.classList.contains('modal-bg')&&e.target!==el)return;UI.exportText=null;render();},
-  pick(i,k){saveNames();UI.pick[+i]=k;render();},
+  pick(i,k){saveNames();UI.pick[+i]=k;UI.rand[+i]=false;render();},
   nethost(){saveNames();netHost();},
   netresume(){saveNames();netHost(netSaved());},
   netjoin(){saveNames();const el=$('#netcode');UI.joinCode=(el?el.value:'').trim().toUpperCase();if(UI.joinCode.length!==4){NET.err='Le code fait 4 caractères.';render();return;}netJoin(UI.joinCode);},
   netcancel(){netLeave();render();},
   netretry(){netJoin(NET.code);},
   set(key,val){saveNames();UI[key]=val;render();},
-  start(){saveNames();UI.confirmQuit=false;newMatch({decks:UI.pick,names:UI.names,mode:UI.mode,variant:'std',hideHands:UI.hideHands});render();},
+  start(){saveNames();UI.confirmQuit=false;const rnd=()=>DECK_ORDER[Math.floor(Math.random()*DECK_ORDER.length)];
+    newMatch({decks:UI.pick.map((k,i)=>UI.rand[i]?rnd():k),names:UI.names,mode:UI.mode,variant:'std',hideHands:UI.hideHands});render();},
   ready(){G.handoff=false;render();},
   ssel(uid){setupToggle(+uid);render();},
   setupok(){const seat=ACT_SEAT!=null?ACT_SEAT:G.cur;if(G.setupSel[seat].length&&!PL(seat).champion)act(()=>setupConfirm(seat));},
@@ -962,7 +1077,7 @@ const H = {
   endturn(){act(endTurnNoAttack);},
   nextround(){act(nextRound);},
   rematch(){const g=G;newMatch({decks:g.decks,names:g.names,mode:g.mode,variant:'std',hideHands:g.hide,online:g.online});render();},
-  newmatch(){if(G&&G.phase!=='matchover'&&!UI.confirmQuit){UI.confirmQuit=true;render();return;}UI.confirmQuit=false;if(G&&G.online)netLeave();G=null;UNDO=[];render();},
+  newmatch(){if(G&&G.phase!=='matchover'&&!UI.confirmQuit){UI.confirmQuit=true;render();return;}UI.confirmQuit=false;if(G&&G.online)netLeave();G=null;UNDO=[];window.scrollTo(0,0);render();},
   stayin(){UI.confirmQuit=false;render();},
   undo(){if(!UNDO.length)return;if(G.online&&!undoAllowed(ACT_SEAT!=null?ACT_SEAT:0))return;G=JSON.parse(UNDO.pop());G.handoff=false;if(HIST.length>G.histCount)HIST.length=G.histCount;render();},
   copyreg(){
@@ -1124,7 +1239,7 @@ function netJoin(code){
       const msg=raw.t==='part'?netReceivePart(raw):raw; if(!msg) return;
       if(msg.t==='full'){netLeave();NET.err='Cette partie a déjà deux joueurs.';render();return;}
       if(msg.t==='bye'){netLeave();NET.err='L\'arbitre a quitté la partie.';render();return;}
-      if(msg.t==='state'){G=msg.G;HIST.splice(0,HIST.length,...(msg.HIST||[]));MY_SEAT=1;UNDO=[];NET.err='';if(UI.tab!=='decks')UI.tab='combat';render();}
+      if(msg.t==='state'){G=msg.G;HIST.splice(0,HIST.length,...(msg.HIST||[]));MY_SEAT=1;UNDO=[];NET.err='';if(UI.tab==='combat'||!G)UI.tab='combat';render();}
     });
     conn.on('close',()=>{if(NET.role==='guest'){NET.lost=true;render();}});
   });
