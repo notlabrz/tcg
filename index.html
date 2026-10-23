@@ -196,9 +196,78 @@ details summary{cursor:pointer;font-weight:700}
 @media (min-width:760px){.filters{grid-template-columns:2fr repeat(4,1fr)}.filters input{grid-column:auto}}
 .navhead h2{margin:0;font-size:20px}
 .rules h3{margin:22px 0 8px}.rules p,.rules li{line-height:1.55}.rules table{margin:8px 0;max-width:640px}
+/* ===== Écran de match compact (téléphone) ===== */
+body.inmatch .bottombar{display:none}
+body.inmatch header{display:none}
+body.inmatch .match{padding-top:calc(6px + env(safe-area-inset-top))}
+body.inmatch #app{padding-bottom:0;height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+body.inmatch .match{flex:1 1 auto;min-height:0;width:100%;box-sizing:border-box;padding-bottom:calc(4px + env(safe-area-inset-bottom))}
+body.inmatch .match>*{flex-shrink:0}
+body.inmatch .mfield{flex:1 1 0;min-height:0}
+body.inmatch .mslot{min-height:0}
+body.inmatch .mfield .mcard,body.inmatch .mfield .mempty{flex:1 1 auto;height:auto!important;min-height:0}
+.mhandrow{position:relative;display:flex;gap:6px;align-items:stretch}
+.mhandrow .mhandcol{flex:1;min-width:0}
+.match{max-width:560px;margin:0 auto;padding:6px 8px 0;display:flex;flex-direction:column;gap:6px}
+.pbar{display:flex;align-items:center;gap:6px 8px;flex-wrap:wrap;font-size:11.5px;padding:4px 8px;border-radius:10px;background:var(--panel);border:1px solid transparent;color:var(--muted)}
+.pbar.on{border-color:var(--accent)}
+.pbar .nm{font-weight:800;font-size:13.5px;color:var(--text)}
+.pbar .st{font-weight:850;font-size:15px;color:var(--text)}
+.pbar .st small{font-size:11px;color:var(--muted);font-weight:600}
+.pbar .badge,.pbar .chip,.pbar .flag{font-size:10.5px;padding:0 6px}
+.mfield{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mslot{display:flex;flex-direction:column;gap:2px;min-width:0}
+.mslot .lb{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;text-align:center}
+.mslot.champ .lb{color:var(--accent);font-weight:700}
+.mcard{--tc:#888;position:relative;height:118px;border-radius:9px;border:2px solid var(--tc);background:linear-gradient(180deg,color-mix(in srgb,var(--tc) 24%,var(--panel2)) 0,var(--panel2) 55%);padding:4px 5px;display:flex;flex-direction:column;gap:1px;overflow:hidden;cursor:pointer;font-size:10px;user-select:none;min-width:0}
+.mcard .mtop{display:flex;justify-content:space-between;color:var(--muted);font-size:8.5px;text-transform:uppercase;letter-spacing:.3px}
+.mcard .mtop b{color:var(--text);font-size:10px}
+.mcard .mnm{font-weight:750;font-size:11.5px;line-height:1.12;max-height:2.25em;overflow:hidden}
+.mcard .mab{color:var(--accent);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mcard .msp{color:var(--atk);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mcard .mtxt{color:#c9ced8;line-height:1.25;overflow:hidden;flex:1}
+.mcard .mtags{display:flex;flex-wrap:wrap;gap:2px}
+.mcard .mtags span{font-size:8.5px;background:#0007;border-radius:3px;padding:0 3px;white-space:nowrap}
+.mcard .mst{margin-top:auto;display:flex;justify-content:space-between;align-items:baseline;font-weight:800;font-size:14px}
+.mcard .mst .atk{color:var(--atk)} .mcard .mst .def{color:var(--def)} .mcard .mst .hurt{color:var(--bad)} .mcard .mst .up{text-decoration:underline}
+.mcard .mst small{font-size:10px;color:var(--muted)}
+.mcard.target{box-shadow:0 0 0 3px var(--accent)}
+.mcard.sel{box-shadow:0 0 0 3px var(--good)}
+.mcard.dim{opacity:.5}
+.mcard.back{background:repeating-linear-gradient(45deg,#2a2f3b 0 8px,#222631 8px 16px);border-color:#454b5a;cursor:default}
+.mempty{height:118px;border:2px dashed var(--line);border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:10.5px}
+.mhandlbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;text-align:center}
+.mhand{display:flex;gap:6px;overflow-x:auto;padding:3px 2px 6px;-webkit-overflow-scrolling:touch}
+.mhand .mcard{flex:0 0 88px}
+.mhand .empty{margin:auto;font-size:12px}
+.mmid{background:#191c22;border:1px solid var(--line);border-radius:12px;padding:7px 8px;display:flex;flex-direction:column;gap:6px;font-size:12.5px;text-align:center}
+.mmid .pips{display:inline-flex;gap:3px;vertical-align:middle;margin-left:6px}
+.mmid .pips i{width:10px;height:10px;border-radius:50%;background:var(--line);display:inline-block}
+.mmid .pips i.on{background:var(--accent)}
+.mmid .btns{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.mmid .btns button{padding:8px 10px;font-size:13px}
+.mmid .small{font-size:11.5px;color:var(--muted)}
+.mmid .pend{margin:0}
+.gear{position:relative;align-self:flex-end;flex:0 0 auto;margin-bottom:6px;z-index:36;width:42px;height:42px;border-radius:50%;font-size:22px;padding:0;background:var(--panel2);border:1px solid #5a6480;box-shadow:0 4px 14px #0008}
+.gmenu-bg{position:fixed;inset:0;z-index:36}
+.gmenu{position:absolute;left:0;bottom:calc(100% + 6px);z-index:37;background:var(--panel);border:1px solid #5a6480;border-radius:14px;padding:6px;display:flex;flex-direction:column;gap:2px;min-width:230px;box-shadow:0 10px 30px #000a}
+.gmenu button{text-align:left;border:0;background:transparent;padding:11px 12px;font-size:15px;border-radius:9px}
+.gmenu button:hover{background:var(--panel2)}
+.gmenu .confirm{padding:8px 10px;font-size:14px;display:flex;flex-direction:column;gap:8px}
+.gmenu .confirm div{display:flex;gap:8px}
+.sheet-bg{position:fixed;inset:0;background:#000a;z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--panel);border:1px solid var(--line);border-bottom:0;border-radius:16px 16px 0 0;width:100%;max-width:560px;max-height:78vh;overflow:auto;padding:14px 16px calc(16px + env(safe-area-inset-bottom));font-size:13.5px}
+.sheet h4{margin:0 0 2px;font-size:17px}.sheet .sub{color:var(--muted);font-size:12px;margin-bottom:8px}
+.sheet dl{margin:0}.sheet dt{color:var(--muted);font-size:11.5px;margin-top:7px}.sheet dd{margin:1px 0 0}.sheet .ab{color:var(--accent);font-weight:700}
+.sheet .acts{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+.sheet .acts button{padding:11px;font-size:15px}
+.sheet .acts .why{font-size:11.5px;color:var(--muted);margin:-2px 0 4px;text-align:center}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--good);color:#04210f;padding:8px 16px;border-radius:8px;font-weight:700;z-index:60}
 .bottombar~#toast{}
 @media (max-width:1050px){.arena{grid-template-columns:1fr}.side{position:static}.setup{grid-template-columns:1fr}}
+@media (max-height:760px){.mcard,.mempty{height:88px}.mhand .mcard{height:112px}.mhandlbl{display:none}.pbar{padding:3px 8px}.mhand{padding-bottom:3px}.mcard .mnm{font-size:11px}.mcard .mst{font-size:13px}.mmid{padding:5px 8px;gap:4px}.match{gap:4px}}
+@media (max-width:400px){.pbar{flex-wrap:nowrap;white-space:nowrap;overflow:hidden}.pbar .chip{display:none}}
+@media (min-height:761px){body.inmatch .mhand .mcard{height:150px;flex-basis:104px}}
 </style>
 </head>
 <body>
@@ -219,7 +288,7 @@ details summary{cursor:pointer;font-weight:700}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.4.3';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.5.1';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -839,7 +908,9 @@ function render(){
   if(typeof hidePop==='function') hidePop();
   document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===UI.tab));
   $('#app').innerHTML = UI.tab==='cartes'?renderCartes():UI.tab==='params'?renderParams():renderCombat();
-  $('#modal').innerHTML = UI.detail?renderDetail(UI.detail):UI.exportText!==null?renderExport():'';
+  const inMatch=UI.tab==='combat'&&!!G; document.body.classList.toggle('inmatch',inMatch);
+  if(!inMatch){UI.gmenu=false;UI.sheet=null;if(UI.mmodal)UI.mmodal=null;}
+  $('#modal').innerHTML = UI.detail?renderDetail(UI.detail):UI.exportText!==null?renderExport():UI.mmodal&&inMatch?renderMatchModal():UI.sheet&&inMatch?renderSheet():'';
   if(NET.role==='host'&&G&&G.online) netBroadcast();
 }
 
@@ -1133,8 +1204,156 @@ function undoAllowed(seat){
 function renderCombat(){
   if(!G) return renderSetup();
   const ho=G.handoff?`<div class="handoff"><div><p class="muted">Passez l'écran à</p><h2>${esc(G.names[G.cur])}</h2><button class="primary" data-a="ready">Je suis prêt</button></div></div>`:'';
-  const me=G.online?MY_SEAT:0;
-  return `${netBanner()}<div class="arena"><div class="table">${playerPanel(1-me,true)}${midBar()}${playerPanel(me,false)}</div><aside class="side">${sidePanel()}</aside></div>${ho}`;
+  const hp=handOwner(), me=G.online?MY_SEAT:hp;   // sur un seul écran, le joueur qui agit est toujours en bas avec sa main
+  return `${netBanner()}<div class="match">${mBar(1-me)}${mField(1-me)}${mMid()}${mField(me)}${mBar(me)}<div class="mhandrow">${gearHTML()}<div class="mhandcol">${mHand(hp)}</div></div></div>${ho}`;
+}
+// Main affichée en bas : la sienne en ligne ; sur un seul écran, celle du joueur qui agit
+function handOwner(){
+  if(G.online) return MY_SEAT;
+  if(G.phase==='setup') return G.cur;
+  if(isOver()) return 0;
+  return actingPlayer();
+}
+function mBar(p){
+  const P=PL(p),k=G.decks[p],on=G.cur===p&&!isOver()&&G.phase!=='setup';
+  return `<div class="pbar ${on?'on':''}"><span class="nm">${esc(G.names[p])}${G.online&&p===MY_SEAT?' <span class="muted">(vous)</span>':''}</span>
+    ${p===G.first?'<span class="badge">1er</span>':'<span class="badge dim">2e</span>'}
+    <span class="chip" style="--tc:${deckColor(k)}">${deckLabel(k)}</span>
+    ${G.target>1?`<span class="wins" title="Manches gagnées">${'●'.repeat(G.wins[p])}${'○'.repeat(Math.max(0,G.target-G.wins[p]))}</span>`:''}
+    <span class="st">✯ ${P.trophies}<small>/${G.win}</small></span>
+    ${P.garde?`<span class="flag">Garde −${P.garde}</span>`:''}${P.elan?'<span class="flag">Élan +2</span>':''}${P.piedFerme?'<span class="flag">Pied ferme</span>':''}
+    <span style="margin-left:auto" title="Deck · Main · Défausse">🂠 ${P.deck.length} · ✋ ${P.hand.length} · 🗑 ${P.discard.length}</span></div>`;
+}
+function mField(p){
+  const P=PL(p), hidden=G.phase==='setup'&&!G.revealed;
+  const slot=(c,champ,lb)=>`<div class="mslot ${champ?'champ':''}"><span class="lb">${lb}</span>${c?(hidden?'<div class="mcard back"></div>':mBoardCard(p,c,champ)):`<div class="mempty">${champ?'—':'libre'}</div>`}</div>`;
+  return `<div class="mfield">${slot(P.champion,true,'Champion')}${slot(P.bench[0],false,'Banc')}${slot(P.bench[1],false,'Banc')}</div>`;
+}
+function mBoardCard(p,c,isChamp){
+  const card=C(c.id),P=PL(p),atk=baseAtk(c)+(isChamp&&P.elan?CONFIG.elan:0);
+  let tags='';
+  if(c.item) tags+=`<span>${c.item==='epee'?'🗡 Épée':'🛡 Plastron'}</span>`;
+  if(c.burn) tags+=`<span style="color:#ffb199">🔥${c.burn}</span>`;
+  if(isHeld(c)) tags+='<span style="color:#9cc8ff">Étreint</span>';
+  if(c.placedTurn===G.turn&&G.phase==='actions'&&!c.start) tags+='<span>Nouveau</span>';
+  const pd=G.pending[0], target=pd&&pd.options&&pd.options.includes(c.uid)&&mine_(pd.p);
+  const act=target?`pk:${c.uid}`:`sheet:${c.uid}`;
+  return `<div class="mcard ${target?'target':''}" style="--tc:${cardColor(card)}" data-a="${act}" data-card="${c.id}" data-uid="${c.uid}">
+    <div class="mtop"><span>${TYPES[card.type].name}</span><b>${STARS[card.size]}</b></div>
+    <div class="mnm">${esc(card.name)}</div>
+    ${card.ab?`<div class="mab">✦ ${abLabel(card)}</div>`:''}
+    <div class="msp">⚔ ${speLabel(card)} · ${speCost(card.id)}</div>
+    ${tags?`<div class="mtags">${tags}</div>`:''}
+    <div class="mst"><span class="atk ${atk>card.atk?'up':''}">⚔${atk}</span><span class="def ${c.dmg?'hurt':(maxDef(c)>card.def?'up':'')}">🛡${curDef(c)}<small>/${maxDef(c)}</small></span></div></div>`;
+}
+function mHandCard(p,h){
+  const card=C(h.id),P=PL(p),pd=G.pending[0];
+  let cls='',act=`sheet:${h.uid}`,badge='';
+  if(G.phase==='setup'&&!P.champion&&(G.online?p===MY_SEAT:(p===G.cur&&!G.handoff))){
+    if(card.cat==='creature'&&card.size==='P'){const k=G.setupSel[p].indexOf(h.uid);act=`ssel:${h.uid}`;cls=k>=0?'sel':'target';if(k>=0)badge='<div class="mtags"><span style="color:var(--good)">Champion</span></div>';}
+    else cls='dim';
+  } else if(pd&&pd.kind==='discard'&&pd.p===p){cls='target'+(pd.chosen.includes(h.uid)?' sel':'');act=`pk:${h.uid}`;}
+  else if(p===G.cur&&G.phase==='actions'&&!pd&&!handActions(h).some(a=>a.ok)) cls='dim';
+  const body=card.cat==='creature'
+    ?`${card.ab?`<div class="mab">✦ ${abLabel(card)}</div>`:''}<div class="msp">⚔ ${speLabel(card)} · ${speCost(card.id)}</div>${badge}<div class="mst"><span class="atk">⚔${card.atk}</span><span class="def">🛡${card.def}</span></div>`
+    :`<div class="mtxt">${esc(card.text)}</div>`;
+  return `<div class="mcard ${cls}" style="--tc:${cardColor(card)}" data-a="${act}" data-card="${h.id}">
+    <div class="mtop"><span>${card.cat==='creature'?TYPES[card.type].name:card.cat==='sort'?'Atout':'Objet'}</span><b>${card.cat==='creature'?STARS[card.size]:''}</b></div>
+    <div class="mnm">${esc(card.name)}</div>${body}</div>`;
+}
+function mHand(p){
+  const P=PL(p);
+  const lbl=`<div class="mhandlbl">${G.online?'Votre main':'Main de '+esc(G.names[p])} · ${P.hand.length} carte${s_(P.hand.length)}</div>`;
+  if(!P.hand.length) return lbl+'<div class="mhand"><span class="empty muted">Main vide</span></div>';
+  if(!handVisible(p)) return lbl+`<div class="mhand">${P.hand.map(()=>'<div class="mcard back"></div>').join('')}</div>`;
+  return lbl+`<div class="mhand">${P.hand.map(h=>mHandCard(p,h)).join('')}</div>`;
+}
+function mMid(){
+  const n=esc(G.names[G.cur]); let main='',btns='';
+  const canUndo=G.online?(MY_SEAT===0?undoAllowed(0):!!G.undoOk):UNDO.length>0;
+  const undo=canUndo?`<button class="ghost" data-a="undo" title="Revenir à l'état précédent (pendant votre tour)">↶</button>`:'';
+  const head=`<span class="small">${G.mode==='blitz'?'Blitz':'Manche '+G.round}</span>`;
+  if(G.phase==='setup'){
+    const seat=G.online?MY_SEAT:G.cur, k=G.setupSel[seat].length;
+    if(G.online&&PL(seat).champion) main=`${head}<div>Champion posé. En attente de ${esc(G.names[1-seat])}…</div>`;
+    else {
+      main=`${head}<div><b>${G.online?'Vous':esc(G.names[seat])}</b> : touchez 1 combattant ✯ de votre main, votre champion (face cachée).</div>`;
+      if(!G.handoff) btns=`<button class="primary" data-a="setupok" ${k?'':'disabled'}>Valider le champion</button>`;
+    }
+  }
+  else if(G.phase==='actions'){
+    const pips=`<span class="pips">${Array.from({length:CONFIG.actionsPerTurn},(_,i)=>`<i class="${i<G.actions?'on':''}"></i>`).join('')}</span>`;
+    main=`<div>${head} · <b>Tour ${G.turn}</b> · ${n}${pips}</div>`;
+    const pd=G.pending[0];
+    if(G.online&&actingPlayer()!==MY_SEAT){
+      main+=`<div class="small">En attente de ${esc(G.names[actingPlayer()])}…${pd?' ('+pendingText(pd)+')':''}</div>`;
+    } else if(pd){
+      const cancel=(pd.kind==='target'&&!['eruption','souffle','repli','tourbillon'].includes(pd.what))||pd.kind==='deckpick';
+      main+=`<div class="pend">${pendingText(pd)}</div>`;
+      if(pd.kind==='deckpick'&&!pd.cards.length) btns=`<span class="small">Aucun combattant ✯ dans votre deck.</span><button class="primary" data-a="rf:none">Mélanger le deck</button>`;
+      else if(pd.kind==='deckpick'){const P=cp();btns=pd.cards.map(id=>`<button data-a="rf:${id}" data-card="${id}">${esc(C(id).name)} ×${P.deck.filter(x=>x===id).length}</button>`).join('');}
+      if(cancel) btns+='<button class="ghost" data-a="cancel">Annuler</button>';
+    } else {
+      const why=attackBlocked(), ch=cp().champion, card=ch?C(ch.id):null, sp=card&&card.spe;
+      if(why){ main+=`<div class="small">Pas d'attaque : ${why}.</div>`; btns=`<button class="primary" data-a="endturn">Fin du tour</button>`; }
+      else {
+        const kb=attackCalc('base'), ks=sp?attackCalc('spe'):null, okS=canAttack('spe'), sc=sp?speCost(ch.id):0;
+        const dm=(k,pari)=>`${k.dmg}${pari?'?':''}${k.kills?' ☠':''}`;
+        btns=`<button class="primary" data-a="attack:base" title="Gratuite · termine le tour">⚔ Base · ${dm(kb)}</button>
+          ${sp?`<button class="primary" data-a="attack:spe" ${okS?'':'disabled'} title="${okS?esc(SPE[sp.kw].text(sp.x)):`Il faut ${sc} action${s_(sc)}`}">✦ ${esc(speLabel(card))} (${sc}) · ${dm(ks,sp.kw==='pari')}</button>`:''}
+          <button data-a="endturn">Fin du tour</button>`;
+        if(sp&&!okS) main+=`<div class="small">${esc(speLabel(card))} : il faut ${sc} action${s_(sc)}.</div>`;
+      }
+    }
+  }
+  else if(G.phase==='roundover'){
+    main=`<div class="banner">🏆 <b>${esc(G.names[G.lastWinner])}</b> remporte la manche ${G.round}. Score ${G.wins[0]}–${G.wins[1]}.</div>`;
+    btns=`<button class="primary" data-a="nextround">Manche suivante (${esc(G.names[1-G.lastWinner])} commence)</button>`;
+  }
+  else if(G.phase==='matchover'){
+    main=`<div class="banner">🏆 <b>${esc(G.names[G.lastWinner])}</b> ${G.mode==='blitz'?'remporte la partie Blitz !':`remporte le match ${G.wins[0]}–${G.wins[1]} !`}</div>`;
+    btns=`<button class="primary" data-a="rematch">Rejouer ce duel</button><button data-a="newmatch">${G.online?'Quitter la partie':'Changer de decks'}</button>`;
+  }
+  return `<div class="mmid">${main}${btns||undo?`<div class="btns">${btns}${undo}</div>`:''}</div>`;
+}
+// Panneau du bas : détail d'une carte et actions possibles (avec la raison si impossible)
+function renderSheet(){
+  const uid=UI.sheet; let id=null,acts='',inst=null;
+  for(let p=0;p<2;p++){const h=PL(p).hand.find(x=>x.uid===uid);if(h&&h.id&&handVisible(p)){id=h.id;
+    acts=handActions(h).map(a=>`<button class="${a.ok?'primary':''}" data-a="play:${h.uid}:${a.key}" ${a.ok?'':'disabled'}>${a.label}</button>${a.ok||!a.why?'':`<div class="why">${esc(a.why)}</div>`}`).join('');}}
+  if(!id){const o=ownerOf(uid);if(o<0){UI.sheet=null;return '';}inst=findC(o,uid);id=inst.id;
+    if(PL(o).bench.includes(inst)&&o===G.cur&&mine_(o)&&G.phase==='actions'&&!G.pending.length&&!G.handoff){
+      const cost=swapCost(inst),held=isHeld(PL(o).champion),ok=G.actions>=cost&&!held;
+      acts=`<button class="${ok?'primary':''}" data-a="swap:${uid}" ${ok?'':'disabled'}>Échanger avec le champion (${cost} action${s_(cost)})</button>${ok?'':`<div class="why">${held?'Votre champion est retenu par une Étreinte ce tour.':`Il faut ${cost} action${s_(cost)}.`}</div>`}`;}}
+  return `<div class="sheet-bg" data-a="closesheet"><div class="sheet">${popHTML(id,inst?uid:null)}<div class="acts">${acts}<button class="ghost" data-a="closesheet">Fermer</button></div></div></div>`;
+}
+// Bouton paramètres (en bas à gauche) et son menu
+function gearHTML(){
+  let menu='';
+  if(UI.gmenu){
+    const quit=UI.confirmQuit
+      ?`<div class="confirm"><span>${G.online?'Quitter la partie en ligne ?':'Abandonner le match ?'}</span><div><button class="primary" data-a="newmatch">Oui</button><button data-a="stayin">Non</button></div></div>`
+      :`<button data-a="newmatch">${G.online?'Quitter la partie':'Abandonner'}</button>`;
+    menu=`<div class="gmenu-bg" data-a="gmenu"></div><div class="gmenu">${quit}<button data-a="mmodal:rules">Règles du jeu</button><button data-a="mmodal:log">Historique du match</button></div>`;
+  }
+  return `${menu}<button class="gear" data-a="gmenu" title="Paramètres" aria-label="Paramètres">⚙</button>`;
+}
+function rulesRecap(){
+  return `<h3 style="margin-top:0">Rappel des règles</h3>
+    <ol style="padding-left:18px;font-size:13px;line-height:1.5">
+      <li><b>Début du tour</b> : pioche 1 carte, puis soins (Soigneuse), puis dégâts (Brasier, Contusion).</li>
+      <li><b>${CONFIG.actionsPerTurn} actions</b> : poser un ✯ (1) · évoluer (1, sur un combattant en jeu depuis le début du tour) · atout ou objet (1) · échange de champion (1 même type, 2 types différents).</li>
+      <li><b>Attaque</b> (une fois, termine le tour) : de base, gratuite ; ou spéciale, payée avec les actions restantes.</li>
+      <li><b>Fin du tour</b> : les effets « jusqu'à la fin du tour » (Élan) s'arrêtent.</li></ol>
+    <p style="font-size:13px">Coup = ATK (+Épée, +Élan, + bonus de l'attaque spéciale) +${CONFIG.weakBonus} si faiblesse − réductions (Armure, Garde), minimum 0. Les dégâts directs (Frappe, Éruption, Embrasement, Brasier, Souffle, Riposte…) ignorent faiblesse et réductions. Cercle des types : Eau &gt; Feu &gt; Combat &gt; Roche &gt; Électrique &gt; Eau.</p>
+    <p style="font-size:13px">Victoire à ${G?G.win:6} étoiles (✯ 1 · ✯✯ 2 · ✯✯✯ 3). On perd aussi sans combattant disponible ou en devant piocher dans un deck vide.</p>
+    <details open><summary>Capacités</summary><ul style="padding-left:18px;font-size:12.5px">${Object.values(ABIL).filter(a=>a.name!=='Reflux').map(a=>`<li><b>${a.name}</b> : ${esc(a.text('X'))}</li>`).join('')}</ul></details>
+    <details open><summary>Attaques spéciales</summary><ul style="padding-left:18px;font-size:12.5px">${Object.values(SPE).map(a=>`<li><b>${a.name}</b> (${a.name==='Charge'?'X actions':speCostTxt(a.cost(1))}) : ${esc(a.text('X'))}</li>`).join('')}</ul></details>`;
+}
+function renderMatchModal(){
+  const body=UI.mmodal==='rules'?rulesRecap()
+    :`<h3 style="margin-top:0">Historique du match</h3><div class="log" style="max-height:none">${G?G.log.slice().reverse().map(l=>`<div class="l ${l.cls}">${esc(l.msg)}</div>`).join(''):''}</div><div style="margin-top:16px">${registryHTML()}</div>`;
+  return `<div class="modal-bg" data-a="closemm"><div class="modal"><button class="mclose ghost" data-a="closemm">✕</button>${body}</div></div>`;
 }
 function playerPanel(p,top){
   const P=PL(p),k=G.decks[p],active=G.cur===p&&!isOver();
@@ -1394,8 +1613,13 @@ const H = {
   endturn(){act(endTurnNoAttack);},
   nextround(){act(nextRound);},
   rematch(){const g=G;newMatch({decks:g.decks,names:g.names,mode:g.mode,variant:'std',hideHands:g.hide,online:g.online});render();},
-  newmatch(){if(G&&G.phase!=='matchover'&&!UI.confirmQuit){UI.confirmQuit=true;render();return;}UI.confirmQuit=false;if(G&&G.online)netLeave();G=null;UNDO=[];window.scrollTo(0,0);render();},
+  newmatch(){if(G&&G.phase!=='matchover'&&!UI.confirmQuit){UI.confirmQuit=true;render();return;}UI.confirmQuit=false;UI.gmenu=false;UI.sheet=null;UI.mmodal=null;if(G&&G.online)netLeave();G=null;UNDO=[];window.scrollTo(0,0);render();},
   stayin(){UI.confirmQuit=false;render();},
+  sheet(uid){UI.sheet=+uid;render();},
+  closesheet(_,e,el){if(el.classList.contains('sheet-bg')&&e.target!==el)return;UI.sheet=null;render();},
+  gmenu(){UI.gmenu=!UI.gmenu;UI.confirmQuit=false;render();},
+  mmodal(k){UI.mmodal=k;UI.gmenu=false;render();},
+  closemm(_,e,el){if(el.classList.contains('modal-bg')&&e.target!==el)return;UI.mmodal=null;render();},
   undo(){if(!UNDO.length)return;if(G.online&&!undoAllowed(ACT_SEAT!=null?ACT_SEAT:0))return;G=JSON.parse(UNDO.pop());G.handoff=false;if(HIST.length>G.histCount)HIST.length=G.histCount;render();},
   copyreg(){
     const txt=registryText(), fb=()=>{UI.exportText=txt;render();};
@@ -1417,6 +1641,7 @@ const GAME_ACTIONS=new Set(['ssel','setupok','play','pk','rf','swap','attack','e
 document.addEventListener('click',e=>{
   const el=e.target.closest('[data-a]'); if(!el||el.disabled) return;
   const [a,...args]=el.dataset.a.split(':');
+  if(a==='play'||a==='swap'||a==='attack'||a==='endturn') UI.sheet=null;
   if(G&&G.online&&GAME_ACTIONS.has(a)){
     if(NET.role==='guest'){ if(NET.conn&&NET.conn.open) NET.conn.send({t:'act',a,args}); return; }
     if(NET.role==='host'){ hostExec(0,a,args); return; }
@@ -1426,7 +1651,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('change',e=>{if(e.target.closest('[data-col]')){colUpdate(e);return;}const o=e.target.closest('[data-opt]');if(o)UI[o.dataset.opt]=o.checked;});
 function colUpdate(e){const el=e.target.closest('[data-col]');if(!el)return false;UI.col[el.dataset.col]=el.value;const g=$('#colgrid');if(g)g.innerHTML=colGridHTML();return true;}
 document.addEventListener('input',e=>{if(colUpdate(e))return;const n=e.target.closest('[data-note]');if(n&&HIST[+n.dataset.note])HIST[+n.dataset.note].notes=n.value;});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(UI.detail||UI.exportText!==null)){UI.detail=null;UI.exportText=null;render();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(UI.detail||UI.exportText!==null||UI.sheet||UI.mmodal||UI.gmenu)){UI.detail=null;UI.exportText=null;UI.sheet=null;UI.mmodal=null;UI.gmenu=false;render();}});
 /* =========================================================
    RÉSEAU (en ligne, 2 appareils) — PeerJS, l'hôte est l'arbitre
    ========================================================= */
