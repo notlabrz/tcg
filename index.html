@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ROJJJO TCG · Duel des champions</title>
+<title>DC TCG · Duel des champions</title>
 <!-- Application web : s'ouvre en plein écran depuis l'écran d'accueil -->
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="ROJJJO">
+<meta name="apple-mobile-web-app-title" content="DC TCG">
 <meta name="theme-color" content="#0d0f13">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -49,6 +49,7 @@ h3{margin:22px 0 10px;font-size:15px}
 .card .band{height:3px;background:var(--tc);border-radius:2px;margin:1px 0 2px}
 .card .kind{font-size:10.5px;color:var(--muted)}
 .card .tal{font-size:11px;color:var(--accent);font-weight:600}
+.card .spe{font-size:11px;color:var(--atk);font-weight:700}
 .card .txt{font-size:11px;color:#c9ced8;line-height:1.3}
 .card .stats{margin-top:auto;display:flex;justify-content:space-between;font-weight:800;font-size:17px}
 .card .stats .atk{color:var(--atk)} .card .stats .def{color:var(--def)}
@@ -71,7 +72,7 @@ h3{margin:22px 0 10px;font-size:15px}
 .card.back.full{width:128px;min-height:168px}
 
 /* decks */
-.dtiles{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.dtiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
 .dtile{--tc:#888;text-align:left;padding:14px;border:2px solid var(--line);border-radius:14px;background:linear-gradient(160deg,color-mix(in srgb,var(--tc) 30%,var(--panel)) 0,var(--panel) 70%)}
 .dtile.on{border-color:var(--tc);box-shadow:0 0 0 2px var(--tc)}
 .dt-name{font-size:20px;font-weight:800}
@@ -153,14 +154,46 @@ details summary{cursor:pointer;font-weight:700}
 .pop .ab{color:var(--accent);font-weight:700}
 .bottombar{position:fixed;left:0;right:0;bottom:0;z-index:35;display:flex;background:#0d0f13;border-top:1px solid var(--line);padding:6px calc(8px + env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-left))}
 .bottombar button{flex:1;border:0;background:transparent;border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;color:var(--muted);font-size:12.5px}
-.bottombar button .ic{font-size:20px;line-height:1}
+.bottombar button .ic{font-size:24px;line-height:1}
 .bottombar button.on{color:var(--text);background:var(--panel2);font-weight:700}
-#app{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+#app{padding-bottom:calc(120px + env(safe-area-inset-bottom))}
+.backbtn{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(62px + env(safe-area-inset-bottom));z-index:34;padding:9px 22px;border-radius:999px;background:var(--panel2);border:1px solid #5a6480;font-weight:600;box-shadow:0 4px 16px #0008}
+.ptitle{text-align:center;margin:0 0 16px;font-size:20px}
+.vcenter{display:flex;flex-direction:column;justify-content:flex-start;min-height:calc(100vh - 46px - 120px - env(safe-area-inset-bottom) - 36px);min-height:calc(100dvh - 46px - 120px - env(safe-area-inset-bottom) - 36px)}
+.vcenter>.menu{margin-top:auto;margin-bottom:auto}
+.vcenter::after{content:'';flex:none;height:44px}
+.ptop{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-bottom:16px}
+.ptop h2{margin:0;font-size:20px;grid-column:2}
+.ptop .right{grid-column:3;justify-self:end}
+.randbtn{flex:0 0 auto;margin-top:12px;padding:0 16px;border:2px solid var(--line);border-radius:12px;font-size:22px;background:var(--panel2)}
+.randbtn.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 25%,var(--panel2))}
 .menu{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
-.menu button{text-align:left;padding:22px 20px;border:2px solid var(--line);border-radius:14px;background:var(--panel);font-size:18px;font-weight:800;min-height:96px}
-.menu button small{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin-top:6px}
+.menu button{text-align:left;padding:22px 20px;border:2px solid var(--line);border-radius:14px;background:var(--panel);font-size:22px;font-weight:800;min-height:96px}
+.menu button small{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-top:6px}
 .menu button:disabled small{color:var(--muted)}
-.navhead{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.navhead{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;margin-bottom:16px}
+.navhead h2{text-align:center}
+.navhead .ghost.spacer{visibility:hidden}
+.ctr{text-align:center}
+.ctr .menu button{text-align:center}
+.ctr .dpick,.ctr .duels,.ctr .grid{justify-content:center}
+.ctr .opts label{justify-content:center}
+.ctr .dtile{text-align:center}
+.ctr .card{text-align:left}
+.deckbtn{--tc:#888;display:block;width:100%;margin-top:12px;padding:14px;border:2px solid var(--tc);border-radius:12px;background:color-mix(in srgb,var(--tc) 22%,var(--panel2));font-size:15px}
+.deckbtn small{display:block;color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.dtile.on{box-shadow:0 0 0 3px var(--accent)}
+.grid.compact{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.grid.compact .card{width:auto;min-height:150px;padding:5px 6px}
+.grid.compact .card .nm{font-size:12px}
+.grid.compact .card .top{font-size:9.5px}
+.grid.compact .card .tal,.grid.compact .card .spe,.grid.compact .card .kind,.grid.compact .card .txt{font-size:10px}
+.grid.compact .card .stats{font-size:14px}
+.filters{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:0 0 12px;text-align:left}
+.filters input{grid-column:1/-1}
+.filters label{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.filters select,.filters input{width:100%;font-size:14px;padding:7px 8px}
+@media (min-width:760px){.filters{grid-template-columns:2fr repeat(4,1fr)}.filters input{grid-column:auto}}
 .navhead h2{margin:0;font-size:20px}
 .rules h3{margin:22px 0 8px}.rules p,.rules li{line-height:1.55}.rules table{margin:8px 0;max-width:640px}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--good);color:#04210f;padding:8px 16px;border-radius:8px;font-weight:700;z-index:60}
@@ -171,13 +204,12 @@ details summary{cursor:pointer;font-weight:700}
 <body>
 <header>
   <h1>DC <span>TCG</span></h1>
-  <span class="ver">v1.0.0</span><!-- numéro de version : à augmenter à chaque mise en ligne -->
 </header>
 <main id="app"></main>
 <nav class="bottombar">
-  <button data-a="tab:combat" data-tab="combat"><span class="ic">⚔</span>Combat</button>
-  <button data-a="tab:cartes" data-tab="cartes"><span class="ic">🂠</span>Cartes</button>
-  <button data-a="tab:params" data-tab="params"><span class="ic">⚙</span>Paramètres</button>
+  <button data-a="tab:combat" data-tab="combat" title="Match" aria-label="Match"><span class="ic">⚔</span></button>
+  <button data-a="tab:cartes" data-tab="cartes" title="Collection" aria-label="Collection"><span class="ic">🂠</span></button>
+  <button data-a="tab:params" data-tab="params" title="Paramètres" aria-label="Paramètres"><span class="ic">⚙</span></button>
 </nav>
 <div id="modal"></div>
 <div id="toast"></div>
@@ -187,11 +219,12 @@ details summary{cursor:pointer;font-weight:700}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
+const APP_VERSION = 'v1.4.3';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
   maxHand: null,           // pas de limite de main en fin de tour (manuel officiel)
-  maxStarters: 3,          // combattants ✯ posés à la préparation : 1 champion + jusqu'à 2 sur le banc
+  maxStarters: 1,          // préparation : 1 seul combattant ✯, le champion (manuel du 23/10)
   benchSlots: 2,
   weakBonus: 1,            // bonus de faiblesse
   poseCost: {P:1, M:2, G:3},
@@ -221,51 +254,148 @@ const TYPES = {
   feu:        {name:'Feu',        color:'#e5484d'},
   eau:        {name:'Eau',        color:'#3b8ff0'},
   roche:      {name:'Roche',      color:'#a08560'},
-  electrique: {name:'Électrique', color:'#e6bb12'}
+  electrique: {name:'Électrique', color:'#e6bb12'},
+  combat:     {name:'Combat',     color:'#e8892c'}
 };
+// Cercle des types : chaque type bat le suivant (Eau > Feu > Combat > Roche > Électrique > Eau)
+const TYPE_CIRCLE = ['eau','feu','combat','roche','electrique'];
 const ABIL = {
+  armure:      {name:'Armure',      text:x=>`Ce combattant subit ${x} dégât${x>1?'s':''} de moins par coup (le coup peut tomber à 0). Ne réduit pas les dégâts directs.`},
+  survolte:    {name:'Survolté',    text:()=>'Ce combattant peut évoluer pendant le tour où il a été posé (toujours une seule évolution par tour).'},
+  riposte:     {name:'Riposte',     text:x=>`Quand ce combattant est champion et survit à un coup, il inflige ${x} dégât${x>1?'s':''} direct${x>1?'s':''} au champion qui l'a frappé.`},
+  regeneration:{name:'Régénération',text:()=>'Quand ce combattant arrive par évolution, il efface tous ses dégâts : il repart avec toute sa DEF.'},
+  frenesie:    {name:'Frénésie',    text:x=>`Quand ce combattant vainc le champion adverse en l'attaquant, il récupère ${x} DEF.`},
   eclaireur:   {name:'Éclaireur',   text:()=>'Quand vous posez ce combattant (depuis la main, par évolution ou par Renfort), piochez 1 carte.'},
   soigneuse:   {name:'Soigneuse',   text:()=>'Tant que ce combattant est sur votre banc, votre champion récupère 1 DEF au début de votre tour. L\'effet est cumulable, sans dépasser la DEF maximale.'},
   embrasement: {name:'Embrasement', text:x=>`Quand ce combattant est vaincu, il inflige ${x} dégât${x>1?'s':''} direct${x>1?'s':''} au champion du joueur qui l'a vaincu (sans faiblesse).`},
+  coup_honneur:{name:'Coup d\'honneur', as:'embrasement', text:x=>`Quand ce combattant est vaincu, il inflige ${x} dégât${x>1?'s':''} direct${x>1?'s':''} au champion du joueur qui l'a vaincu (même effet qu'Embrasement).`},
+  onde_choc:   {name:'Onde de choc', as:'eruption', text:x=>`Quand vous posez ce combattant (depuis la main ou par évolution), il inflige ${x} dégâts directs à un combattant adverse de votre choix (même effet qu'Éruption).`},
   eruption:    {name:'Éruption',    text:x=>`Quand vous posez ce combattant (depuis la main ou par évolution), il inflige ${x} dégâts directs à un combattant adverse de votre choix (champion ou banc), sans faiblesse.`}
 };
+// Attaques spéciales (v1.7) : mot-clé, coût en actions, effet. « X » = chiffre de la carte.
+const SPE = {
+  charge:    {name:'Charge',    cost:x=>x, text:x=>`Le coup inflige ${x} dégât${x>1?'s':''} de plus.`},
+  assaut:    {name:'Assaut',    cost:()=>0, text:x=>`Le coup inflige ${x} dégâts de plus, puis votre champion subit ${x} dégâts directs (recul). Si le recul le met à 0 DEF, il est vaincu.`},
+  pari:      {name:'Pari',      cost:()=>0, text:x=>`Lancez une pièce. Face : le coup inflige ${x} dégâts de plus. Pile : l'attaque rate et n'inflige aucun dégât (le tour se termine quand même).`},
+  brasier:   {name:'Brasier',   cost:()=>1, text:x=>`Si le coup inflige au moins 1 dégât, la cible subit ${x} dégât${x>1?'s':''} direct${x>1?'s':''} au début du prochain tour de son propriétaire, après les soins de Soigneuse. Un seul Brasier à la fois par cible (le plus fort).`},
+  souffle:   {name:'Souffle',   cost:()=>1, text:x=>`Après le coup, infligez ${x} dégâts directs à un combattant du banc adverse de votre choix.`},
+  recherche: {name:'Recherche', cost:()=>1, text:()=>`Le coup inflige 1 dégât de moins (minimum 0), puis piochez 1 carte.`},
+  vague:     {name:'Vague',     cost:()=>1, text:x=>`Après le coup, votre champion récupère ${x} DEF (sans dépasser sa DEF maximale).`},
+  repli:     {name:'Repli',     cost:()=>1, text:()=>`Après le coup, échangez votre champion avec un combattant de votre banc, sans payer l'échange.`},
+  etreinte:  {name:'Étreinte',  cost:()=>0, text:()=>`Le coup inflige 1 dégât de moins (minimum 0). Si la cible survit, son propriétaire ne peut pas l'échanger pendant son prochain tour (Échange forcé reste possible).`},
+  acharnement:{name:'Acharnement',cost:()=>1, text:x=>`Si la cible avait déjà subi des dégâts avant ce coup, le coup inflige ${x} dégât${x>1?'s':''} de plus.`},
+  garde:     {name:'Garde',     cost:()=>1, text:x=>`Après le coup, jusqu'au début de votre prochain tour, votre champion subit ${x} dégât${x>1?'s':''} de moins par coup.`},
+  contusion: {name:'Contusion', as:'brasier', cost:()=>1, text:x=>`Si le coup inflige au moins 1 dégât, la cible subit ${x} dégât${x>1?'s':''} direct${x>1?'s':''} au début du prochain tour de son propriétaire, après les soins (même effet que Brasier).`},
+  tourbillon:{name:'Tourbillon',cost:()=>1, text:()=>`Si la cible survit, choisissez un combattant du banc adverse : il devient champion, l'ancien champion va au banc.`}
+};
+const SPE_NOX=['recherche','repli','etreinte','tourbillon'];
+function abIs(card,k){return !!(card&&card.ab&&(ABIL[card.ab].as||card.ab)===k);}
+function speBase(kw){return SPE[kw].as||kw;}
+function speLabel(card){const sp=card.spe;return SPE[sp.kw].name+(SPE_NOX.includes(sp.kw)?'':' '+sp.x);}
+function speCost(id){const sp=C(id).spe;return SPE[sp.kw].cost(sp.x);}
+function speCostTxt(n){return n?`${n} action${n>1?'s':''}`:'gratuite';}
 const CARDS = {};
 const LV = {P:1,M:2,G:3};
 const STARS={P:'✯',M:'✯✯',G:'✯✯✯'};
 
 // [id, nom, taille, atk, def, faiblesse, capacité, X, lignée]
-function creatures(type, rows){
-  rows.forEach(([id,name,size,atk,def,weak,ab,x,line])=>{
-    CARDS[id]={id,name,cat:'creature',type,size,level:LV[size],atk,def,weak,ab:ab||null,abX:x||0,line:line||null};
+// [id, nom, taille, atk, def, faiblesse, capacité, X, lignée, attaque spéciale, X]
+function creatures(fam,type,rows){
+  rows.forEach(([id,name,size,atk,def,weak,ab,x,line,spe,sx])=>{
+    if(CARDS[id]) return; // carte commune à plusieurs decks (Sirène, Crabe, Bernard)
+    CARDS[id]={id,name,cat:'creature',type,fam,size,level:LV[size],atk,def,weak,ab:ab||null,abX:x||0,line:line||null,spe:{kw:spe,x:sx||0}};
   });
 }
-// Livret des decks de test (22/10/2026)
-// [id, nom, taille, atk, def, faiblesse, capacité, X, lignée]
-creatures('eau',[
-  ['murene','Murène','P',2,5,'feu',null,0,'A'],
-  ['vigie','Vigie des récifs','P',2,4,'feu','eclaireur',0,'B'],
-  ['oursin','Oursin piquant','P',2,4,'feu','embrasement',1,'C'],
-  ['sirene','Sirène guérisseuse','P',1,5,'electrique','soigneuse'],
-  ['crabe','Crabe cuirassé','P',3,4,'electrique'],
-  ['bernard','Bernard-l\'ermite','P',2,5,'feu'],
-  ['kraken','Kraken','M',3,8,'electrique',null,0,'A'],
-  ['tortue','Tortue des marées','M',4,7,'feu','soigneuse',0,'B'],
-  ['hydre','Hydre','M',4,6,'feu','embrasement',2,'C'],
-  ['leviathan','Léviathan','G',6,10,'electrique',null,0,'A'],
-  ['maitre_marees','Maître des marées','G',6,9,'feu','eruption',2,'B']
+// ===== Decks découverte =====
+creatures('vague','eau',[
+  ['murene','Murène','P',2,5,'feu',null,0,'A','etreinte'],
+  ['vigie','Vigie des récifs','P',2,4,'feu','eclaireur',0,'B','recherche'],
+  ['oursin','Oursin piquant','P',2,4,'feu','embrasement',1,'C','repli'],
+  ['sirene','Sirène guérisseuse','P',1,5,'electrique','soigneuse',0,null,'vague',2],
+  ['crabe','Crabe cuirassé','P',3,4,'electrique',null,0,null,'vague',1],
+  ['bernard','Bernard-l\'ermite','P',2,5,'feu',null,0,null,'repli'],
+  ['kraken','Kraken','M',3,8,'electrique',null,0,'A','etreinte'],
+  ['tortue','Tortue des marées','M',4,7,'feu','soigneuse',0,'B','vague',2],
+  ['hydre','Hydre','M',4,6,'feu','embrasement',2,'C','pari',3],
+  ['leviathan','Léviathan','G',6,10,'electrique',null,0,'A','tourbillon'],
+  ['maitre_marees','Maître des marées','G',6,9,'feu','eruption',2,'B','vague',3]
 ]);
-creatures('feu',[
-  ['salamandre','Salamandre','P',2,5,'eau',null,0,'A'],
-  ['guetteur','Guetteur de flamme','P',2,4,'eau','eclaireur',0,'B'],
-  ['imp','Imp explosif','P',2,4,'eau','embrasement',1,'C'],
-  ['veilleur','Veilleur de cendres','P',1,5,'roche','soigneuse'],
-  ['chien_braise','Chien de braise','P',3,4,'roche'],
-  ['garde_lave','Garde de lave','P',2,5,'eau'],
-  ['phenix','Phénix','M',5,6,'eau',null,0,'A'],
-  ['pyromancien','Pyromancien','M',2,9,'roche','soigneuse',0,'B'],
-  ['demon','Démon incandescent','M',4,6,'eau','embrasement',2,'C'],
-  ['dragon_lave','Dragon de lave','G',8,8,'eau',null,0,'A'],
-  ['titan_volcan','Titan du volcan','G',4,11,'roche','eruption',2,'B']
+creatures('poing','combat',[
+  ['jeune_pugiliste','Jeune pugiliste','P',2,5,'feu',null,0,'A','contusion',1],
+  ['eclaireur_clan','Éclaireur du clan','P',2,4,'feu','eclaireur',0,'B','recherche'],
+  ['cogneur','Cogneur téméraire','P',2,4,'feu','coup_honneur',1,'C','repli'],
+  ['vieux_maitre','Vieux maître','P',1,5,'roche','soigneuse',0,null,'charge',1],
+  ['molosse','Molosse de combat','P',3,4,'roche',null,0,null,'etreinte'],
+  ['sparring','Sparring-partner','P',2,5,'feu',null,0,null,'contusion',1],
+  ['pugiliste','Pugiliste','M',5,6,'feu',null,0,'A','assaut',2],
+  ['moine_gardien','Moine gardien','M',2,9,'roche','soigneuse',0,'B','contusion',1],
+  ['berserker','Berserker','M',4,6,'feu','coup_honneur',2,'C','pari',3],
+  ['champion_ring','Champion du ring','G',8,8,'feu',null,0,'A','souffle',2],
+  ['colosse_temple','Colosse du temple','G',4,11,'roche','onde_choc',2,'B','charge',2]
+]);
+// ===== Decks à thème =====
+creatures('feu','feu',[
+  ['salamandre','Salamandre','P',2,5,'eau',null,0,'A','brasier',1],
+  ['vigie_cendres','Vigie des cendres','P',2,4,'combat','eclaireur',0,'B','recherche'],
+  ['imp','Imp explosif','P',2,4,'eau','embrasement',1,'C','etreinte'],
+  ['veilleur','Veilleur de cendres','P',1,5,'roche','eruption',1,null,'charge',1],
+  ['garde_lave','Garde de lave','P',2,5,'eau',null,0,null,'recherche'],
+  ['chien_braise','Chien de braise','P',3,4,'roche',null,0,null,'repli'],
+  ['phenix','Phénix','M',4,7,'eau',null,0,'A','assaut',2],
+  ['mage_flammes','Mage des flammes','M',4,7,'combat',null,0,'B','brasier',1],
+  ['demon','Démon incandescent','M',4,6,'eau','embrasement',2,'C','assaut',2],
+  ['dragon_lave','Dragon de lave','G',7,9,'eau',null,0,'A','souffle',2],
+  ['seigneur_volcan','Seigneur volcanique','G',6,9,'electrique','eruption',2,'B','charge',2]
+]);
+creatures('eau','eau',[
+  ['jeune_dauphin','Jeune dauphin','P',2,5,'feu',null,0,'A','vague',1],
+  ['heron','Héron guetteur','P',2,4,'electrique','eclaireur',0,'B','recherche'],
+  ['jeune_requin','Jeune requin','P',2,4,'combat','frenesie',2,'C','recherche'],
+  ['sirene'],['crabe'],['bernard'],
+  ['dauphin','Dauphin','M',4,7,'electrique',null,0,'A','charge',1],
+  ['ondine','Ondine','M',4,7,'electrique',null,0,'B','vague',1],
+  ['grand_requin','Grand requin','M',4,6,'roche','frenesie',3,'C','assaut',2],
+  ['orque','Orque','G',7,9,'electrique',null,0,'A','vague',2],
+  ['reine_marees','Reine des marées','G',6,9,'roche','regeneration',0,'B','vague',3]
+]);
+creatures('elec','electrique',[
+  ['furet','Furet statique','P',2,5,'eau',null,0,'A','etreinte'],
+  ['bobine','Bobine vive','P',2,4,'roche','survolte',0,'B','recherche'],
+  ['luciole','Luciole','P',2,4,'roche','eclaireur',0,'C','recherche'],
+  ['pile_chargee','Pile chargée','P',1,5,'feu','eclaireur',0,null,'charge',1],
+  ['sentinelle','Sentinelle cuivrée','P',2,5,'roche',null,0,null,'etreinte'],
+  ['chacal','Chacal électrique','P',3,4,'combat',null,0,null,'recherche'],
+  ['lynx','Lynx d\'orage','M',4,7,'eau',null,0,'A','charge',1],
+  ['golem_dynamo','Golem dynamo','M',3,7,'roche','eruption',1,'B','charge',1],
+  ['phalene','Phalène d\'orage','M',4,6,'roche','eclaireur',0,'C','pari',3],
+  ['dragon_foudre','Dragon de foudre','G',7,9,'feu',null,0,'A','souffle',2],
+  ['seigneur_orage','Seigneur de l\'orage','G',5,10,'roche','eruption',2,'B','charge',2]
+]);
+creatures('roche','roche',[
+  ['galet','Galet roulant','P',2,5,'electrique',null,0,'A','garde',1],
+  ['tailleur','Tailleur de pierre','P',2,4,'combat','eclaireur',0,'B','recherche'],
+  ['herisson','Hérisson de quartz','P',2,4,'combat','armure',1,'C','etreinte'],
+  ['golem_poche','Golem de poche','P',1,5,'eau','eclaireur',0,null,'charge',1],
+  ['gargouille','Gargouille','P',2,5,'combat',null,0,null,'etreinte'],
+  ['belier','Bélier de roche','P',3,4,'feu',null,0,null,'etreinte'],
+  ['rhinoceros','Rhinocéros de granit','M',4,7,'electrique',null,0,'A','charge',1],
+  ['golem_granit','Golem de granit','M',3,7,'combat','armure',1,'B','garde',1],
+  ['basilic','Basilic de quartz','M',4,6,'combat','armure',1,'C','charge',1],
+  ['titan_roche','Titan de roche','G',7,9,'eau',null,0,'A','charge',2],
+  ['colosse_roche','Colosse de roche','G',5,10,'combat','armure',2,'B','etreinte']
+]);
+creatures('combat','combat',[
+  ['apprenti','Apprenti lutteur','P',2,5,'roche',null,0,'A','garde',1],
+  ['novice','Novice du dojo','P',2,4,'feu','eclaireur',0,'B','recherche'],
+  ['bagarreur','Bagarreur','P',2,4,'feu','riposte',1,'C','garde',1],
+  ['vieux_sensei','Vieux sensei','P',1,5,'electrique','riposte',1,null,'charge',1],
+  ['garde_dojo','Garde du dojo','P',2,5,'roche',null,0,null,'garde',1],
+  ['boxeur_rue','Boxeur de rue','P',3,4,'eau',null,0,null,'etreinte'],
+  ['lutteur','Lutteur','M',4,7,'roche',null,0,'A','acharnement',2],
+  ['moine_boxeur','Moine-boxeur','M',3,7,'feu','riposte',1,'B','acharnement',1],
+  ['champion_rue','Champion de rue','M',4,6,'feu','riposte',2,'C','pari',3],
+  ['grand_maitre','Grand maître du dojo','G',7,9,'electrique',null,0,'A','assaut',2],
+  ['maitre_riposte','Maître de la riposte','G',5,10,'feu','riposte',2,'B','charge',2]
 ]);
 function nc(id,name,cat,text){CARDS[id]={id,name,cat,text};}
 nc('frappe','Frappe','sort','Inflige 3 dégâts directs à un combattant adverse (champion ou banc), sans tenir compte de la faiblesse ni des réductions de dégâts.');
@@ -276,22 +406,29 @@ nc('pioche','Pioche','sort','Piochez 2 cartes.');
 nc('renfort','Renfort','sort','Cherchez un combattant ✯ dans votre deck et posez-le sur votre banc (il faut une place libre), puis mélangez votre deck. Il compte comme posé depuis la main. Jouable même s\'il n\'y a plus de ✯ dans le deck : vous mélangez alors simplement le deck.');
 nc('plastron','Plastron','objet',`+${CONFIG.plastron} DEF tant que le combattant est en jeu : sa DEF de départ et sa DEF restante augmentent chacune de ${CONFIG.plastron}.`);
 nc('epee','Épée','objet',`+${CONFIG.epee} ATK tant que le combattant est en jeu.`);
-// liens d'évolution
+// liens d'évolution (au sein d'une même famille de deck)
 Object.values(CARDS).forEach(c=>{ if(c.cat==='creature'&&c.line){
-  c.from=(Object.values(CARDS).find(x=>x.cat==='creature'&&x.type===c.type&&x.line===c.line&&x.level===c.level-1)||{}).id||null;
-  c.next=(Object.values(CARDS).find(x=>x.cat==='creature'&&x.type===c.type&&x.line===c.line&&x.level===c.level+1)||{}).id||null;
+  c.from=(Object.values(CARDS).find(x=>x.cat==='creature'&&x.fam===c.fam&&x.line===c.line&&x.level===c.level-1)||{}).id||null;
+  c.next=(Object.values(CARDS).find(x=>x.cat==='creature'&&x.fam===c.fam&&x.line===c.line&&x.level===c.level+1)||{}).id||null;
 }});
 
 /* =========================================================
-   DECKS DE TEST OFFICIELS (livret du 22/10/2026)
+   DECKS (livrets du 23/10/2026)
    ========================================================= */
 const ATOUTS = [['frappe',2],['soin',2],['elan',1],['echange_force',1],['pioche',1],['renfort',1],['plastron',1],['epee',1]];
 const DECKS = {
-  eau: {name:'Deck A', list:[['murene',3],['vigie',3],['oursin',2],['sirene',1],['crabe',2],['bernard',2],['kraken',2],['tortue',2],['hydre',1],['leviathan',1],['maitre_marees',1],...ATOUTS]},
-  feu: {name:'Deck B', list:[['salamandre',3],['guetteur',3],['imp',2],['veilleur',1],['chien_braise',2],['garde_lave',2],['phenix',2],['pyromancien',2],['demon',1],['dragon_lave',1],['titan_volcan',1],...ATOUTS]}
+  vague: {name:'Deck Vague', type:'eau', group:'decouverte', list:[['murene',3],['vigie',3],['oursin',2],['sirene',1],['crabe',2],['bernard',2],['kraken',2],['tortue',2],['hydre',1],['leviathan',1],['maitre_marees',1],...ATOUTS]},
+  poing: {name:'Deck Poing', type:'combat', group:'decouverte', list:[['jeune_pugiliste',3],['eclaireur_clan',3],['cogneur',2],['vieux_maitre',1],['molosse',2],['sparring',2],['pugiliste',2],['moine_gardien',2],['berserker',1],['champion_ring',1],['colosse_temple',1],...ATOUTS]},
+  feu:   {name:'Deck Feu', type:'feu', group:'theme', style:'Brûler et exploser', list:[['salamandre',3],['vigie_cendres',3],['imp',2],['veilleur',1],['garde_lave',2],['chien_braise',2],['phenix',2],['mage_flammes',2],['demon',1],['dragon_lave',1],['seigneur_volcan',1],...ATOUTS]},
+  eau:   {name:'Deck Eau', type:'eau', group:'theme', style:'Frapper et se refaire', list:[['jeune_dauphin',3],['heron',3],['jeune_requin',2],['sirene',1],['crabe',2],['bernard',2],['dauphin',2],['ondine',2],['grand_requin',1],['orque',1],['reine_marees',1],...ATOUTS]},
+  elec:  {name:'Deck Électrique', type:'electrique', group:'theme', style:'La vitesse', list:[['furet',3],['bobine',3],['luciole',2],['pile_chargee',1],['sentinelle',2],['chacal',2],['lynx',2],['golem_dynamo',2],['phalene',1],['dragon_foudre',1],['seigneur_orage',1],...ATOUTS]},
+  roche: {name:'Deck Roche', type:'roche', group:'theme', style:'Le mur', list:[['galet',3],['tailleur',3],['herisson',2],['golem_poche',1],['gargouille',2],['belier',2],['rhinoceros',2],['golem_granit',2],['basilic',1],['titan_roche',1],['colosse_roche',1],...ATOUTS]},
+  combat:{name:'Deck Combat', type:'combat', group:'theme', style:'Le duel', list:[['apprenti',3],['novice',3],['bagarreur',2],['vieux_sensei',1],['garde_dojo',2],['boxeur_rue',2],['lutteur',2],['moine_boxeur',2],['champion_rue',1],['grand_maitre',1],['maitre_riposte',1],...ATOUTS]}
 };
-const DECK_ORDER = ['eau','feu'];
-function deckLabel(k){return `${DECKS[k].name} (${TYPES[k].name})`;}
+const DECK_ORDER = ['vague','poing','feu','eau','elec','roche','combat'];
+const DECK_GROUPS = [['decouverte','Decks découverte'],['theme','Decks à thème']];
+function deckColor(k){return TYPES[DECKS[k].type].color;}
+function deckLabel(k){return DECKS[k].name;}
 
 /* =========================================================
    OUTILS
@@ -317,6 +454,7 @@ function cardHTML(id,o={}){
   if(c.cat==='creature'){
     top=`<span>${TYPES[c.type].name}</span><b>${STARS[c.size]}</b>`;
     if(c.ab) body+=`<div class="tal">✦ ${abLabel(c)}</div>`;
+    if(c.spe) body+=`<div class="spe">⚔ ${speLabel(c)} · ${speCost(c.id)}</div>`;
     body+=`<div class="kind">Faible : ${TYPES[c.weak].name}<br>${lineLabel(c)}</div>`;
     const s=o.stats||{atk:c.atk,def:c.def};
     body+=`<div class="stats"><span class="atk ${s.ac||''}">⚔ ${s.atk}</span><span class="def ${s.dc||''}">🛡 ${s.def}</span></div>`;
@@ -332,8 +470,8 @@ function cardHTML(id,o={}){
 /* =========================================================
    ÉTAT
    ========================================================= */
-const UI = {tab:'combat', nav:{combat:[],cartes:[],params:[]}, rand:[false,false], deck:'eau', deckEvo:true, detail:null, exportText:null, confirmQuit:false,
-  play:'local', joinCode:'', names:['Joueur A','Joueur B'], pick:['eau','feu'], mode:'match', hideHands:false};
+const UI = {col:{q:'',cat:'all',type:'all',stars:'all',sort:'starsA'}, tab:'combat', nav:{combat:[],cartes:[],params:[]}, rand:[false,false], deck:'vague', deckEvo:true, detail:null, exportText:null, confirmQuit:false,
+  play:'local', joinCode:'', names:['Joueur A','Joueur B'], pick:['vague','poing'], mode:'match', hideHands:false};
 let G=null, UNDO=[], HIST=[];
 let MY_SEAT=null;   // en ligne : 0 = hôte (arbitre), 1 = invité ; null = un seul écran
 let ACT_SEAT=null;  // siège du joueur dont l'action est en cours d'exécution (hôte)
@@ -352,8 +490,8 @@ function ownerOf(uid){return findC(0,uid)?0:findC(1,uid)?1:-1;}
 function maxDef(c){return C(c.id).def+(c.item==='plastron'?CONFIG.plastron:0);}
 function curDef(c){return maxDef(c)-c.dmg;}
 function baseAtk(c){return C(c.id).atk+(c.item==='epee'?CONFIG.epee:0);}
-function reduction(p,c){return armor(c)+(PL(p).champion===c&&PL(p).piedFerme?CONFIG.piedFerme:0);}
-function armor(c){return C(c.id).ab==='armure'?C(c.id).abX:0;}
+function reduction(p,c){return armor(c)+(PL(p).champion===c?(PL(p).piedFerme?CONFIG.piedFerme:0)+(PL(p).garde||0):0);}
+function armor(c){return abIs(C(c.id),'armure')?C(c.id).abX:0;}
 function makeC(id,start){return {uid:nu(),id,dmg:0,item:null,start:!!start,placedTurn:G?G.turn:0};}
 function nm(c){return C(c.id).name;}
 function deckList(k){return DECKS[k].list;}
@@ -392,7 +530,7 @@ function setupToggle(uid){
   const seat=seatOfHand(uid); if(seat<0||PL(seat).champion) return;
   const h=PL(seat).hand.find(x=>x.uid===uid); if(C(h.id).cat!=='creature'||C(h.id).size!=='P') return;
   const sel=G.setupSel[seat], i=sel.indexOf(uid);
-  if(i>=0) sel.splice(i,1); else if(sel.length<CONFIG.maxStarters) sel.push(uid);
+  if(i>=0) sel.splice(i,1); else if(sel.length<CONFIG.maxStarters) sel.push(uid); else if(CONFIG.maxStarters===1) sel[0]=uid;
 }
 function setupConfirm(seat){
   if(seat==null) seat=G.cur;
@@ -410,12 +548,16 @@ function lose(p,reason){if(!isOver()) endRound(1-p,reason);}
 function startTurn(){
   G.turn++; G.pturns[G.cur]++;
   const P=cp();
-  P.piedFerme=false;
+  P.piedFerme=false; P.garde=0;
   G.actions=CONFIG.actionsPerTurn; G.evolved=[]; G.phase='actions'; G.after=null;
   log(`Tour ${G.turn} · ${G.names[G.cur]}`,'turn');
   if(!drawCard(G.cur)) return lose(G.cur,'deck vide');
-  const n=P.bench.filter(b=>C(b.id).ab==='soigneuse').length;
+  // Début de tour (v1.7) : pioche, puis soins (Soigneuse), puis dégâts (Brasier)
+  const n=P.bench.filter(b=>abIs(C(b.id),'soigneuse')).length;
   if(n&&P.champion){const g=heal(P.champion,n);if(g)log(`Soigneuse${s_(n)} : ${nm(P.champion)} récupère ${g} DEF (${curDef(P.champion)}/${maxDef(P.champion)}).`,'good');}
+  const burnt=mine(G.cur).filter(c=>c.burn);
+  burnt.forEach(c=>{if(!mine(G.cur).includes(c))return;const x=c.burn;c.burn=0;const L=c.burnName||'Brasier';c.burnName=null;damage(G.cur,c,x,1-G.cur,`🔥 ${L} ${x}`);});
+  if(burnt.length){aftermath();if(isOver())return;}
   G.handoff=G.hide;
 }
 function heal(c,n){const b=curDef(c);c.dmg=Math.max(0,c.dmg-n);return curDef(c)-b;}
@@ -431,10 +573,10 @@ function vanquish(p,c,killer){
   const card=C(c.id), t=G.tro[card.size];
   PL(killer).trophies+=t;
   log(`☠ ${card.name} est vaincu : ${G.names[killer]} récupère ${t} étoile${s_(t)} (${PL(killer).trophies}/${G.win}).`,'good');
-  if(card.ab==='embrasement'){
+  if(abIs(card,'embrasement')){
     const kc=PL(killer).champion;
-    if(kc) damage(killer,kc,Math.max(0,card.abX-reduction(killer,kc)),p,`✦ Embrasement ${card.abX}`);
-    else log('✦ Embrasement : aucun champion à toucher.','sys');
+    if(kc) damage(killer,kc,card.abX,p,`✦ ${ABIL[card.ab].name} ${card.abX}`);
+    else log(`✦ ${ABIL[card.ab].name} : aucun champion à toucher.`,'sys');
   }
 }
 // Fin de résolution : victoire, remplacement, défaite (section 6.3)
@@ -467,22 +609,22 @@ function swap(p,uid,how){
 }
 function onEnter(p,c){
   const card=C(c.id);
-  if(card.ab==='eclaireur'){ if(!drawCard(p)) return lose(p,'deck vide (Éclaireur)'); log(`✦ Éclaireur : ${G.names[p]} pioche 1 carte.`,'good'); }
-  if(card.ab==='eruption'){
+  if(abIs(card,'eclaireur')){ if(!drawCard(p)) return lose(p,'deck vide (Éclaireur)'); log(`✦ Éclaireur : ${G.names[p]} pioche 1 carte.`,'good'); }
+  if(abIs(card,'eruption')){
     const t=mine(1-p).map(x=>x.uid);
     if(t.length===1) eruption(p,c.uid,t[0]);
     else G.pending.push({kind:'target',what:'eruption',p,src:c.uid,options:t});
   }
 }
 function eruption(p,srcUid,tUid){
-  const src=findC(p,srcUid)||{id:'titan_volcan'}, x=C(src.id).abX||2;
-  const t=findC(1-p,tUid); damage(1-p,t,Math.max(0,x-reduction(1-p,t)),p,`✦ Éruption ${x}`);
+  const src=findC(p,srcUid), card=src?C(src.id):null, x=card?card.abX:2;
+  const t=findC(1-p,tUid); damage(1-p,t,x,p,`✦ ${card?ABIL[card.ab].name:'Éruption'} ${x}`);
   aftermath();
 }
 function canEvolve(c,card){
   const k=C(c.id);
-  return k.type===card.type&&k.line&&k.line===card.line&&k.level===card.level-1
-    &&c.placedTurn<G.turn&&!G.evolved.includes(c.uid)&&!(c.start&&G.pturns[G.cur]===1);
+  return k.fam===card.fam&&k.line&&k.line===card.line&&k.level===card.level-1
+    &&(c.placedTurn<G.turn||abIs(k,'survolte'))&&!G.evolved.includes(c.uid)&&!(c.start&&G.pturns[G.cur]===1);
 }
 function evoOnly(c){return CONFIG.evoOnlyForLineage&&!(G&&G.noEvo)&&!!c.from&&!(G&&G.levM&&c.size==='M');}
 function atkCost(){return G&&G.levAtk?0:CONFIG.attackCost;}
@@ -507,7 +649,7 @@ function handActions(h){
         const any=mine(p).some(x=>x.id===c.from);
         w=!any?`Nécessite ${C(c.from).name} en jeu`
           :mine(p).some(x=>x.id===c.from&&x.start&&G.pturns[G.cur]===1)?'Les combattants posés à la préparation n\'évoluent pas pendant votre premier tour'
-          :mine(p).some(x=>x.id===c.from&&x.placedTurn===G.turn)?'Posée ce tour : elle doit être en jeu au début du tour pour évoluer'
+          :mine(p).some(x=>x.id===c.from&&x.placedTurn===G.turn&&!abIs(C(x.id),'survolte'))?'Posée ce tour : elle doit être en jeu au début du tour pour évoluer'
           :'Déjà évoluée ce tour';
       }
       out.push({key:'evolve',label:`Évoluer (${CONFIG.evolveCost})`,ok:!w,why:w,targets:t});
@@ -539,8 +681,10 @@ function doPose(uid){
 }
 function doEvolve(uid,tUid){
   const h=takeHand(uid), c=findC(G.cur,tUid), old=nm(c);
+  const surv=c.placedTurn===G.turn;
   cp().discard.push(c.id); c.id=h.id; G.actions-=CONFIG.evolveCost; G.evolved.push(c.uid); G.evoCount++;
-  log(`${G.names[G.cur]} fait évoluer ${old} en ${nm(c)} (${curDef(c)}/${maxDef(c)} DEF).`);
+  if(abIs(C(c.id),'regeneration')&&c.dmg){c.dmg=0;log(`✦ Régénération : ${nm(c)} efface tous ses dégâts.`,'good');}
+  log(`${G.names[G.cur]} fait évoluer ${old} en ${nm(c)}${surv?' (Survolté)':''} (${curDef(c)}/${maxDef(c)} DEF).`);
   onEnter(G.cur,c);
 }
 function doSpell(uid,tUid){
@@ -568,34 +712,102 @@ function doItem(uid,tUid){
   log(`${G.names[G.cur]} équipe ${nm(t)} de ${C(h.id).name}${h.id==='plastron'?` (${curDef(t)}/${maxDef(t)} DEF)`:''}.`);
 }
 function doSwap(uid){
+  if(isHeld(cp().champion)) return;
   const b=findC(G.cur,uid),cost=swapCost(b);
   G.actions-=cost;
   swap(G.cur,uid,`Échange (${cost} action${s_(cost)})`);
 }
-function attackCalc(){
-  const A=cp(),D=op(),a=A.champion,d=D.champion;
+function isHeld(c){return !!(c&&c.heldUntil&&G&&G.turn<=c.heldUntil);}
+// kind : 'base' ou 'spe' ; coin : résultat du Pari (true = face, false = pile, undefined = aperçu)
+function attackCalc(kind,coin){
+  kind=kind||'base';
+  const A=cp(),D=op(),a=A.champion,d=D.champion,sp=C(a.id).spe;
   let atk=baseAtk(a)+(A.elan?CONFIG.elan:0);
-  const parts=[`ATK ${atk}`];
+  const parts=[`ATK ${atk}`]; let bonus=0,minus=0;
+  if(kind==='spe'&&sp){
+    if(sp.kw==='pari'&&coin===false) return {dmg:0,txt:'pile : l\'attaque rate, aucun dégât',kills:false,miss:true};
+    if(sp.kw==='charge'||sp.kw==='assaut'||sp.kw==='pari'){bonus=sp.x;parts.push(`+${sp.x} ${SPE[sp.kw].name}${sp.kw==='pari'&&coin===undefined?' (si face)':''}`);}
+    if(sp.kw==='acharnement'){ if(d.dmg>0){bonus=sp.x;parts.push(`+${sp.x} Acharnement`);} else parts.push('Acharnement sans effet (cible intacte)'); }
+    if(sp.kw==='recherche'||sp.kw==='etreinte'){minus=1;}
+  }
   const weak=C(d.id).weak===C(a.id).type;
   if(weak) parts.push(`+${CONFIG.weakBonus} faiblesse`);
-  const red=armor(d)+(D.piedFerme?CONFIG.piedFerme:0);
+  const red=armor(d)+(D.piedFerme?CONFIG.piedFerme:0)+(D.garde||0);
   if(armor(d)) parts.push(`−${armor(d)} Armure`);
   if(D.piedFerme) parts.push(`−${CONFIG.piedFerme} Pied ferme`);
-  const dmg=Math.max(0,atk+(weak?CONFIG.weakBonus:0)-red);
+  if(D.garde) parts.push(`−${D.garde} Garde`);
+  if(minus) parts.push(`−1 ${SPE[sp.kw].name}`);
+  const dmg=Math.max(0,atk+bonus+(weak?CONFIG.weakBonus:0)-red-minus);
   return {dmg,txt:parts.join(' ')+` = ${dmg}`,kills:dmg>=curDef(d)};
 }
-function canAttack(){
-  if(G.phase!=='actions'||G.pending.length) return false;
-  if(!CONFIG.firstPlayerAttacksT1&&G.cur===G.first&&G.pturns[G.cur]===1) return false;
-  if(G.actions<atkCost()) return false;
-  return !!(cp().champion&&op().champion);
+function attackBlocked(){
+  if(G.phase!=='actions'||G.pending.length) return 'action en cours';
+  if(!CONFIG.firstPlayerAttacksT1&&G.cur===G.first&&G.pturns[G.cur]===1) return 'le premier joueur n\'attaque pas à son premier tour';
+  if(!(cp().champion&&op().champion)) return 'pas de champion';
+  return '';
 }
-function doAttack(){
-  const A=cp(),D=op(),a=A.champion,d=D.champion,k=attackCalc();
-  G.actions-=atkCost();
-  log(`⚔ ${nm(a)} attaque ${nm(d)}${atkCost()?` (${atkCost()} action)`:''} : ${k.txt}.`);
-  damage(1-G.cur,d,k.dmg,G.cur);
-  G.after='end'; aftermath(); flow();
+function canAttack(kind){
+  if(attackBlocked()) return false;
+  if(kind==='spe') return !!C(cp().champion.id).spe&&G.actions>=speCost(cp().champion.id);
+  return G.actions>=atkCost();
+}
+function doAttack(kind){
+  kind=kind==='spe'?'spe':'base';
+  const p=G.cur,A=cp(),D=op(),a=A.champion,d=D.champion,card=C(a.id),sp=card.spe;
+  let coin;
+  if(kind==='spe'){G.actions-=speCost(a.id); if(sp.kw==='pari'){coin=Math.random()<.5; log(`🪙 Pari : la pièce tombe sur ${coin?'FACE':'PILE'}.`,coin?'good':'bad');}}
+  else G.actions-=atkCost();
+  const k=attackCalc(kind,coin);
+  log(`⚔ ${nm(a)} attaque ${nm(d)} (${kind==='spe'?'attaque spéciale '+speLabel(card):'attaque de base'}) : ${k.txt}.`);
+  if(!k.miss) damage(1-p,d,k.dmg,p);
+  const dCard=C(d.id);
+  if(!k.miss&&D.champion===d&&abIs(dCard,'riposte')&&A.champion===a) damage(p,a,dCard.abX,1-p,`↩ Riposte ${dCard.abX} de ${dCard.name}`);
+  if(!k.miss&&!mine(1-p).includes(d)&&abIs(card,'frenesie')&&A.champion===a){
+    const g=heal(a,card.abX);log(`✦ Frénésie : ${card.name} récupère ${g} DEF (${curDef(a)}/${maxDef(a)}).`,'good');}
+  G.after='end';
+  if(kind==='spe') speEffect(p,sp,a,d,k);
+  if(!G.pending.some(x=>x.post)) aftermath();
+  flow();
+}
+// Effet de l'attaque spéciale, après le coup (et ses conséquences) et avant la fin de la résolution
+function speEffect(p,sp,a,d,k){
+  const A=PL(p),D=PL(1-p),aliveA=A.champion===a,survived=D.champion===d;
+  const kw=speBase(sp.kw),x=sp.x,L=SPE[sp.kw].name;
+  if(kw==='assaut'&&aliveA){damage(p,a,x,1-p,`↩ Recul d'Assaut ${x}`);}
+  else if(kw==='brasier'){
+    if(!k.miss&&k.dmg>=1&&survived){if(x>=(d.burn||0)){d.burn=x;d.burnName=L;}log(`🔥 ${L} : ${nm(d)} subira ${d.burn} dégât${s_(d.burn)} direct${s_(d.burn)} au début du prochain tour de ${G.names[1-p]}.`);}
+    else log(`🔥 ${L} sans effet (aucun dégât, ou cible vaincue).`,'sys');
+  }
+  else if(kw==='souffle'){
+    const t=D.bench.map(c=>c.uid);
+    if(!t.length) log('✦ Souffle : banc adverse vide, aucun effet.','sys');
+    else if(t.length===1) souffleApply(p,t[0],x);
+    else G.pending.push({kind:'target',what:'souffle',p,x,options:t,post:true,cardId:a.id});
+  }
+  else if(kw==='garde'){A.garde=Math.max(A.garde||0,x);log(`✦ Garde : jusqu'à son prochain tour, le champion de ${G.names[p]} subira ${x} dégât${s_(x)} de moins par coup.`);}
+  else if(kw==='recherche'){ if(!drawCard(p)) return lose(p,'deck vide (Recherche)'); log(`✦ Recherche : ${G.names[p]} pioche 1 carte.`,'good'); }
+  else if(kw==='vague'){ if(aliveA){const g=heal(a,x);log(`✦ Vague : ${nm(a)} récupère ${g} DEF (${curDef(a)}/${maxDef(a)}).`,'good');} }
+  else if(kw==='repli'){
+    if(!aliveA) return;
+    if(isHeld(a)){log('✦ Repli impossible : votre champion est retenu par une Étreinte.','sys');return;}
+    const t=A.bench.map(c=>c.uid);
+    if(!t.length) log('✦ Repli : banc vide, aucun échange.','sys');
+    else if(t.length===1) repliApply(p,t[0]);
+    else G.pending.push({kind:'target',what:'repli',p,options:t,post:true,cardId:a.id});
+  }
+  else if(kw==='etreinte'){ if(survived&&!k.miss){d.heldUntil=G.turn+1;log(`✦ Étreinte : ${G.names[1-p]} ne pourra pas échanger ${nm(d)} pendant son prochain tour.`);} }
+  else if(kw==='tourbillon'){
+    if(!survived){log('✦ Tourbillon sans effet : la cible est vaincue.','sys');return;}
+    const t=D.bench.map(c=>c.uid);
+    if(!t.length) log('✦ Tourbillon : banc adverse vide, aucun effet.','sys');
+    else if(t.length===1) swap(1-p,t[0],'✦ Tourbillon');
+    else G.pending.push({kind:'target',what:'tourbillon',p,options:t,post:true,cardId:a.id});
+  }
+}
+function souffleApply(p,uid,x){const t=findC(1-p,uid);damage(1-p,t,x,p,`✦ Souffle ${x}`);}
+function repliApply(p,uid){
+  const P=PL(p),b=P.bench.find(c=>c.uid===uid),i=P.bench.indexOf(b),old=P.champion;
+  P.bench[i]=old;P.champion=b;log(`✦ Repli : ${nm(b)} devient champion de ${G.names[p]}, ${nm(old)} va au banc.`);
 }
 function endTurnNoAttack(){log(`${G.names[G.cur]} termine son tour sans attaquer.`,'sys');G.after='end';flow();}
 function flow(){
@@ -633,79 +845,117 @@ function render(){
 
 /* ---- onglet Decks ---- */
 function navHead(tab,title){
-  return `<div class="navhead"><button class="ghost" data-a="back:${tab}">← Retour</button><h2>${title}</h2></div>`;
+  return `<h2 class="ptitle">${title}</h2><button class="backbtn" data-a="back:${tab}">← Retour</button>`;
 }
 function menu(items){
   return `<div class="menu">${items.map(([a,label,sub,dis])=>`<button data-a="${a}" ${dis?'disabled':''}>${label}<small>${dis?'Bientôt disponible':sub||''}</small></button>`).join('')}</div>`;
 }
-function renderCartes(){
-  const nav=UI.nav.cartes;
-  if(!nav.length) return `<div class="page"><h2 style="margin-top:0">Cartes</h2>${menu([['go:cartes:collection','Collection','Toutes les cartes du jeu'],['go:cartes:decks','Decks','Les decks et leur composition']])}</div>`;
-  if(nav[0]==='collection'){
-    const all=Object.values(CARDS);
-    const groups=[['Combattants',all.filter(c=>c.cat==='creature').sort((x,y)=>x.level-y.level||DECK_ORDER.indexOf(x.type)-DECK_ORDER.indexOf(y.type)||String(x.line||'Z').localeCompare(String(y.line||'Z')))],
-      ['Atouts',all.filter(c=>c.cat==='sort')],['Objets',all.filter(c=>c.cat==='objet')]];
-    return `<div class="page">${navHead('cartes','Collection')}
-      ${groups.map(([t,cs])=>`<h3>${t} <span class="muted">(${cs.length})</span></h3><div class="grid">${cs.map(c=>cardHTML(c.id,{cls:'click',attrs:`data-a="detail:${c.id}"`})).join('')}</div>`).join('')}</div>`;
-  }
-  if(nav[0]==='decks'&&nav.length===1){
-    const tiles=DECK_ORDER.map(k=>`<button class="dtile" style="--tc:${TYPES[k].color}" data-a="go:cartes:decks:${k}">
-      <div class="dt-name">${DECKS[k].name} · ${TYPES[k].name}</div><div class="dt-sub">${expand(DECKS[k].list).length} cartes · ${expand(DECKS[k].list).filter(id=>C(id).cat==='creature').length} combattants · ${expand(DECKS[k].list).filter(id=>C(id).cat!=='creature').length} atouts et objets</div></button>`).join('');
-    return `<div class="page">${navHead('cartes','Decks')}<div class="dtiles">${tiles}</div></div>`;
-  }
-  const k=nav[1], list=DECKS[k].list;
+function deckTile(k,action,on){
+  return `<button class="dtile ${on?'on':''}" style="--tc:${deckColor(k)}" data-a="${action}">
+      <div class="dt-name">${DECKS[k].name}</div><div class="dt-sub">${TYPES[DECKS[k].type].name}${DECKS[k].style?' · '+DECKS[k].style:''}<br>${expand(DECKS[k].list).length} cartes · ${expand(DECKS[k].list).filter(id=>C(id).cat==='creature').length} combattants · ${expand(DECKS[k].list).filter(id=>C(id).cat!=='creature').length} atouts et objets</div></button>`;
+}
+function deckCompoHTML(k){
+  const list=DECKS[k].list;
   const groups=[['Combattants ✯',id=>C(id).size==='P'],['Combattants ✯✯',id=>C(id).size==='M'],['Combattants ✯✯✯',id=>C(id).size==='G'],
     ['Atouts',id=>C(id).cat==='sort'],['Objets',id=>C(id).cat==='objet']];
-  const sections=groups.map(([title,f])=>{
-    const items=list.filter(([id])=>C(id).cat==='creature'?f(id)&&C(id).cat==='creature':f(id)); const n=items.reduce((t,[,c])=>t+c,0);
+  const tot=list.reduce((t,[,c])=>t+c,0);
+  return `<p class="muted" style="margin-top:0">${TYPES[DECKS[k].type].name}${DECKS[k].style?' · '+DECKS[k].style:''} · ${tot} cartes · cliquez sur une carte pour le détail</p>`+groups.map(([title,f])=>{
+    const items=list.filter(([id])=>f(id)); const n=items.reduce((t,[,c])=>t+c,0);
     if(!items.length) return '';
     return `<h3>${title} <span class="muted">(${n})</span></h3><div class="grid">${items.map(([id,c])=>cardHTML(id,{count:c,cls:'click',attrs:`data-a="detail:${id}"`})).join('')}</div>`;
   }).join('');
-  const tot=list.reduce((t,[,c])=>t+c,0);
-  return `<div class="page">${navHead('cartes',`<span style="color:${TYPES[k].color}">${deckLabel(k)}</span>`)}
-    <p class="muted" style="margin-top:0">${tot} cartes · cliquez sur une carte pour le détail</p>${sections}</div>`;
+}
+function renderCartes(){
+  const nav=UI.nav.cartes;
+  if(!nav.length||nav[0]==='collection') return renderCollection();
+  if(nav[0]==='decks'&&nav.length===1){
+    const tiles=DECK_GROUPS.map(([g,t])=>`<h3>${t}</h3><div class="dtiles">${DECK_ORDER.filter(k=>DECKS[k].group===g).map(k=>deckTile(k,`go:cartes:decks:${k}`)).join('')}</div>`).join('');
+    return `<div class="page ctr">${navHead('cartes','Decks')}${tiles}</div>`;
+  }
+  const k=nav[1];
+  return `<div class="page ctr">${navHead('cartes',`<span style="color:${deckColor(k)}">${deckLabel(k)}</span>`)}${deckCompoHTML(k)}</div>`;
+}
+/* ---- Collection : filtres et tri ---- */
+const norm=t=>String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+function colCards(){
+  const f=UI.col, catOrder={creature:0,sort:1,objet:2};
+  let cs=Object.values(CARDS).filter(c=>{
+    if(f.q&&!norm(c.name).includes(norm(f.q))) return false;
+    if(f.cat!=='all'&&c.cat!==f.cat) return false;
+    if(f.type!=='all'&&(c.cat!=='creature'||c.type!==f.type)) return false;
+    if(f.stars!=='all'&&(c.cat!=='creature'||c.size!==f.stars)) return false;
+    return true;
+  });
+  const base=(x,y)=>catOrder[x.cat]-catOrder[y.cat];
+  const byStars=(x,y)=>(x.level||9)-(y.level||9)||DECK_ORDER.indexOf(x.fam)-DECK_ORDER.indexOf(y.fam)||String(x.line||'Z').localeCompare(String(y.line||'Z'))||x.name.localeCompare(y.name,'fr');
+  // ▼ = du plus grand au plus petit, ▲ = du plus petit au plus grand ; atouts et objets toujours après les combattants
+  const num=(k,dir)=>(x,y)=>base(x,y)||dir*((x[k]||0)-(y[k]||0))||byStars(x,y);
+  const sorts={
+    name:(x,y)=>x.name.localeCompare(y.name,'fr'),
+    type:(x,y)=>base(x,y)||TYPE_CIRCLE.indexOf(x.type)-TYPE_CIRCLE.indexOf(y.type)||byStars(x,y),
+    starsD:num('level',-1), starsA:num('level',1),
+    atkD:num('atk',-1), atkA:num('atk',1), defD:num('def',-1), defA:num('def',1)
+  };
+  return cs.sort(sorts[f.sort]||sorts.starsA);
+}
+function colGridHTML(){
+  const cs=colCards();
+  return `<p class="muted" style="margin:0 0 10px">${cs.length} carte${s_(cs.length)}</p>`+
+    (cs.length?`<div class="grid compact">${cs.map(c=>cardHTML(c.id,{cls:'click',attrs:`data-a="detail:${c.id}"`})).join('')}</div>`:'<p class="muted">Aucune carte ne correspond.</p>');
+}
+function renderCollection(){
+  const f=UI.col, sel=(key,label,opts)=>`<label>${label}<select data-col="${key}">${opts.map(([v,t])=>`<option value="${v}" ${f[key]===v?'selected':''}>${t}</option>`).join('')}</select></label>`;
+  const bar=`<div class="filters">
+    <input data-col="q" type="search" placeholder="Rechercher une carte…" value="${esc(f.q)}">
+    ${sel('cat','Catégorie',[['all','Toutes'],['creature','Combattants'],['sort','Atouts'],['objet','Objets']])}
+    ${sel('type','Type',[['all','Tous'],...TYPE_CIRCLE.map(t=>[t,TYPES[t].name])])}
+    ${sel('stars','Étoiles',[['all','Toutes'],['P','✯'],['M','✯✯'],['G','✯✯✯']])}
+    ${sel('sort','Trier par',[['name','Nom'],['type','Type'],['starsD','Étoiles ▼'],['starsA','Étoiles ▲'],['atkD','ATK ▼'],['atkA','ATK ▲'],['defD','DEF ▼'],['defA','DEF ▲']])}</div>`;
+  return `<div class="page ctr"><div class="ptop"><h2>Collection</h2><button class="right" data-a="go:cartes:decks">Decks ›</button></div>${bar}<div id="colgrid">${colGridHTML()}</div></div>`;
 }
 
 /* ---- onglet Paramètres ---- */
 function renderParams(){
   const nav=UI.nav.params;
-  if(!nav.length) return `<div class="page"><h2 style="margin-top:0">Paramètres</h2>${menu([['go:params:compte','Compte','',true],['go:params:regles','Règles du jeu','Le manuel officiel']])}</div>`;
+  if(!nav.length) return `<div class="page ctr"><h2 class="ptitle">Paramètres</h2>${menu([['go:params:compte','Compte','',true],['go:params:regles','Règles du jeu','']])}
+    <p class="muted" style="position:fixed;left:0;right:0;bottom:calc(66px + env(safe-area-inset-bottom));text-align:center;font-size:11px;margin:0;opacity:.7">DC TCG · ${APP_VERSION}</p></div>`;
   return `<div class="page rules">${navHead('params','Règles du jeu')}${RULES_HTML}</div>`;
 }
 const RULES_HTML=`
-<p class="muted">Manuel des règles · Duel des champions · 22 octobre 2026</p>
+<p class="muted">Manuel des règles, livret des decks découverte et livret des decks à thème · Duel des champions · 23 octobre 2026</p>
 <h3>1. But du jeu</h3>
-<p><b>Le premier joueur qui récupère 6 étoiles gagne la partie.</b> Chaque joueur a <b>un champion</b> qui se bat et jusqu'à <b>deux remplaçants</b> sur le banc. Chaque fois que vous vainquez un combattant adverse, vous récupérez son nombre d'étoiles. L'arène est la zone de jeu : le champion et le banc de chaque joueur.</p>
-<p>Vous perdez aussi la partie si vous n'avez plus de combattant disponible (champion vaincu et banc vide), ou si vous devez piocher alors que votre deck est vide.</p>
+<p><b>Le premier joueur qui récupère 6 étoiles gagne la partie.</b> L'arène est la zone de jeu : l'espace du champion et le banc de chaque joueur. Chaque joueur a <b>un champion</b> qui se bat et jusqu'à <b>deux remplaçants</b> sur le banc. Chaque fois que vous vainquez un combattant adverse, vous récupérez son nombre d'étoiles.</p>
+<p>Vous perdez aussi si vous n'avez plus de combattant disponible (champion vaincu et banc vide), ou si vous devez piocher alors que votre deck est vide.</p>
 <h3>2. Les cartes</h3>
 <p>Trois sortes de cartes : les <b>combattants</b>, les <b>atouts</b> et les <b>objets</b>.</p>
-<p>Un combattant a un <b>type</b> (Eau, Feu, Combat, Roche, Électrique ou Neutre), un <b>nombre d'étoiles</b> (✯ petit, ✯✯ moyen, ✯✯✯ grand), une <b>ATK</b> (les dégâts qu'il inflige), une <b>DEF</b> (qui sert aussi de points de vie : les dégâts sont retirés de la DEF restante), une <b>faiblesse</b> et parfois une <b>capacité</b>.</p>
+<p>Un combattant a un <b>type</b> (Eau, Feu, Combat, Roche, Électrique ou Neutre), un <b>nombre d'étoiles</b> (✯, ✯✯ ou ✯✯✯), une <b>ATK</b>, une <b>DEF</b> (qui sert aussi de points de vie : les dégâts sont retirés de la DEF restante), une <b>faiblesse</b>, une <b>attaque spéciale</b> avec son coût en actions, et parfois une <b>capacité</b>.</p>
 <table><tr><th>Étoiles</th><th>Coût de pose</th><th>Étoiles données</th></tr><tr><td>✯</td><td>1 action</td><td>1</td></tr><tr><td>✯✯</td><td>2 actions</td><td>2</td></tr><tr><td>✯✯✯</td><td>3 actions</td><td>3</td></tr></table>
 <p>Les ✯✯ et ✯✯✯ d'une <b>lignée d'évolution</b> ne se posent pas directement : ils arrivent par évolution (section 8).</p>
-<p>Un <b>atout</b> produit un effet immédiat, puis il est défaussé. Un <b>objet</b> se fixe à l'un de vos combattants (champion ou banc), un seul par combattant, et il est défaussé avec lui.</p>
-<p>Un deck contient <b>30 cartes</b>, 3 exemplaires maximum d'une même carte.</p>
+<p>Un <b>atout</b> produit un effet immédiat, puis il est défaussé. Un <b>objet</b> se fixe à l'un de vos combattants (champion ou banc), un seul par combattant, et il est défaussé avec lui. Un deck contient <b>30 cartes</b>, 3 exemplaires maximum d'une même carte.</p>
 <h3>3. Préparer une partie</h3>
 <ol><li>Mélangez votre deck et piochez <b>6 cartes</b>.</li>
 <li><b>Main noire</b> : sans combattant ✯ en main, remettez la main dans le deck, mélangez et repiochez 6 cartes, autant de fois que nécessaire. À chaque main noire, votre adversaire pioche 1 carte de plus.</li>
-<li>Posez face cachée de <b>1 à 3 combattants ✯</b> de votre main, sans payer d'action : le premier est le champion, les suivants vont sur le banc. Les deux joueurs révèlent en même temps.</li>
+<li>Posez face cachée <b>1 combattant ✯</b> de votre main, sans payer d'action : c'est votre champion. Le banc commence vide. Les deux joueurs révèlent leur champion en même temps.</li>
 <li>Pile ou face pour désigner le premier joueur. Les compteurs d'étoiles démarrent à 0.</li></ol>
 <h3>4. Le tour de jeu</h3>
-<ol><li><b>Début de tour</b> : piochez 1 carte (deck vide : vous perdez), puis les effets de début de tour s'appliquent.</li>
+<ol><li><b>Début de tour</b> : piochez 1 carte (deck vide : vous perdez), puis les soins (Soigneuse), puis les dégâts (Brasier). Un combattant vaincu ainsi est remplacé avant vos actions.</li>
 <li><b>Actions</b> : 3 actions, dans l'ordre que vous voulez.</li>
-<li><b>Attaque</b> (facultative et gratuite) : votre champion peut attaquer. L'attaque termine votre tour.</li>
+<li><b>Attaque</b> : votre champion peut attaquer avec son <b>attaque de base</b> (gratuite) ou son <b>attaque spéciale</b> (section 5). L'attaque termine votre tour. Vous pouvez ne pas attaquer.</li>
 <li><b>Fin de tour</b> : les effets « jusqu'à la fin du tour » s'arrêtent.</li></ol>
 <table><tr><th>Action</th><th>Coût</th></tr>
 <tr><td>Poser un combattant de la main sur le banc</td><td>1 (✯), 2 (✯✯) ou 3 (✯✯✯)</td></tr>
-<tr><td>Jouer un atout</td><td>1</td></tr><tr><td>Poser un objet</td><td>1</td></tr>
+<tr><td>Jouer un atout ou poser un objet</td><td>1</td></tr>
 <tr><td>Échanger le champion avec un combattant du banc du même type</td><td>1</td></tr>
 <tr><td>Échanger le champion avec un combattant du banc d'un type différent</td><td>2</td></tr>
 <tr><td>Faire évoluer un combattant en jeu</td><td>1</td></tr></table>
-<ul><li>L'attaque n'est pas une action : vous pouvez dépenser vos 3 actions puis attaquer.</li>
+<ul><li>L'attaque de base n'est pas une action : vous pouvez dépenser vos 3 actions puis attaquer. L'attaque spéciale se paie avec les actions qui vous restent au moment d'attaquer : gardez-en assez.</li>
 <li>Les actions non utilisées sont perdues. Vous pouvez jouer plusieurs atouts dans le même tour.</li>
 <li>Le banc a 2 places. Les combattants se posent toujours sur le banc ; le champion change par échange ou après une défaite.</li>
 <li>Le premier joueur n'attaque pas lors de son premier tour.</li></ul>
 <h3>5. Le combat</h3>
-<p>Votre champion attaque le champion adverse. Dégâts = <b>ATK</b> de votre champion + ses bonus d'ATK, <b>+1</b> si son type est la faiblesse de la cible, moins les réductions de dégâts de la cible (le coup peut tomber à 0). Les dégâts sont retirés de la DEF restante et <b>restent d'un tour à l'autre</b>.</p>
+<p>Votre champion attaque le champion adverse, avec <b>l'attaque de base</b> (gratuite : il inflige son ATK) ou <b>son attaque spéciale</b> (coût de 0, 1 ou 2 actions, écrit sur la carte). Les deux terminent le tour, et on n'attaque qu'une fois par tour.</p>
+<p>Dégâts = <b>ATK</b> + bonus d'ATK (Épée, Élan) + bonus de l'attaque spéciale, <b>+1</b> si le type de votre champion est la faiblesse de la cible, moins les réductions de dégâts de la cible (le coup peut tomber à 0). Les dégâts sont retirés de la DEF restante et <b>restent d'un tour à l'autre</b>.</p>
+<p><b>Ordre</b> : on résout d'abord le coup sur la cible (combattant vaincu, étoiles, Embrasement), puis l'effet de l'attaque spéciale (recul, soin, pioche, échange…), puis la fin de la résolution (section 6).</p>
 <h3>6. Combattant vaincu, remplacement et fin de partie</h3>
 <p>Un combattant dont la DEF restante tombe à 0 ou moins est vaincu : il est défaussé avec son objet, puis l'adversaire récupère ses étoiles (1, 2 ou 3).</p>
 <p>Quand l'attaque ou l'atout est entièrement résolu, on vérifie :</p>
@@ -713,17 +963,17 @@ const RULES_HTML=`
 <li><b>Remplacement</b> : le joueur dont le champion est vaincu choisit un combattant de son banc, qui devient champion gratuitement.</li>
 <li><b>Défaite</b> : sans combattant sur son banc, ce joueur perd. Si les deux perdent en même temps, le défenseur gagne.</li></ol>
 <p>Si votre champion est vaincu par un atout, le remplacement a lieu après la résolution de l'atout.</p>
-<h3>7. Atouts et objets</h3>
-<p>Chaque atout ou objet joué coûte 1 action.</p>
+<h3>7. Atouts et objets des decks</h3>
+<p>Chaque atout ou objet coûte le nombre d'actions indiqué sur sa carte (1 pour tous ceux des decks découverte).</p>
 <table><tr><th>Carte</th><th>Effet</th></tr>
-<tr><td><b>Soin</b></td><td>Un de vos combattants récupère 4 DEF, sans dépasser sa DEF maximale.</td></tr>
-<tr><td><b>Frappe</b></td><td>3 dégâts à un combattant adverse (champion ou banc), sans faiblesse ni réductions de dégâts.</td></tr>
-<tr><td><b>Échange forcé</b></td><td>Vous choisissez le combattant du banc adverse qui devient son champion ; l'ancien champion va au banc.</td></tr>
+<tr><td><b>Frappe</b> ×2</td><td>3 dégâts directs à un combattant adverse (champion ou banc).</td></tr>
+<tr><td><b>Soin</b> ×2</td><td>Un de vos combattants (champion ou banc) récupère 4 DEF, sans dépasser sa DEF maximale.</td></tr>
 <tr><td><b>Élan</b></td><td>+2 ATK à votre champion jusqu'à la fin du tour.</td></tr>
+<tr><td><b>Échange forcé</b></td><td>Vous choisissez le combattant du banc adverse qui devient son champion ; l'ancien champion va au banc.</td></tr>
 <tr><td><b>Pioche</b></td><td>Piochez 2 cartes.</td></tr>
-<tr><td><b>Renfort</b></td><td>Cherchez un combattant ✯ dans votre deck et posez-le sur votre banc (place libre nécessaire), puis mélangez. Il compte comme posé depuis la main. Jouable même sans ✯ dans le deck : vous mélangez simplement.</td></tr>
-<tr><td><b>Épée</b></td><td>+1 ATK tant que le combattant est en jeu.</td></tr>
-<tr><td><b>Plastron</b></td><td>+2 DEF tant que le combattant est en jeu (DEF de départ et DEF restante).</td></tr></table>
+<tr><td><b>Renfort</b></td><td>Cherchez un ✯ dans votre deck et posez-le sur votre banc (place libre nécessaire), puis mélangez. Il compte comme posé depuis la main. Jouable même sans ✯ dans le deck : vous mélangez simplement.</td></tr>
+<tr><td><b>Plastron</b></td><td>+2 DEF tant que le combattant est en jeu (DEF de départ et DEF restante).</td></tr>
+<tr><td><b>Épée</b></td><td>+1 ATK tant que le combattant est en jeu.</td></tr></table>
 <p>Frappe et Échange forcé ne se jouent que s'il existe une cible valide.</p>
 <h3>8. L'évolution</h3>
 <p>Une lignée va d'un ✯ à un ✯✯, puis éventuellement à un ✯✯✯. Les ✯✯ et ✯✯✯ d'une lignée ne se posent jamais depuis la main ; un combattant hors lignée se pose normalement.</p>
@@ -731,19 +981,50 @@ const RULES_HTML=`
 <li>Jouez la carte suivante de la lignée sur un de vos combattants en jeu de la même lignée (champion ou banc). L'ancienne carte est défaussée sans donner d'étoile.</li>
 <li>Le combattant garde sa place, son objet et ses dégâts.</li>
 <li>Il ne peut évoluer que s'il était <b>déjà en jeu au début de votre tour</b> (pas d'évolution le tour de la pose, ni deux fois par tour).</li>
-<li>La carte jouée compte comme posée depuis la main et utilise sa propre capacité et sa propre faiblesse.</li>
+<li>La carte jouée compte comme posée depuis la main et utilise sa propre capacité, sa propre attaque spéciale et sa propre faiblesse.</li>
 <li>Vaincue plus tard, elle rapporte les étoiles de sa nouvelle carte.</li></ol>
-<p>Les combattants posés à la préparation ne peuvent pas évoluer pendant le premier tour de leur propriétaire.</p>
-<h3>9. Capacités des decks de test</h3>
+<p>Le champion posé lors de la préparation ne peut pas évoluer pendant le premier tour de son propriétaire.</p>
+<h3>9. Types et faiblesses</h3>
+<p>Les cinq types forment un cercle : <b>Eau &gt; Feu &gt; Combat &gt; Roche &gt; Électrique &gt; Eau</b>. Quand un combattant attaque un combattant dont la faiblesse est son type, le coup inflige 1 dégât de plus.</p>
+<table><tr><th>Type</th><th>Bat</th><th>Est battu par</th></tr>
+<tr><td>Eau</td><td>Feu</td><td>Électrique</td></tr><tr><td>Feu</td><td>Combat</td><td>Eau</td></tr><tr><td>Combat</td><td>Roche</td><td>Feu</td></tr><tr><td>Roche</td><td>Électrique</td><td>Combat</td></tr><tr><td>Électrique</td><td>Eau</td><td>Roche</td></tr></table>
+<p>Entre Vague (Eau) et Poing (Combat), aucune faiblesse ne joue.</p>
+<h3>10. Capacités</h3>
 <table><tr><th>Capacité</th><th>Effet</th></tr>
 <tr><td><b>Éclaireur</b></td><td>Quand vous posez ce combattant, piochez 1 carte.</td></tr>
-<tr><td><b>Soigneuse</b></td><td>Tant qu'il est sur votre banc, votre champion récupère 1 DEF au début de votre tour (cumulable, sans dépasser la DEF maximale).</td></tr>
-<tr><td><b>Embrasement X</b></td><td>Quand ce combattant est vaincu, il inflige X dégâts directs au champion de celui qui l'a vaincu (après le décompte des étoiles ; peut s'enchaîner).</td></tr>
-<tr><td><b>Éruption X</b></td><td>Quand vous posez ce combattant (y compris par évolution), il inflige X dégâts directs à un combattant adverse de votre choix.</td></tr></table>
-<p>Les effets « quand vous posez » se déclenchent à la pose depuis la main, par évolution ou par Renfort, jamais après un échange ou un remplacement. Les dégâts directs ne tiennent pas compte de la faiblesse.</p>
-<h3>10. Précisions</h3>
-<ul><li>Seule votre main reste cachée : champion, banc, objets, étoiles, DEF restantes et défausse sont visibles par les deux joueurs.</li>
-<li>Les objets restent attachés au combattant quand il change de place.</li></ul>`;
+<tr><td><b>Soigneuse</b></td><td>Tant qu'il est sur votre banc, votre champion récupère 1 DEF au début de votre tour (cumulable, sans dépasser la DEF maximale, avant les dégâts de Brasier).</td></tr>
+<tr><td><b>Éruption X</b> · <b>Onde de choc X</b></td><td>Quand vous posez ce combattant, il inflige X dégâts directs à un combattant adverse de votre choix (champion ou banc).</td></tr>
+<tr><td><b>Embrasement X</b> · <b>Coup d'honneur X</b></td><td>Quand ce combattant est vaincu, il inflige X dégâts directs au champion du joueur qui l'a vaincu (après le décompte des étoiles ; peut s'enchaîner).</td></tr>
+<tr><td><b>Armure X</b></td><td>Ce combattant subit X dégâts de moins par coup (le coup peut tomber à 0).</td></tr>
+<tr><td><b>Survolté</b></td><td>Ce combattant peut évoluer pendant le tour où il a été posé (toujours une seule évolution par tour ; le champion de départ n'évolue pas au premier tour).</td></tr>
+<tr><td><b>Riposte X</b></td><td>Quand ce combattant est champion et survit à un coup, il inflige X dégâts directs au champion qui l'a frappé.</td></tr>
+<tr><td><b>Régénération</b></td><td>Quand ce combattant arrive par évolution, il efface tous ses dégâts.</td></tr>
+<tr><td><b>Frénésie X</b></td><td>Quand ce combattant vainc le champion adverse en l'attaquant, il récupère X DEF.</td></tr></table>
+<ul><li>« Quand vous posez » : pose depuis la main, évolution ou Renfort, jamais après un échange ou un remplacement.</li>
+<li><b>Dégâts directs</b> (Frappe, Éruption, Onde de choc, Embrasement, Coup d'honneur, Brasier, Contusion, Souffle, Riposte) : ni la faiblesse ni les réductions (Armure, Garde) ne s'appliquent.</li>
+<li><b>Armure et Garde</b> se cumulent, mais ne réduisent que les coups, jamais les dégâts directs.</li>
+<li><b>Riposte et Frénésie</b> se résolvent juste après le coup, avant l'effet de l'attaque spéciale. Riposte ne joue que si le champion survit au coup.</li>
+<li>Sur les cartes de Poing, <b>Contusion</b> = Brasier, <b>Coup d'honneur</b> = Embrasement, <b>Onde de choc</b> = Éruption.</li></ul>
+<h3>11. Attaques spéciales</h3>
+<table><tr><th>Mot-clé</th><th>Coût</th><th>Effet</th></tr>
+<tr><td><b>Charge X</b></td><td>X</td><td>Le coup inflige X dégâts de plus.</td></tr>
+<tr><td><b>Assaut X</b></td><td>0</td><td>Le coup inflige X dégâts de plus, puis votre champion subit X dégâts directs (recul). S'il tombe à 0 DEF, il est vaincu.</td></tr>
+<tr><td><b>Pari X</b></td><td>0</td><td>Pièce : face, le coup inflige X dégâts de plus ; pile, l'attaque rate (elle compte quand même et termine le tour).</td></tr>
+<tr><td><b>Acharnement X</b></td><td>1</td><td>Si la cible avait déjà subi des dégâts avant ce coup, le coup inflige X dégâts de plus.</td></tr>
+<tr><td><b>Brasier X</b> · <b>Contusion X</b></td><td>1</td><td>Si le coup inflige au moins 1 dégât, la cible subit X dégâts directs au début du prochain tour de son propriétaire, après les soins (un seul à la fois par cible, le plus fort).</td></tr>
+<tr><td><b>Souffle X</b></td><td>1</td><td>Après le coup, X dégâts directs à un combattant du banc adverse de votre choix.</td></tr>
+<tr><td><b>Recherche</b></td><td>1</td><td>Le coup inflige 1 dégât de moins (minimum 0), puis piochez 1 carte.</td></tr>
+<tr><td><b>Vague X</b></td><td>1</td><td>Après le coup, votre champion récupère X DEF (sans dépasser sa DEF maximale).</td></tr>
+<tr><td><b>Garde X</b></td><td>1</td><td>Après le coup, jusqu'au début de votre prochain tour, votre champion subit X dégâts de moins par coup.</td></tr>
+<tr><td><b>Repli</b></td><td>1</td><td>Après le coup, échangez votre champion avec un combattant de votre banc, sans payer l'échange.</td></tr>
+<tr><td><b>Étreinte</b></td><td>0</td><td>Le coup inflige 1 dégât de moins (minimum 0). Si la cible survit, son propriétaire ne peut pas l'échanger pendant son prochain tour (Échange forcé reste possible).</td></tr>
+<tr><td><b>Tourbillon</b></td><td>1</td><td>Si la cible survit, choisissez un combattant du banc adverse : il devient champion, l'ancien champion va au banc.</td></tr></table>
+<p><b>Ordre</b> : le coup sur la cible (vaincu, étoiles, Embrasement, Riposte, Frénésie), puis l'effet de l'attaque spéciale, puis la fin de la résolution.</p>
+<h3>12. Précisions</h3>
+<ul><li>Il n'y a pas de limite de cartes en main.</li>
+<li>Seule votre main reste cachée : champion, banc, objets, étoiles, DEF restantes et défausse sont visibles par les deux joueurs.</li>
+<li>Les objets restent attachés au combattant quand il change de place.</li>
+<li>Embrasement se résout après le décompte des étoiles ; la victoire est vérifiée une fois toute la résolution terminée.</li></ul>`;
 function renderDetail(id){
   const c=C(id); let info='<dl>';
   if(c.cat==='creature'){
@@ -751,6 +1032,7 @@ function renderDetail(id){
     info+=`<dt>Faiblesse</dt><dd>${TYPES[c.weak].name} : +${CONFIG.weakBonus} dégât quand un combattant ${TYPES[c.weak].name} l'attaque</dd>`;
     info+=`<dt>Entrée en jeu</dt><dd>${c.from?`Uniquement par évolution depuis ${C(c.from).name} (${CONFIG.evolveCost} action, sur un combattant en jeu au début du tour). Jamais posé directement depuis la main.`:`Pose sur le banc : ${CONFIG.poseCost[c.size]} action${s_(CONFIG.poseCost[c.size])}`}</dd>`;
     info+=`<dt>Étoiles données si vaincu</dt><dd>${G?G.tro[c.size]:VARIANTS.std.tro[c.size]}</dd>`;
+    if(c.spe) info+=`<dt>Attaque spéciale ⚔ ${speLabel(c)} (${speCostTxt(speCost(id))})</dt><dd>${esc(SPE[c.spe.kw].text(c.spe.x))}</dd>`;
     if(c.ab) info+=`<dt>Capacité ✦ ${abLabel(c)}</dt><dd>${esc(ABIL[c.ab].text(c.abX))}</dd>`;
     info+=`<dt>Lignée</dt><dd>${lineLabel(c)}</dd>`;
   } else info+=`<dt>${c.cat==='sort'?'Atout':'Objet'} · 1 action</dt><dd>${esc(c.text)}</dd>`;
@@ -767,8 +1049,19 @@ function renderDetail(id){
 }
 
 /* ---- Combat : menus ---- */
+function deckChoice(i){
+  const r=UI.rand[i], k=UI.pick[i];
+  return `<div style="display:flex;gap:8px;align-items:stretch"><button class="deckbtn" style="--tc:${r?'var(--line)':deckColor(k)}" data-a="go:combat:${UI.nav.combat.join(':')}:deck${i}"><small>Choix du deck</small><b>${r?'Aléatoire':deckLabel(k)}</b> ›</button><button class="randbtn ${r?'on':''}" data-a="pickrand:${i}" title="Deck aléatoire" aria-label="Deck aléatoire">🎲</button></div>`;
+}
+function resolveDeck(i){return UI.rand[i]?DECK_ORDER[Math.floor(Math.random()*DECK_ORDER.length)]:UI.pick[i];}
+function deckChooser(i){
+  const cur=UI.rand[i]?null:UI.pick[i], base=UI.nav.combat.join(':');
+  const tiles=DECK_GROUPS.map(([g,t])=>`<h3>${t}</h3><div class="dtiles">${DECK_ORDER.filter(k=>DECKS[k].group===g).map(k=>deckTile(k,`go:combat:${base}:${k}`,k===cur)).join('')}</div>`).join('');
+  return `<div class="page ctr">${navHead('combat','Choix du deck')}<p class="muted" style="margin-top:0">Touchez un deck pour voir sa composition et le choisir.</p>${tiles}
+</div>`;
+}
 function deckPick(i,withRandom){
-  return `<div class="dpick">${DECK_ORDER.map(k=>`<button class="dchip ${!UI.rand[i]&&UI.pick[i]===k?'on':''}" style="--tc:${TYPES[k].color}" data-a="pick:${i}:${k}">${deckLabel(k)}</button>`).join('')}${withRandom?`<button class="dchip ${UI.rand[i]?'on':''}" style="--tc:var(--accent)" data-a="pickrand:${i}">🎲 Aléatoire</button>`:''}</div>`;
+  return `<div class="dpick">${DECK_GROUPS.map(([g,t])=>`<span class="muted" style="width:100%;font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-top:4px">${t}</span>`+DECK_ORDER.filter(k=>DECKS[k].group===g).map(k=>`<button class="dchip ${!UI.rand[i]&&UI.pick[i]===k?'on':''}" style="--tc:${deckColor(k)}" data-a="pick:${i}:${k}">${deckLabel(k)}</button>`).join('')).join('')}${withRandom?`<button class="dchip ${UI.rand[i]?'on':''}" style="--tc:var(--accent)" data-a="pickrand:${i}">🎲 Aléatoire</button>`:''}</div>`;
 }
 function modeChips(){
   const chip=(val,label)=>`<button class="dchip ${UI.mode===val?'on':''}" style="--tc:var(--accent)" data-a="set:mode:${val}">${label}</button>`;
@@ -778,38 +1071,44 @@ function renderSetup(){
   const nav=UI.nav.combat, err=NET.err?`<div class="box" style="border-color:var(--bad);margin-bottom:16px;color:#ffb3b3">${esc(NET.err)}</div>`:'';
   const reg=HIST.length?`<div class="box" style="margin-top:16px">${registryHTML()}</div>`:'';
   // écrans d'attente du jeu en ligne
-  if(NET.role==='host') return `<div class="page">${err}<div class="box" style="text-align:center"><p class="muted" style="margin:0">Code du match</p>
+  if(NET.role==='host') return `<div class="page ctr">${err}<div class="box" style="text-align:center"><p class="muted" style="margin:0">Code du match</p>
       <div style="font-size:54px;font-weight:900;letter-spacing:10px;margin:6px 0">${NET.code||'…'}</div>
       <p>${esc(NET.status||'')}</p><p class="muted">Donnez ce code à votre adversaire : il choisit « Rejoindre un match » sur son appareil.</p>
       <button data-a="netcancel">Annuler</button></div></div>`;
-  if(NET.role==='guest') return `<div class="page">${err}<div class="box" style="text-align:center"><p>${esc(NET.status||'Connexion…')}</p><button data-a="netcancel">Annuler</button></div></div>`;
+  if(NET.role==='guest') return `<div class="page ctr">${err}<div class="box" style="text-align:center"><p>${esc(NET.status||'Connexion…')}</p><button data-a="netcancel">Annuler</button></div></div>`;
+  const di=nav.findIndex(x=>/^deck[01]$/.test(x));
+  if(di>=0){
+    const i=+nav[di].slice(4), k=nav[di+1];
+    if(!k) return deckChooser(i);
+    const choose=`<button class="primary" style="font-size:16px;padding:12px 22px" data-a="choosedeck:${i}:${k}">Choisir ce deck</button>`;
+    return `<div class="page ctr">${navHead('combat',`<span style="color:${deckColor(k)}">${deckLabel(k)}</span>`)}<div style="margin-bottom:14px">${choose}</div>${deckCompoHTML(k)}<div style="margin-top:20px">${choose}</div></div>`;
+  }
   const path=nav.join('/');
-  if(path==='') return `<div class="page"><h2 style="margin-top:0">Combat</h2>${err}${menu([['go:combat:versus','Versus','Contre un autre joueur, sur deux appareils'],['go:combat:solo','Solo','Seul ou à deux sur un écran']])}${reg}</div>`;
-  if(path==='versus') return `<div class="page">${navHead('combat','Versus')}${err}${menu([['go:combat:versus:prive','Privé','Avec un code à partager'],['go:combat:versus:alea','Aléatoire','',true]])}</div>`;
-  if(path==='versus/prive') return `<div class="page">${navHead('combat','Privé')}${err}${menu([['go:combat:versus:prive:creer','Créer un match','Obtenir un code'],['go:combat:versus:prive:rejoindre','Rejoindre un match','Entrer un code']])}</div>`;
+  if(path==='') return `<div class="page ctr vcenter"><h2 class="ptitle">Match</h2>${err}${menu([['go:combat:versus','Versus','Contre un autre joueur, sur deux appareils'],['go:combat:solo','Solo','Seul ou à deux sur un écran']])}${reg}</div>`;
+  if(path==='versus') return `<div class="page ctr vcenter">${navHead('combat','Versus')}${err}${menu([['go:combat:versus:prive','Privé','Avec un code à partager'],['go:combat:versus:alea','Aléatoire','',true]])}</div>`;
+  if(path==='versus/prive') return `<div class="page ctr vcenter">${navHead('combat','Privé')}${err}${menu([['go:combat:versus:prive:creer','Créer un match','Obtenir un code'],['go:combat:versus:prive:rejoindre','Rejoindre un match','Entrer un code']])}</div>`;
   if(path==='versus/prive/creer'){
     const saved=netSaved();
-    return `<div class="page">${navHead('combat','Créer un match')}${err}
+    return `<div class="page ctr">${navHead('combat','Créer un match')}${err}
       <div class="box"><h3>Paramètres du match</h3>${modeChips()}</div>
-      <div class="box" style="margin-top:16px"><h3>Votre deck</h3><label>Nom <input id="nm0" value="${esc(UI.names[0])}"></label>${deckPick(0,false)}</div>
-      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap"><button class="primary" data-a="nethost">Créer le match et obtenir le code</button>
+      <div class="box" style="margin-top:16px"><h3>Votre deck</h3><label>Nom <input id="nm0" value="${esc(UI.names[0])}"></label>${deckChoice(0)}</div>
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><button class="primary" data-a="nethost">Créer le match et obtenir le code</button>
       ${saved?`<button data-a="netresume">Reprendre le match en cours (code ${esc(saved.code)})</button>`:''}</div>
-      <p class="muted">Votre appareil sera l'arbitre : il doit rester ouvert pendant tout le match.</p></div>`;
+      <p class="muted">Votre appareil sera l'hôte du match : il doit rester ouvert pendant tout le match.</p></div>`;
   }
-  if(path==='versus/prive/rejoindre') return `<div class="page">${navHead('combat','Rejoindre un match')}${err}
-      <div class="box"><h3>Votre deck</h3><label>Nom <input id="nm0" value="${esc(UI.names[0])}"></label>${deckPick(0,false)}</div>
+  if(path==='versus/prive/rejoindre') return `<div class="page ctr">${navHead('combat','Rejoindre un match')}${err}
+      <div class="box"><h3>Votre deck</h3><label>Nom <input id="nm0" value="${esc(UI.names[0])}"></label>${deckChoice(0)}</div>
       <div class="box" style="margin-top:16px"><h3>Code du match</h3>
         <input id="netcode" maxlength="4" style="text-transform:uppercase;width:130px;font-size:22px;letter-spacing:4px" value="${esc(UI.joinCode||'')}">
         <div style="margin-top:12px"><button class="primary" data-a="netjoin">Rejoindre le match</button></div></div></div>`;
-  if(path==='solo') return `<div class="page">${navHead('combat','Solo')}${menu([['go:combat:solo:event','Événement','',true],['go:combat:solo:ecran','1 écran','Deux joueurs sur le même appareil']])}${reg}</div>`;
+  if(path==='solo') return `<div class="page ctr vcenter">${navHead('combat','Solo')}${menu([['go:combat:solo:event','Événement','',true],['go:combat:solo:ecran','1 écran','Deux joueurs sur le même appareil']])}${reg}</div>`;
   if(path==='solo/ecran'){
-    const col=i=>`<div class="box"><h3>Joueur ${i?'B':'A'}</h3><label>Nom <input id="nm${i}" value="${esc(UI.names[i])}"></label>${deckPick(i,true)}</div>`;
-    return `<div class="page">${navHead('combat','1 écran')}
+    const col=i=>`<div class="box"><h3>Joueur ${i?'B':'A'}</h3><label>Nom <input id="nm${i}" value="${esc(UI.names[i])}"></label>${deckChoice(i)}</div>`;
+    return `<div class="page ctr">${navHead('combat','1 écran')}
       <div class="box opts"><h3>Paramètres du match</h3>${modeChips()}
         <label style="margin-top:12px"><input type="checkbox" ${UI.hideHands?'checked':''} data-opt="hideHands"> <span>Main cachée : masquer la main entre les tours (écran « passez à… »)</span></label></div>
       <div class="setup" style="margin-top:16px">${col(0)}${col(1)}</div>
-      <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
-        <button class="primary" data-a="start">Lancer le match</button><span class="muted">Le premier joueur est tiré à pile ou face.</span></div>${reg}</div>`;
+      <div style="margin-top:16px"><button class="primary" style="font-size:16px;padding:12px 22px" data-a="start">Lancer le match</button><p class="muted">Le premier joueur est tiré à pile ou face.</p></div>${reg}</div>`;
   }
   UI.nav.combat=[]; return renderSetup();
 }
@@ -817,8 +1116,8 @@ function netBanner(){
   if(!G||!G.online) return '';
   let msg='',btn='';
   if(NET.role==='host'&&!NET.conn) msg=`Adversaire déconnecté. Il peut revenir avec le code <b>${esc(NET.code)}</b> (« Rejoindre »).`;
-  if(NET.role==='guest'&&NET.lost){msg='Connexion avec l\'arbitre perdue.';btn='<button class="primary" data-a="netretry">Se reconnecter</button>';}
-  if(!msg) return `<div class="muted" style="padding:6px 14px 0;font-size:12px">En ligne · code ${esc(NET.code||'')} · ${NET.role==='host'?'vous êtes l\'arbitre':'connecté à l\'arbitre'}</div>`;
+  if(NET.role==='guest'&&NET.lost){msg='Connexion avec l\'hôte perdue.';btn='<button class="primary" data-a="netretry">Se reconnecter</button>';}
+  if(!msg) return `<div class="muted" style="padding:6px 14px 0;font-size:12px">En ligne · code ${esc(NET.code||'')} · ${NET.role==='host'?'vous êtes l\'hôte':'connecté à l\'hôte'}</div>`;
   return `<div class="box" style="margin:12px 12px 0;border-color:var(--accent);display:flex;gap:12px;align-items:center;justify-content:space-between"><span>⚠ ${msg}</span>${btn}</div>`;
 }
 
@@ -841,10 +1140,10 @@ function playerPanel(p,top){
   const P=PL(p),k=G.decks[p],active=G.cur===p&&!isOver();
   const info=`<div class="pinfo">
     <span class="pname">${esc(G.names[p])}${G.online&&p===MY_SEAT?' <span class="muted">(vous)</span>':''}</span>${p===G.first?'<span class="badge">1er</span>':'<span class="badge dim">2e</span>'}
-    <span class="chip" style="--tc:${TYPES[k].color}">${deckLabel(k)}</span>
+    <span class="chip" style="--tc:${deckColor(k)}">${deckLabel(k)}</span>
     ${G.target>1?`<span class="wins" title="Manches gagnées">${'●'.repeat(G.wins[p])}${'○'.repeat(Math.max(0,G.target-G.wins[p]))}</span>`:''}
     <span class="troph" title="Étoiles">✯ ${P.trophies}<small> / ${G.win}</small></span>
-    ${P.piedFerme?'<span class="flag">Pied ferme −2</span>':''}${P.elan?'<span class="flag">Élan +2</span>':''}
+    ${P.piedFerme?'<span class="flag">Pied ferme −2</span>':''}${P.garde?`<span class="flag">Garde −${P.garde}</span>`:''}${P.elan?'<span class="flag">Élan +2</span>':''}
     <span class="muted">Deck ${P.deck.length} · Main ${P.hand.length} · Défausse ${P.discard.length}</span></div>`;
   const hidden=G.phase==='setup'&&!G.revealed;
   const champ=P.champion?(hidden?`<div class="card back full"></div>`:boardCard(p,P.champion,true)):`<div class="emptyslot">vide</div>`;
@@ -890,6 +1189,8 @@ function boardCard(p,c,isChamp){
   if(c.item) tags+=`<span class="tag eq">${esc(C(c.item).name)}</span>`;
   if(G.evolved&&G.evolved.includes(c.uid)&&G.phase==='actions') tags+='<span class="tag st">Évoluée ce tour</span>';
   if(c.start&&G.pturns[p]<=1) tags+='<span class="tag">Départ</span>';
+  if(c.burn) tags+=`<span class="tag" style="background:#ff5c5c33;color:#ffb199">🔥 ${c.burnName||'Brasier'} ${c.burn}</span>`;
+  if(isHeld(c)) tags+='<span class="tag" style="background:#3b8ff033;color:#9cc8ff">Étreint</span>';
   if(c.placedTurn===G.turn&&G.phase==='actions'&&!c.start) tags+='<span class="tag">Posée ce tour</span>';
   let cls='',attrs='';
   const pd=G.pending[0];
@@ -897,7 +1198,8 @@ function boardCard(p,c,isChamp){
   let btn='';
   if(!isChamp&&p===G.cur&&mine_(p)&&G.phase==='actions'&&!G.pending.length&&!G.handoff){
     const cost=swapCost(c);
-    btn=`<button data-a="swap:${c.uid}" ${G.actions>=cost?'':'disabled'} title="${cost===CONFIG.swapSameType?'Même type':'Types différents'} : ${cost} action${s_(cost)}${G.actions<cost?' (pas assez d\'actions)':''}">Échanger (${cost})</button>`;
+    const held=isHeld(PL(p).champion);
+    btn=`<button data-a="swap:${c.uid}" ${G.actions>=cost&&!held?'':'disabled'} title="${held?'Champion retenu par une Étreinte : pas d\'échange ce tour':''}${cost===CONFIG.swapSameType?'Même type':'Types différents'} : ${cost} action${s_(cost)}${G.actions<cost?' (pas assez d\'actions)':''}">Échanger (${cost})</button>`;
   }
   return `<div class="hcard">${cardHTML(c.id,{cls,attrs,stats,uid:c.uid,extra:tags?`<div class="tags">${tags}</div>`:''})}${btn}</div>`;
 }
@@ -908,6 +1210,9 @@ function pendingText(pd){
   if(pd.kind==='discard') return `${n} : main de plus de ${CONFIG.maxHand} cartes, choisissez ${pd.n} carte${s_(pd.n)} à défausser (${pd.chosen.length}/${pd.n}).`;
   const w=pd.what;
   if(w==='eruption') return `✦ Éruption : choisissez le combattant adverse touché (champion ou banc).`;
+  if(w==='souffle') return `✦ Souffle ${pd.x} : choisissez le combattant du banc adverse touché.`;
+  if(w==='repli') return `✦ Repli : choisissez le combattant de votre banc qui devient champion.`;
+  if(w==='tourbillon') return `✦ Tourbillon : choisissez le combattant du banc adverse qui devient son champion.`;
   if(w==='evolve') return `Choisissez le combattant qui évolue en ${C(pd.cardId).name}.`;
   if(w==='item') return `Choisissez le combattant qui reçoit ${C(pd.cardId).name}.`;
   return `${C(pd.cardId).name} : choisissez la cible.`;
@@ -920,7 +1225,7 @@ function midBar(){
     const seat=G.online?MY_SEAT:G.cur, k=G.setupSel[seat].length;
     if(G.online&&PL(seat).champion) main=`<b>Manche ${G.round} · préparation</b><br>Vos combattants sont posés. En attente de ${esc(G.names[1-seat])}…`;
     else {
-      main=`<b>Manche ${G.round} · préparation</b><br>${G.online?'Vous':esc(G.names[seat])} : cliquez de 1 à ${CONFIG.maxStarters} combattants ✯ de votre main, posés face cachée. Le premier choisi est le champion, les suivants vont sur le banc.`;
+      main=`<b>Manche ${G.round} · préparation</b><br>${G.online?'Vous':esc(G.names[seat])} : ${CONFIG.maxStarters===1?'choisissez 1 combattant ✯ de votre main : votre champion, posé face cachée.':`cliquez de 1 à ${CONFIG.maxStarters} combattants ✯ de votre main, posés face cachée. Le premier choisi est le champion, les suivants vont sur le banc.`}`;
       if(!G.handoff) btns=`<button class="primary" data-a="setupok" ${k?'':'disabled'}>Valider (${k} combattant${s_(k)})</button>`;
     }
   }
@@ -931,16 +1236,21 @@ function midBar(){
     if(G.online&&actingPlayer()!==MY_SEAT){
       main+=`<div class="prev">En attente de ${esc(G.names[actingPlayer()])}…${pd?' ('+pendingText(pd)+')':''}</div>`;
     } else if(pd){
-      const cancel=(pd.kind==='target'&&pd.what!=='eruption')||pd.kind==='deckpick';
+      const cancel=(pd.kind==='target'&&!['eruption','souffle','repli','tourbillon'].includes(pd.what))||pd.kind==='deckpick';
       main+=`<div class="pend">${pendingText(pd)} ${cancel?'<button class="ghost" data-a="cancel">Annuler</button>':''}</div>`;
       if(pd.kind==='deckpick'&&!pd.cards.length) main+=`<div class="midbtns" style="margin-top:6px"><span>Aucun combattant ✯ dans votre deck.</span><button class="primary" data-a="rf:none">Mélanger le deck (Renfort sans effet)</button></div>`;
       else if(pd.kind==='deckpick'){const P=cp();main+=`<div class="midbtns" style="margin-top:6px">${pd.cards.map(id=>`<button data-a="rf:${id}" data-card="${id}">${esc(C(id).name)} ×${P.deck.filter(x=>x===id).length}${C(id).ab?' · ✦ '+abLabel(C(id)):''}</button>`).join('')}</div>`;}
     } else {
-      const ok=canAttack();
-      const why=G.cur===G.first&&G.pturns[G.cur]===1?'le premier joueur n\'attaque pas à son premier tour':G.actions<atkCost()?`il faut ${atkCost()} action pour attaquer`:'';
-      if(!ok&&why) main+=`<div class="prev">Attaque impossible : ${why}.</div>`;
-      if(ok){const k=attackCalc();main+=`<div class="prev">Attaque : ${esc(nm(cp().champion))} → ${esc(nm(op().champion))} · ${k.txt}${k.kills?' · <b style="color:var(--good)">vaincu</b>':''}</div>`;}
-      btns=`<button class="primary" data-a="attack" ${ok?'':'disabled'} title="${ok?'L\'attaque termine le tour':why}">⚔ Attaquer (${atkCost()?atkCost()+' action, ':''}fin du tour)</button>
+      const why=attackBlocked(), ch=cp().champion, card=ch?C(ch.id):null, sp=card&&card.spe;
+      const okB=canAttack('base'), okS=canAttack('spe'), sc=sp?speCost(ch.id):0;
+      if(why) main+=`<div class="prev">Attaque impossible : ${why}.</div>`;
+      else {
+        const kb=attackCalc('base'), ks=sp?attackCalc('spe'):null;
+        main+=`<div class="prev">⚔ Base : ${esc(nm(ch))} → ${esc(nm(op().champion))} · ${kb.txt}${kb.kills?' · <b style="color:var(--good)">vaincu</b>':''}</div>`;
+        if(sp) main+=`<div class="prev">✦ ${speLabel(card)} (${speCostTxt(sc)}) · ${ks.txt}${ks.kills?' · <b style="color:var(--good)">vaincu</b>':''} — ${esc(SPE[sp.kw].text(sp.x))}${!okS?` <b>Il faut ${sc} action${s_(sc)}.</b>`:''}</div>`;
+      }
+      btns=`<button class="primary" data-a="attack:base" ${okB?'':'disabled'} title="${why||'Gratuite · termine le tour'}">⚔ Attaque de base</button>
+        ${sp?`<button class="primary" data-a="attack:spe" ${okS?'':'disabled'} title="${why||(okS?'Termine le tour':`Il faut ${sc} action${s_(sc)}`)}">✦ ${esc(speLabel(card))} (${speCostTxt(sc)})</button>`:''}
         <button data-a="endturn">Terminer sans attaquer</button>`;
     }
   }
@@ -997,6 +1307,7 @@ function popHTML(id,uid){
     if(inst.item) h+=`<dt>Objet : ${esc(C(inst.item).name)}</dt><dd>${esc(C(inst.item).text)}</dd>`;
     if(champ&&PL(o).piedFerme) h+=`<dt>Pied ferme actif</dt><dd>−${CONFIG.piedFerme} dégâts par coup jusqu'au prochain tour de ${esc(G.names[o])}.</dd>`;
   }
+  if(c.spe) h+=`<dt>Attaque spéciale (${speCostTxt(speCost(id))})</dt><dd><span class="ab" style="color:var(--atk)">⚔ ${speLabel(c)}</span> : ${esc(SPE[c.spe.kw].text(c.spe.x))}</dd>`;
   if(c.ab) h+=`<dt>Capacité</dt><dd><span class="ab">✦ ${abLabel(c)}</span> : ${esc(ABIL[c.ab].text(c.abX))}</dd>`;
   else h+=`<dt>Capacité</dt><dd>aucune</dd>`;
   h+=`<dt>Faiblesse</dt><dd>${TYPES[c.weak].name} : +${CONFIG.weakBonus} dégât si un combattant ${TYPES[c.weak].name} l'attaque</dd>`;
@@ -1033,15 +1344,17 @@ const H = {
   tab(t){if(UI.tab!==t)UI.nav[UI.tab]=[];else if(!(t==='combat'&&G))UI.nav[t]=[];UI.tab=t;window.scrollTo(0,0);render();},
   go(tab,...path){path=path.filter(x=>x&&typeof x==='string');saveNames();NET.err='';UI.nav[tab]=path;window.scrollTo(0,0);render();},
   back(tab){saveNames();NET.err='';UI.nav[tab].pop();window.scrollTo(0,0);render();},
+  choosedeck(i,k){if(!DECKS[k])return;UI.pick[+i]=k;UI.rand[+i]=false;const n=UI.nav.combat,di=n.findIndex(x=>/^deck[01]$/.test(x));if(di>=0)UI.nav.combat=n.slice(0,di);window.scrollTo(0,0);render();},
+  chooserand(i){UI.rand[+i]=true;const n=UI.nav.combat,di=n.findIndex(x=>/^deck[01]$/.test(x));if(di>=0)UI.nav.combat=n.slice(0,di);window.scrollTo(0,0);render();},
   pickrand(i){saveNames();UI.rand[+i]=!UI.rand[+i];render();},
   deck(k){UI.deck=k;render();},
   detail(id){UI.detail=id;render();},
   close(_,e,el){if(el.classList.contains('modal-bg')&&e.target!==el)return;UI.detail=null;render();},
   closeexp(_,e,el){if(el.classList.contains('modal-bg')&&e.target!==el)return;UI.exportText=null;render();},
   pick(i,k){saveNames();UI.pick[+i]=k;UI.rand[+i]=false;render();},
-  nethost(){saveNames();netHost();},
+  nethost(){saveNames();NET.myDeck=resolveDeck(0);netHost();},
   netresume(){saveNames();netHost(netSaved());},
-  netjoin(){saveNames();const el=$('#netcode');UI.joinCode=(el?el.value:'').trim().toUpperCase();if(UI.joinCode.length!==4){NET.err='Le code fait 4 caractères.';render();return;}netJoin(UI.joinCode);},
+  netjoin(){saveNames();NET.myDeck=resolveDeck(0);const el=$('#netcode');UI.joinCode=(el?el.value:'').trim().toUpperCase();if(UI.joinCode.length!==4){NET.err='Le code fait 4 caractères.';render();return;}netJoin(UI.joinCode);},
   netcancel(){netLeave();render();},
   netretry(){netJoin(NET.code);},
   set(key,val){saveNames();UI[key]=val;render();},
@@ -1075,9 +1388,9 @@ const H = {
     if(pd.kind==='replace') return act(()=>{G.pending.shift();promote(pd.p,uid);});
     act(()=>{G.pending.shift();execTarget(pd,uid);});
   },
-  cancel(){const pd=G.pending[0];if(pd&&((pd.kind==='target'&&pd.what!=='eruption')||pd.kind==='deckpick')){G.pending.shift();render();}},
+  cancel(){const pd=G.pending[0];if(pd&&((pd.kind==='target'&&!pd.post&&pd.what!=='eruption')||pd.kind==='deckpick')){G.pending.shift();render();}},
   swap(uid){act(()=>doSwap(+uid));},
-  attack(){if(canAttack())act(doAttack);},
+  attack(kind){kind=kind==='spe'?'spe':'base';if(canAttack(kind))act(()=>doAttack(kind));},
   endturn(){act(endTurnNoAttack);},
   nextround(){act(nextRound);},
   rematch(){const g=G;newMatch({decks:g.decks,names:g.names,mode:g.mode,variant:'std',hideHands:g.hide,online:g.online});render();},
@@ -1091,6 +1404,10 @@ const H = {
 };
 function execTarget(pd,uid){
   const w=pd.what;
+  if(w==='souffle'||w==='repli'||w==='tourbillon'){
+    if(w==='souffle') souffleApply(pd.p,uid,pd.x); else if(w==='repli') repliApply(pd.p,uid); else swap(1-pd.p,uid,'✦ Tourbillon');
+    return aftermath();
+  }
   if(w==='eruption') return eruption(pd.p,pd.src,uid);
   if(w==='evolve') return doEvolve(pd.handUid,uid);
   if(w==='item') return doItem(pd.handUid,uid);
@@ -1106,8 +1423,9 @@ document.addEventListener('click',e=>{
   }
   if(H[a]) H[a](...(args.length?args:[undefined]),e,el);
 });
-document.addEventListener('change',e=>{const o=e.target.closest('[data-opt]');if(o)UI[o.dataset.opt]=o.checked;});
-document.addEventListener('input',e=>{const n=e.target.closest('[data-note]');if(n&&HIST[+n.dataset.note])HIST[+n.dataset.note].notes=n.value;});
+document.addEventListener('change',e=>{if(e.target.closest('[data-col]')){colUpdate(e);return;}const o=e.target.closest('[data-opt]');if(o)UI[o.dataset.opt]=o.checked;});
+function colUpdate(e){const el=e.target.closest('[data-col]');if(!el)return false;UI.col[el.dataset.col]=el.value;const g=$('#colgrid');if(g)g.innerHTML=colGridHTML();return true;}
+document.addEventListener('input',e=>{if(colUpdate(e))return;const n=e.target.closest('[data-note]');if(n&&HIST[+n.dataset.note])HIST[+n.dataset.note].notes=n.value;});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(UI.detail||UI.exportText!==null)){UI.detail=null;UI.exportText=null;render();}});
 /* =========================================================
    RÉSEAU (en ligne, 2 appareils) — PeerJS, l'hôte est l'arbitre
@@ -1123,7 +1441,7 @@ function peerOptions(){
 function newCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let c='';for(let i=0;i<4;i++)c+=A[Math.floor(Math.random()*A.length)];return c;}
 function netErr(err){
   const t=err&&err.type;
-  return t==='peer-unavailable'?'Aucune partie trouvée avec ce code (vérifiez-le, et que l\'appareil de l\'arbitre est bien ouvert).'
+  return t==='peer-unavailable'?'Aucune partie trouvée avec ce code (vérifiez-le, et que l\'appareil de l\'hôte est bien ouvert).'
     :t==='network'||t==='server-error'||t==='socket-error'||t==='socket-closed'?'Service de connexion injoignable. Vérifiez votre connexion Internet et réessayez.'
     :t==='browser-incompatible'?'Ce navigateur ne permet pas le jeu en ligne.'
     :'Erreur de connexion'+(t?` (${t})`:'')+'.';
@@ -1135,7 +1453,7 @@ function netLeave(){
   try{if(NET.conn&&NET.conn.open)NET.conn.send({t:'bye'});}catch(e){}
   try{if(NET.peer)NET.peer.destroy();}catch(e){}
   if(NET.role==='host') netForget();
-  Object.assign(NET,{role:null,peer:null,conn:null,code:'',status:'',err:'',lost:false});
+  Object.assign(NET,{role:null,peer:null,conn:null,code:'',status:'',err:'',lost:false,myDeck:null});
   MY_SEAT=null; if(G&&G.online){G=null;UNDO=[];}
 }
 function netHost(saved){
@@ -1167,9 +1485,9 @@ function hostOnData(conn,msg){
     NET.conn=conn; NET.lastSeen=Date.now();
     if(!G){
       MY_SEAT=0; UI.tab='combat';
-      const deck=DECK_ORDER.includes(msg.deck)?msg.deck:DECK_ORDER[1];
+      const deck=DECK_ORDER.includes(msg.deck)?msg.deck:'poing';
       const name=String(msg.name||'Invité').slice(0,24);
-      newMatch({decks:[UI.pick[0],deck],names:[UI.names[0],name],mode:UI.mode,variant:'std',hideHands:false,online:true});
+      newMatch({decks:[NET.myDeck||UI.pick[0],deck],names:[UI.names[0],name],mode:UI.mode,variant:'std',hideHands:false,online:true});
       log(`${name} a rejoint la partie.`,'sys');
     } else log(`${G.names[1]} est de retour.`,'sys');
     render(); return;
@@ -1236,13 +1554,13 @@ function netJoin(code){
   peer.on('error',err=>{NET.err=netErr(err);if(!G){NET.role=null;}else NET.lost=true;render();});
   peer.on('open',()=>{
     const conn=peer.connect(PEER_PREFIX+code,{reliable:true,serialization:'json'}); NET.conn=conn;
-    conn.on('open',()=>{NET.lost=false;NET.lastSeen=Date.now();NET.status='Connecté, en attente de l\'arbitre…';conn.send({t:'hello',name:UI.names[0],deck:UI.pick[0]});render();});
+    conn.on('open',()=>{NET.lost=false;NET.lastSeen=Date.now();NET.status='Connecté, en attente de l\'hôte…';if(!NET.myDeck)NET.myDeck=resolveDeck(0);conn.send({t:'hello',name:UI.names[0],deck:NET.myDeck});render();});
     conn.on('data',raw=>{
       if(!raw||typeof raw!=='object') return;
       NET.lastSeen=Date.now(); if(NET.lost){NET.lost=false;render();}
       const msg=raw.t==='part'?netReceivePart(raw):raw; if(!msg) return;
       if(msg.t==='full'){netLeave();NET.err='Cette partie a déjà deux joueurs.';render();return;}
-      if(msg.t==='bye'){netLeave();NET.err='L\'arbitre a quitté la partie.';render();return;}
+      if(msg.t==='bye'){netLeave();NET.err='L\'hôte a quitté la partie.';render();return;}
       if(msg.t==='state'){G=msg.G;HIST.splice(0,HIST.length,...(msg.HIST||[]));MY_SEAT=1;UNDO=[];NET.err='';if(UI.tab==='combat'||!G)UI.tab='combat';render();}
     });
     conn.on('close',()=>{if(NET.role==='guest'){NET.lost=true;render();}});

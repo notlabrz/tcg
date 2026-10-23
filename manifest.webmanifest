@@ -1,6 +1,6 @@
 {
-  "name": "ROJJJO TCG · Duel des champions",
-  "short_name": "ROJJJO",
+  "name": "DC TCG · Duel des champions",
+  "short_name": "DC TCG",
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",
