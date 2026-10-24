@@ -265,9 +265,62 @@ body.inmatch .mfield .mcard,body.inmatch .mfield .mempty{flex:1 1 auto;height:au
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--good);color:#04210f;padding:8px 16px;border-radius:8px;font-weight:700;z-index:60}
 .bottombar~#toast{}
 @media (max-width:1050px){.arena{grid-template-columns:1fr}.side{position:static}.setup{grid-template-columns:1fr}}
-@media (max-height:760px){.mcard,.mempty{height:88px}.mhand .mcard{height:112px}.mhandlbl{display:none}.pbar{padding:3px 8px}.mhand{padding-bottom:3px}.mcard .mnm{font-size:11px}.mcard .mst{font-size:13px}.mmid{padding:5px 8px;gap:4px}.match{gap:4px}}
+@media (max-height:760px){.mcard,.mempty{height:88px}.mhand .mcard{height:112px}.pbar{padding:3px 8px}.mhand{padding-bottom:3px}.mcard .mnm{font-size:11px}.mcard .mst{font-size:13px}.mmid{padding:5px 8px;gap:4px}.match{gap:4px}}
 @media (max-width:400px){.pbar{flex-wrap:nowrap;white-space:nowrap;overflow:hidden}.pbar .chip{display:none}}
 @media (min-height:761px){body.inmatch .mhand .mcard{height:150px;flex-basis:104px}}
+
+/* ===== Plateau de match (maquette v1.6) ===== */
+.match2{flex:1 1 auto;min-height:0;width:100%;max-width:560px;margin:0 auto;box-sizing:border-box;display:flex;flex-direction:column;gap:3px;padding:calc(4px + env(safe-area-inset-top)) 8px calc(4px + env(safe-area-inset-bottom))}
+.match2>*{flex-shrink:0}
+.ohand{display:flex;flex-direction:column;align-items:center;gap:2px}
+.obacks{display:flex;gap:4px;justify-content:center;flex-wrap:nowrap;overflow:hidden;max-width:100%}
+.obacks i{width:22px;height:30px;border-radius:3px;border:1px dashed #4a5163;background:#262a34;flex:0 0 auto}
+.board{position:relative;flex:1 1 0!important;min-height:0;display:flex;flex-direction:column;gap:4px;container-type:inline-size;overflow:visible}
+.ring{position:absolute;left:50%;top:50%;border-radius:50%;transform:translate(-50%,-50%);border:10cqw solid #262b36;pointer-events:none;z-index:0}
+.ring.r1{width:64cqw;height:64cqw}
+.ring.r2{width:140cqw;height:140cqw}
+.brow{position:relative;z-index:1;display:grid;min-height:0;gap:2.5cqw}
+.brow.bench{flex:1 1 0;grid-template-columns:22cqw 1fr 22cqw}
+.brow.champ{flex:1.35 1 0;grid-template-columns:1fr 24.5cqw 1fr}
+.brow .bside{display:flex;flex-direction:column;min-height:0;min-width:0}
+.brow .bside.end{align-items:flex-end;justify-content:flex-end}
+.brow .lb{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;text-align:center;line-height:13px;height:13px}
+.brow .lb.ch{color:var(--accent);font-weight:800}
+.pair,.cz{display:flex;flex-direction:column;min-height:0;min-width:0}
+.pair .pr{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:2.5cqw}
+.board .mcard,.board .mempty{height:auto!important;flex:1 1 auto;min-height:0;min-width:0}
+.pair .pr>*{min-height:0}
+.board .mempty{background:var(--bg)}
+.pile{width:22cqw;flex:1 1 auto;min-height:0;border:2px dashed #3a4050;border-radius:9px;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:10.5px;color:var(--muted);padding:3px;box-sizing:border-box;overflow:hidden}
+.brow.champ .bside .pile{margin-top:13px;flex:0 1 auto;height:calc(100% - 13px - 2px);max-height:78%}
+.brow.champ .bside.end .pile{margin-top:0}
+.pile.deck>div{width:100%;height:100%;border-radius:6px;background:#2a2f3b;display:flex;align-items:center;justify-content:center}
+.pile.disc{cursor:pointer}
+.pile.disc.full{border:2px solid var(--tc);border-style:solid;background:linear-gradient(180deg,color-mix(in srgb,var(--tc) 22%,var(--panel2)) 0,var(--panel2) 60%)}
+.pile.disc b{color:var(--text);font-size:10.5px;line-height:1.15;margin-bottom:4px}
+.sinfo{justify-content:space-between;padding-top:13px}.board .sinfo .pbar{margin-left:-2.5cqw;max-width:calc(100% + 2.5cqw)}.board .sact .pbar{max-width:calc(100% + 2.5cqw);margin-right:-2.5cqw}
+.sact{justify-content:flex-start;padding-top:13px}
+.board .pbar{align-self:flex-start;max-width:100%;box-sizing:border-box;flex-wrap:nowrap;white-space:nowrap;overflow:hidden;padding:3px 4px;font-size:10.5px;gap:3px;background:var(--panel);border-radius:10px}
+.board .pbar .nm{overflow:hidden;text-overflow:ellipsis;min-width:0;font-size:11px}.board .pbar .badge{font-size:9px;padding:0 3px;flex:0 0 auto}.board .pbar .st{font-size:11.5px;flex:0 0 auto}.board .pbar .st small{font-size:9px}.board .pbar .wins{flex:0 0 auto;font-size:8px}
+.flags{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}.flags .flag{font-size:10px;padding:0 5px}
+.tinfo{font-size:10.5px;color:var(--muted);line-height:1.35;text-align:center;align-self:stretch}
+.tinfo b{color:var(--text)}
+.tinfo .pips{display:inline-flex;gap:3px}.tinfo .pips i{width:10px;height:10px;border-radius:50%;background:var(--line);display:inline-block}.tinfo .pips i.on{background:var(--accent)}
+.azone{margin-top:5px;display:flex;flex-direction:column;gap:4px;min-height:0;overflow:visible;position:relative;z-index:5}
+.amsg{font-size:10.5px;color:var(--muted);line-height:1.3}.amsg .pend{color:var(--accent);margin:0}.amsg .small{font-size:10.5px}
+.abtns{display:flex;flex-direction:column;gap:4px;align-items:stretch}
+.abtns button{padding:6px 7px;font-size:12px;border-radius:9px;line-height:1.15}
+.abtns button.ghost[data-a="undo"]{align-self:flex-start;padding:4px 12px}
+.gearz{justify-content:flex-end;position:relative}
+.gearz .gear{margin:0;align-self:flex-start}
+.gearz .gmenu{bottom:calc(100% + 6px);left:0}
+.bover{position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.boverin{pointer-events:auto;background:var(--panel);border:1px solid var(--accent);border-radius:14px;padding:14px;max-width:86%;text-align:center;box-shadow:0 10px 30px #000c;display:flex;flex-direction:column;gap:10px}
+.boverin .abtns{align-items:center}
+.match2 .mhandlbl{font-size:10px}
+.match2 .mhand{padding:2px 2px 2px}
+.dlist .l{padding:7px 4px;border-bottom:1px solid var(--line)}
+@media (max-height:700px){.match2 .mhand .mcard{height:104px}.match2>.mhandlbl{display:none}.obacks i{width:16px;height:22px}}
 </style>
 </head>
 <body>
@@ -288,7 +341,7 @@ body.inmatch .mfield .mcard,body.inmatch .mfield .mempty{flex:1 1 auto;height:au
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.5.1';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.6.0';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1204,8 +1257,16 @@ function undoAllowed(seat){
 function renderCombat(){
   if(!G) return renderSetup();
   const ho=G.handoff?`<div class="handoff"><div><p class="muted">Passez l'écran à</p><h2>${esc(G.names[G.cur])}</h2><button class="primary" data-a="ready">Je suis prêt</button></div></div>`:'';
-  const hp=handOwner(), me=G.online?MY_SEAT:hp;   // sur un seul écran, le joueur qui agit est toujours en bas avec sa main
-  return `${netBanner()}<div class="match">${mBar(1-me)}${mField(1-me)}${mMid()}${mField(me)}${mBar(me)}<div class="mhandrow">${gearHTML()}<div class="mhandcol">${mHand(hp)}</div></div></div>${ho}`;
+  const hp=handOwner(), me=G.online?MY_SEAT:hp, op=1-me, m=midParts();
+  const act=`${m.main?`<div class="amsg">${m.main}</div>`:''}${m.btns||m.undo?`<div class="abtns">${m.btns}${m.undo}</div>`:''}`;
+  const over=m.over?`<div class="bover"><div class="boverin">${m.main}<div class="abtns">${m.btns}</div></div></div>`:'';
+  return `${netBanner()}<div class="match2">${oppHand(op)}<div class="board">
+    <div class="ring r1"></div><div class="ring r2"></div>
+    <div class="brow bench"><div class="bside">${pileDisc(op)}</div>${benchPair(op)}<div class="bside"></div></div>
+    <div class="brow champ"><div class="bside">${pileDeck(op)}</div>${champZone(op)}<div class="bside sinfo"><div class="tinfo">${m.info}</div>${mBar(op)}</div></div>
+    <div class="brow champ"><div class="bside sact">${mBar(me)}${m.over?'':`<div class="azone">${act}</div>`}</div>${champZone(me)}<div class="bside end">${pileDeck(me)}</div></div>
+    <div class="brow bench"><div class="bside gearz">${gearHTML()}</div>${benchPair(me)}<div class="bside end">${pileDisc(me)}</div></div>
+    ${over}</div>${mHand(hp)}</div>${ho}`;
 }
 // Main affichée en bas : la sienne en ligne ; sur un seul écran, celle du joueur qui agit
 function handOwner(){
@@ -1216,14 +1277,22 @@ function handOwner(){
 }
 function mBar(p){
   const P=PL(p),k=G.decks[p],on=G.cur===p&&!isOver()&&G.phase!=='setup';
-  return `<div class="pbar ${on?'on':''}"><span class="nm">${esc(G.names[p])}${G.online&&p===MY_SEAT?' <span class="muted">(vous)</span>':''}</span>
+  return `<div class="pbar ${on?'on':''}"><span class="nm">${esc(G.names[p])}</span>
     ${p===G.first?'<span class="badge">1er</span>':'<span class="badge dim">2e</span>'}
-    <span class="chip" style="--tc:${deckColor(k)}">${deckLabel(k)}</span>
     ${G.target>1?`<span class="wins" title="Manches gagnées">${'●'.repeat(G.wins[p])}${'○'.repeat(Math.max(0,G.target-G.wins[p]))}</span>`:''}
-    <span class="st">✯ ${P.trophies}<small>/${G.win}</small></span>
-    ${P.garde?`<span class="flag">Garde −${P.garde}</span>`:''}${P.elan?'<span class="flag">Élan +2</span>':''}${P.piedFerme?'<span class="flag">Pied ferme</span>':''}
-    <span style="margin-left:auto" title="Deck · Main · Défausse">🂠 ${P.deck.length} · ✋ ${P.hand.length} · 🗑 ${P.discard.length}</span></div>`;
+    <span class="st">✯ ${P.trophies}<small>/${G.win}</small></span></div>${P.garde||P.elan||P.piedFerme?`<div class="flags">${P.garde?`<span class="flag">Garde −${P.garde}</span>`:''}${P.elan?'<span class="flag">Élan +2</span>':''}${P.piedFerme?'<span class="flag">Pied ferme</span>':''}</div>`:''}`;
 }
+function bslot(p,c,champ){
+  const hidden=G.phase==='setup'&&!G.revealed;
+  return c?(hidden?'<div class="mcard back"></div>':mBoardCard(p,c,champ)):`<div class="mempty">${champ?'—':'libre'}</div>`;
+}
+function benchPair(p){const P=PL(p);return `<div class="pair"><span class="lb">Banc</span><div class="pr">${bslot(p,P.bench[0],false)}${bslot(p,P.bench[1],false)}</div></div>`;}
+function champZone(p){return `<div class="cz"><span class="lb ch">Champion</span>${bslot(p,PL(p).champion,true)}</div>`;}
+function pileDeck(p){return `<div class="pile deck"><div>Deck<br>(${PL(p).deck.length})</div></div>`;}
+function pileDisc(p){const D=PL(p).discard,top=D.length?C(D[D.length-1]):null;
+  return `<div class="pile disc ${top?'full':''}" data-a="mmodal:disc${p}" ${top?`style="--tc:${cardColor(top)}"`:''}>${top?`<b>${esc(top.name)}</b>`:''}<div>Cimetière<br>(${D.length})</div></div>`;}
+function oppHand(p){const n=PL(p).hand.length;
+  return `<div class="ohand"><div class="obacks">${Array.from({length:n},()=>'<i></i>').join('')}</div><div class="mhandlbl">${G.online?'Main de '+esc(G.names[p]):'Main de '+esc(G.names[p])} · ${n} carte${s_(n)}</div></div>`;}
 function mField(p){
   const P=PL(p), hidden=G.phase==='setup'&&!G.revealed;
   const slot=(c,champ,lb)=>`<div class="mslot ${champ?'champ':''}"><span class="lb">${lb}</span>${c?(hidden?'<div class="mcard back"></div>':mBoardCard(p,c,champ)):`<div class="mempty">${champ?'—':'libre'}</div>`}</div>`;
@@ -1268,8 +1337,8 @@ function mHand(p){
   if(!handVisible(p)) return lbl+`<div class="mhand">${P.hand.map(()=>'<div class="mcard back"></div>').join('')}</div>`;
   return lbl+`<div class="mhand">${P.hand.map(h=>mHandCard(p,h)).join('')}</div>`;
 }
-function mMid(){
-  const n=esc(G.names[G.cur]); let main='',btns='';
+function midParts(){
+  const n=esc(G.names[G.cur]); let main='',btns='',info='';
   const canUndo=G.online?(MY_SEAT===0?undoAllowed(0):!!G.undoOk):UNDO.length>0;
   const undo=canUndo?`<button class="ghost" data-a="undo" title="Revenir à l'état précédent (pendant votre tour)">↶</button>`:'';
   const head=`<span class="small">${G.mode==='blitz'?'Blitz':'Manche '+G.round}</span>`;
@@ -1283,7 +1352,7 @@ function mMid(){
   }
   else if(G.phase==='actions'){
     const pips=`<span class="pips">${Array.from({length:CONFIG.actionsPerTurn},(_,i)=>`<i class="${i<G.actions?'on':''}"></i>`).join('')}</span>`;
-    main=`<div>${head} · <b>Tour ${G.turn}</b> · ${n}${pips}</div>`;
+    info=`<div>${head}</div><div><b>Tour ${G.turn}</b> · ${n}</div><div>${pips}</div>`;
     const pd=G.pending[0];
     if(G.online&&actingPlayer()!==MY_SEAT){
       main+=`<div class="small">En attente de ${esc(G.names[actingPlayer()])}…${pd?' ('+pendingText(pd)+')':''}</div>`;
@@ -1314,7 +1383,8 @@ function mMid(){
     main=`<div class="banner">🏆 <b>${esc(G.names[G.lastWinner])}</b> ${G.mode==='blitz'?'remporte la partie Blitz !':`remporte le match ${G.wins[0]}–${G.wins[1]} !`}</div>`;
     btns=`<button class="primary" data-a="rematch">Rejouer ce duel</button><button data-a="newmatch">${G.online?'Quitter la partie':'Changer de decks'}</button>`;
   }
-  return `<div class="mmid">${main}${btns||undo?`<div class="btns">${btns}${undo}</div>`:''}</div>`;
+  if(G.phase==='setup'){info=head;main=main.replace(head,'');}
+  return {info,main,btns,undo,over:G.phase==='roundover'||G.phase==='matchover'};
 }
 // Panneau du bas : détail d'une carte et actions possibles (avec la raison si impossible)
 function renderSheet(){
@@ -1351,7 +1421,9 @@ function rulesRecap(){
     <details open><summary>Attaques spéciales</summary><ul style="padding-left:18px;font-size:12.5px">${Object.values(SPE).map(a=>`<li><b>${a.name}</b> (${a.name==='Charge'?'X actions':speCostTxt(a.cost(1))}) : ${esc(a.text('X'))}</li>`).join('')}</ul></details>`;
 }
 function renderMatchModal(){
-  const body=UI.mmodal==='rules'?rulesRecap()
+  const dp=/^disc(\d)$/.exec(UI.mmodal||'');
+  const body=dp?`<h3 style="margin-top:0">Cimetière de ${esc(G.names[+dp[1]])}</h3>${PL(+dp[1]).discard.length?`<div class="dlist">${PL(+dp[1]).discard.slice().reverse().map(id=>`<div class="l" data-card="${id}">${esc(C(id).name)}</div>`).join('')}</div>`:'<p class="muted">Vide.</p>'}`
+    :UI.mmodal==='rules'?rulesRecap()
     :`<h3 style="margin-top:0">Historique du match</h3><div class="log" style="max-height:none">${G?G.log.slice().reverse().map(l=>`<div class="l ${l.cls}">${esc(l.msg)}</div>`).join(''):''}</div><div style="margin-top:16px">${registryHTML()}</div>`;
   return `<div class="modal-bg" data-a="closemm"><div class="modal"><button class="mclose ghost" data-a="closemm">✕</button>${body}</div></div>`;
 }
