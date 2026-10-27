@@ -321,6 +321,10 @@ body.inmatch .mfield .mcard,body.inmatch .mfield .mempty{flex:1 1 auto;height:au
 .match2 .mhand{padding:2px 2px 2px}
 .dlist .l{padding:7px 4px;border-bottom:1px solid var(--line)}
 @media (max-height:700px){.match2 .mhand .mcard{height:104px}.match2>.mhandlbl{display:none}.obacks i{width:16px;height:22px}}
+/* pas de sélection de texte ni de menu (copier, rechercher…) à l'appui long, sauf dans les champs */
+html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+img{-webkit-user-drag:none}
 /* glisser-déposer */
 .mhand .mcard[data-drag]{touch-action:pan-x}
 .board .mcard[data-drag]{touch-action:none}
@@ -353,7 +357,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.7.1';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.7.2';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1315,7 +1319,7 @@ function mBar(p){
 function canPlayNow(p){return !!G&&G.phase==='actions'&&!G.pending.length&&!G.handoff&&p===G.cur&&mine_(p);}
 function bslot(p,c,champ){
   const hidden=G.phase==='setup'&&!G.revealed;
-  return c?(hidden?'<div class="mcard back"></div>':mBoardCard(p,c,champ)):`<div class="mempty" ${!champ&&canPlayNow(p)?'data-drop="bench"':''}>${champ?'—':'libre'}</div>`;
+  return c?(hidden?'<div class="mcard back"></div>':mBoardCard(p,c,champ)):`<div class="mempty" ${!champ&&canPlayNow(p)?'data-drop="bench"':champ?`data-drop="champ" data-p="${p}"`:''}>${champ?'—':'libre'}</div>`;
 }
 // Échange possible avec ce combattant du banc (coût, Étreinte)
 function swapOk(uid){const P=cp(),b=P.bench.find(x=>x.uid===uid);return !!b&&!!P.champion&&!isHeld(P.champion)&&G.actions>=swapCost(b);}
@@ -1342,7 +1346,9 @@ function mBoardCard(p,c,isChamp){
   if(c.placedTurn===G.turn&&G.phase==='actions'&&!c.start) tags+='<span>Nouveau</span>';
   const pd=G.pending[0], target=pd&&pd.options&&pd.options.includes(c.uid)&&mine_(pd.p);
   const act=target?`pk:${c.uid}`:`sheet:${c.uid}`;
-  const drag=!isChamp&&canPlayNow(p)&&swapOk(c.uid)?`data-drag="b:${c.uid}"`:'';
+  const rep=pd&&pd.kind==='replace'&&pd.p===p&&mine_(p);
+  const drag=isChamp?(canPlayNow(p)&&canAttack('base')?`data-drag="c:${c.uid}"`:'')
+    :rep?`data-drag="r:${c.uid}"`:canPlayNow(p)&&swapOk(c.uid)?`data-drag="b:${c.uid}"`:'';
   return `<div class="mcard ${target?'target':''}" style="--tc:${cardColor(card)}" data-a="${act}" data-card="${c.id}" data-uid="${c.uid}" ${drag}>
     <div class="mtop"><span>${TYPES[card.type].name}</span><b>${STARS[card.size]}</b></div>
     <div class="mnm">${esc(card.name)}</div>
@@ -1353,16 +1359,16 @@ function mBoardCard(p,c,isChamp){
 }
 function mHandCard(p,h){
   const card=C(h.id),P=PL(p),pd=G.pending[0];
-  let cls='',act=`sheet:${h.uid}`,badge='';
+  let cls='',act=`sheet:${h.uid}`,badge='',setupDrag=false;
   if(G.phase==='setup'&&!P.champion&&(G.online?p===MY_SEAT:(p===G.cur&&!G.handoff))){
-    if(card.cat==='creature'&&card.size==='P'){const k=G.setupSel[p].indexOf(h.uid);act=`ssel:${h.uid}`;cls=k>=0?'sel':'target';if(k>=0)badge='<div class="mtags"><span style="color:var(--good)">Champion</span></div>';}
+    if(card.cat==='creature'&&card.size==='P'){const k=G.setupSel[p].indexOf(h.uid);act=`ssel:${h.uid}`;cls=k>=0?'sel':'target';setupDrag=true;if(k>=0)badge='<div class="mtags"><span style="color:var(--good)">Champion</span></div>';}
     else cls='dim';
   } else if(pd&&pd.kind==='discard'&&pd.p===p){cls='target'+(pd.chosen.includes(h.uid)?' sel':'');act=`pk:${h.uid}`;}
   else if(p===G.cur&&G.phase==='actions'&&!pd&&!handActions(h).some(a=>a.ok)) cls='dim';
   const body=card.cat==='creature'
     ?`${card.ab?`<div class="mab">✦ ${abLabel(card)}</div>`:''}<div class="msp">⚔ ${speLabel(card)} · ${speCost(card.id)}</div>${badge}<div class="mst"><span class="atk">⚔${card.atk}</span><span class="def">🛡${card.def}</span></div>`
     :`<div class="mtxt">${esc(card.text)}</div>`;
-  const drag=canPlayNow(p)&&handActions(h).some(a=>a.ok)?`data-drag="h:${h.uid}"`:'';
+  const drag=setupDrag?`data-drag="s:${h.uid}"`:canPlayNow(p)&&handActions(h).some(a=>a.ok)?`data-drag="h:${h.uid}"`:'';
   return `<div class="mcard ${cls}" style="--tc:${cardColor(card)}" data-a="${act}" data-card="${h.id}" ${drag}>
     <div class="mtop"><span>${card.cat==='creature'?TYPES[card.type].name:card.cat==='sort'?'Atout':'Objet'}</span><b>${card.cat==='creature'?STARS[card.size]:''}</b></div>
     <div class="mnm">${esc(card.name)}</div>${body}</div>`;
@@ -1690,6 +1696,11 @@ const H = {
     newMatch({decks:UI.pick.map((k,i)=>UI.rand[i]?rnd():k),names:UI.names,mode:UI.mode,variant:'std',hideHands:UI.hideHands});render();},
   ready(){G.handoff=false;render();},
   ssel(uid){setupToggle(+uid);render();},
+  // préparation par glisser-déposer : choisit ce ✯ comme champion et valide
+  setdrop(uid){uid=+uid;if(!G||G.phase!=='setup')return;const seat=seatOfHand(uid);if(seat<0||PL(seat).champion)return;
+    if(ACT_SEAT!=null?seat!==ACT_SEAT:(!G.online&&(seat!==G.cur||G.handoff)))return;
+    const h=PL(seat).hand.find(x=>x.uid===uid);if(!h||C(h.id).cat!=='creature'||C(h.id).size!=='P')return;
+    G.setupSel[seat]=[uid];act(()=>setupConfirm(seat));},
   setupok(){const seat=ACT_SEAT!=null?ACT_SEAT:G.cur;if(G.setupSel[seat].length&&!PL(seat).champion)act(()=>setupConfirm(seat));},
   play(uid,key){
     const h=cp().hand.find(x=>x.uid===+uid); if(!h) return;
@@ -1757,7 +1768,7 @@ function execTarget(pd,uid){
   if(w==='item') return doItem(pd.handUid,uid);
   return doSpell(pd.handUid,uid);
 }
-const GAME_ACTIONS=new Set(['ssel','setupok','play','drop','pk','rf','swap','attack','endturn','cancel','undo','nextround','rematch']);
+const GAME_ACTIONS=new Set(['ssel','setupok','setdrop','play','drop','pk','rf','swap','attack','endturn','cancel','undo','nextround','rematch']);
 function dispatch(a,args,e,el){
   if(a==='play'||a==='swap'||a==='attack'||a==='endturn'||a==='drop') UI.sheet=null;
   if(G&&G.online&&GAME_ACTIONS.has(a)){
@@ -1779,6 +1790,12 @@ const DRAG={src:null,on:false,ghost:null,zones:[],over:null,x0:0,y0:0,id:null,su
 function dragZones(kind,uid){
   const out=[], byUid=u=>document.querySelector(`.board [data-uid="${u}"]`);
   if(kind==='b'){const ch=cp().champion,el=ch&&byUid(ch.uid);if(el)out.push({el,a:'swap',args:[String(uid)]});return out;}
+  // champion sur le champion adverse : attaque de base
+  if(kind==='c'){const oc=op().champion,el=oc&&byUid(oc.uid);if(el)out.push({el,a:'attack',args:['base']});return out;}
+  // préparation : un ✯ de la main sur sa place de champion
+  if(kind==='s'){const seat=seatOfHand(uid),el=document.querySelector(`.board [data-drop="champ"][data-p="${seat}"]`);if(el)out.push({el,a:'setdrop',args:[String(uid)]});return out;}
+  // champion vaincu : un combattant du banc sur la place vide du champion
+  if(kind==='r'){const p=ownerOf(uid),el=document.querySelector(`.board [data-drop="champ"][data-p="${p}"]`);if(el)out.push({el,a:'pk',args:[String(uid)]});return out;}
   const h=cp().hand.find(x=>x.uid===uid); if(!h) return out;
   handActions(h).filter(x=>x.ok).forEach(x=>{
     if(x.key==='pose') document.querySelectorAll('.board [data-drop="bench"]').forEach(el=>out.push({el,a:'drop',args:[String(uid),'pose','0']}));
@@ -1811,7 +1828,7 @@ document.addEventListener('pointermove',e=>{
   if(!DRAG.src||e.pointerId!==DRAG.id) return;
   const dx=e.clientX-DRAG.x0, dy=e.clientY-DRAG.y0;
   if(!DRAG.on){
-    const [kind,u]=DRAG.src.dataset.drag.split(':'), inHand=kind==='h';
+    const [kind,u]=DRAG.src.dataset.drag.split(':'), inHand=kind==='h'||kind==='s';
     // dans la main, un geste horizontal fait défiler la main ; il faut tirer la carte vers le haut
     const go=inHand?(dy<-12&&Math.abs(dy)>Math.abs(dx)):(Math.hypot(dx,dy)>10);
     if(!go){ if(inHand&&Math.abs(dx)>12) DRAG.src=null; return; }
@@ -1839,6 +1856,7 @@ document.addEventListener('pointerup',e=>{
 });
 document.addEventListener('pointercancel',e=>{ if(DRAG.src&&e.pointerId===DRAG.id) dragEnd(); });
 // Zoom désactivé sur toutes les pages : pincement bloqué ici (iOS ignore user-scalable=no) ; le double tap est bloqué par touch-action:manipulation
+document.addEventListener('contextmenu',e=>{if(!e.target.closest('input,textarea'))e.preventDefault();});
 ['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
 document.addEventListener('touchmove',e=>{if(e.touches&&e.touches.length>1)e.preventDefault();},{passive:false});
 document.addEventListener('change',e=>{if(e.target.closest('[data-col]')){colUpdate(e);return;}const o=e.target.closest('[data-opt]');if(o)UI[o.dataset.opt]=o.checked;});
@@ -1922,6 +1940,7 @@ function hostAllowed(seat,a,args){
   if(G.phase==='setup'){
     if(a==='ssel') return seatOfHand(+args[0])===seat;
     if(a==='setupok') return !PL(seat).champion;
+    if(a==='setdrop') return seatOfHand(+args[0])===seat&&!PL(seat).champion;
     return false;
   }
   if(G.phase!=='actions') return false;
