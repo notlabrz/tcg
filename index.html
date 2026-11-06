@@ -276,9 +276,11 @@ details summary{cursor:pointer;font-weight:700}
 .grid.c4 .card .cnt{top:-7px;right:-5px;font-size:10px;padding:0 5px}
 .grid.c4 .card{overflow:visible}
 .dt-name.xo{font-size:20px}
-.card.nown,.dtile.nown{filter:grayscale(1) brightness(.55)}
+.card.nown{filter:grayscale(1) brightness(.55)}.dtile.nown{filter:saturate(.55) brightness(.78);opacity:.72}
 .coin{font-style:normal}
-.accf{margin:0 0 10px}.accf input{flex:1}
+.accf{margin:0 0 10px}.accf{min-width:0}.accf>span.xo{flex:0 0 96px;font-size:12.5px}.nfield .accin{flex:1 1 0;position:relative;min-width:0;display:block;padding:0;text-transform:none;letter-spacing:0;font-size:inherit}.accin input{width:100%;box-sizing:border-box}.accin input[data-af^=pass]{padding-right:76px}.eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);padding:5px 9px;font-size:12px;border:0;background:var(--panel2)}
+.accstats.two{grid-template-columns:1fr 1fr}.accname2{font-size:19px;padding:6px 2px}
+.sdcompo{margin-top:16px;padding-top:4px;border-top:1px solid var(--line)}.sdcompo h3.grp{font-size:18px;margin:14px 0 6px}
 .accerr{color:#ffb3b3;text-align:center;margin:12px 0 0}
 .cap{text-align:center;margin:8px 0 0}
 .accbtns{display:flex;flex-direction:column;gap:10px;max-width:320px;margin:18px auto 0}.accbtns button{padding:12px;font-size:16px}
@@ -287,7 +289,8 @@ details summary{cursor:pointer;font-weight:700}
 .lvl{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;margin-bottom:6px}.lvl .xo{font-size:18px}
 .lvbar{height:10px;border-radius:6px;background:var(--bg);border:1px solid var(--line);overflow:hidden}.lvbar i{display:block;height:100%;background:var(--accent);border-radius:6px}
 .accstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}.accstats div{background:var(--panel2);border-radius:10px;padding:10px 4px}.accstats b{display:block;font-size:22px}.accstats span{font-size:12px;color:var(--muted)}
-.wallet{display:inline-block;margin:0 auto 6px;padding:7px 16px;border-radius:20px;background:var(--panel);border:1px solid var(--line);font-size:15px}
+.shopbig{padding:12px 22px;font-size:16px}
+.wallet{display:inline-block;margin:0;padding:6px 12px;border-radius:20px;background:var(--panel);border:1px solid var(--line);font-size:15px}
 .shopit{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;margin-bottom:10px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--tc);text-align:left}
 .shopit .dt-name{font-size:19px}.shopit small{display:block;margin:2px 0 6px}
 .shopit>button{flex:none;min-width:96px;padding:10px 12px;font-size:16px}.shopit>button.buy{background:#2b3346;border-color:#4a5674}.shopit>button.off{background:#262a34;color:#7d8597}
@@ -298,6 +301,7 @@ details summary{cursor:pointer;font-weight:700}
 .fbtn{align-self:stretch;padding:9px 12px;font-weight:700}
 .fcount{display:inline-block;min-width:18px;padding:0 6px;margin-left:6px;border-radius:9px;background:var(--accent);color:#1a1a1a;font-size:11.5px;line-height:18px}
 .fmodal{max-width:420px;padding-bottom:28px}
+.modal-bg.fbg{pointer-events:none}.fbg .fmodal{pointer-events:auto}
 .fmodal .filters{margin-bottom:16px}
 .fbtns{display:flex;gap:8px;justify-content:center}
 .filters{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:0 0 12px;text-align:left}
@@ -587,7 +591,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.21.1';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.22.0';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -863,7 +867,7 @@ function cardHTML(id,o={}){
 /* =========================================================
    ÉTAT
    ========================================================= */
-const UI = {af:{deck:'vague'}, buyAsk:null, col:{q:'',cat:[],type:[],stars:[],sort:'starsA'}, tab:'combat', nav:{combat:[],cartes:[],params:[]}, rand:[false,false], deck:'vague', deckEvo:true, detail:null, exportText:null, confirmQuit:false,
+const UI = {af:{deck:'vague'}, buyAsk:null, col:{q:'',cat:[],type:[],stars:[],own:[],sort:'starsA'}, tab:'combat', nav:{combat:[],cartes:[],params:[]}, rand:[false,false], deck:'vague', deckEvo:true, detail:null, exportText:null, confirmQuit:false,
   play:'local', joinCode:'', names:['JOUEUR1','JOUEUR2'], pick:['vague','seve'], mode:'match', hideHands:false};
 let G=null, UNDO=[], HIST=[];
 let MY_SEAT=null;   // en ligne : 0 = hôte (arbitre), 1 = invité ; null = un seul écran
@@ -1326,6 +1330,7 @@ function colCards(){
     if(f.cat.length&&!f.cat.includes(c.cat)) return false;
     if(f.type.length&&(c.cat!=='creature'||!f.type.includes(c.type))) return false;
     if(f.stars.length&&(c.cat!=='creature'||!f.stars.includes(c.size))) return false;
+    if(ACC.p&&f.own.length===1&&(f.own[0]==='oui')!==ownsCard(c.id)) return false;
     return true;
   });
   const base=(x,y)=>catOrder[x.cat]-catOrder[y.cat];
@@ -1342,7 +1347,8 @@ function colCards(){
 }
 function colGridHTML(){
   const cs=colCards();
-  return `<p class="muted" style="margin:0 0 10px">${cs.length} carte${s_(cs.length)}</p>`+
+  const own=ACC.p?cs.filter(c=>ownsCard(c.id)).length:null;
+  return `<p class="muted" style="margin:0 0 10px">${own!=null?`${own}/${cs.length}`:cs.length} carte${s_(cs.length)}${own!=null?' possédée'+s_(own):''}</p>`+
     (cs.length?`<div class="grid compact">${cs.map(c=>cardHTML(c.id,{cls:'click'+(ownsCard(c.id)?'':' nown'),attrs:`data-a="detail:${c.id}"`})).join('')}</div>`:'<p class="muted">Aucune carte ne correspond.</p>');
 }
 function colSel(key,label,opts){const f=UI.col;return `<label>${label}<select data-col="${key}">${opts.map(([v,t])=>`<option value="${v}" ${f[key]===v?'selected':''}>${t}</option>`).join('')}</select></label>`;}
@@ -1354,7 +1360,7 @@ function sortFab(){
   return `${menu}<button class="sortfab ${UI.sortOpen?'open':''}" data-a="sortmenu" title="Trier : ${cur[2]}" aria-label="Trier : ${cur[2]}"><i class="sico s-${cur[0]}"></i></button>`;
 }
 // nombre de filtres actifs (le tri n'est pas compté)
-function colActive(){const f=UI.col;return f.cat.length+f.type.length+f.stars.length;}
+function colActive(){const f=UI.col;return f.cat.length+f.type.length+f.stars.length+(ACC.p?f.own.length:0);}
 function colCountTxt(){const n=colActive();return n?` <span class="fcount">${n}</span>`:'';}
 function renderCollection(){
   const bar=`<div class="colbar"><input data-col="q" type="search" placeholder="Rechercher une carte…" value="${esc(UI.col.q)}">
@@ -1367,10 +1373,10 @@ function colChk(key,label,opts,cls){
   return `<div class="fgroup ${cls||''}"><div class="flbl xo">${label}</div><div class="fchks">${opts.map(([v,t])=>`<label class="chk"><input type="checkbox" data-colchk="${key}:${v}" ${UI.col[key].includes(v)?'checked':''}><span>${t}</span></label>`).join('')}</div></div>`;
 }
 function renderColFilters(){
-  return `<div class="modal-bg" data-a="closecolf"><div class="modal fmodal"><h3 class="xo grp" style="margin:0 0 14px">Filtres</h3><div class="filters one">
+  return `<div class="modal-bg fbg"><div class="modal fmodal"><h3 class="xo grp" style="margin:0 0 14px">Filtres</h3><div class="filters one">
     ${colChk('cat','Catégorie',[['creature','Combattants'],['sort','Atouts'],['objet','Objets']])}
     ${colChk('type','Type',TYPE_ORDER.map(t=>[t,TYPES[t].name]),'t3')}
-    ${colChk('stars','Étoiles',[['P','✯'],['M','✯✯'],['G','✯✯✯']])}</div>
+    ${colChk('stars','Étoiles',[['P','✯'],['M','✯✯'],['G','✯✯✯']])}${ACC.p?colChk('own','Possession',[['oui','Possédées'],['non','Non possédées']]):''}</div>
     <div class="fbtns"><button class="ghost" data-a="colreset">Réinitialiser</button><button class="primary xo" data-a="closecolf">Voir les cartes</button></div></div></div>`;
 }
 
@@ -1573,18 +1579,22 @@ function checkReward(){
     toast(`Victoire : +${ECO.winCoins} pièces · +${ECO.winPoints} points`+(lv>before?` · Niveau ${lv} !`:''));render();});
 }
 const COIN='<span class="coin" aria-hidden="true">🪙</span>';
-function accField(key,label,type){const v=UI.af[key]||'';return `<label class="nfield accf"><span class="xo">${label}</span><input data-af="${key}" type="${type||'text'}" value="${type==='password'?'':esc(v)}" ${type==='password'?'autocomplete="current-password"':'maxlength="12" autocapitalize="characters" autocomplete="username"'} spellcheck="false"></label>`;}
-function startDeckPick(){return `<div class="sdecks">${ECO.startDecks.map(k=>`<button class="dtile ${UI.af.deck===k?'on':''}" style="--tc:${deckColor(k)}" data-a="afdeck:${k}"><div class="dt-name xo">${DECKS[k].name}</div><small>${esc(DECKS[k].style||'')}</small></button>`).join('')}</div>
-  <p class="muted cap">Tu pourras voir sa composition dans Collection › Decks.</p>`;}
+function accField(key,label,type){const v=UI.af[key]||'',pw=type==='password',show=pw&&UI.af.show;
+  return `<label class="nfield accf"><span class="xo">${label}</span><span class="accin"><input data-af="${key}" type="${show?'text':type||'text'}" value="${esc(v)}" ${pw?'autocomplete="new-password" autocapitalize="off"':'maxlength="12" autocapitalize="characters" autocomplete="username"'} spellcheck="false">${pw?`<button type="button" class="eye ghost" data-a="afshow" aria-label="${show?'Masquer':'Afficher'} le mot de passe">${show?'Masquer':'Voir'}</button>`:''}</span></label>`;}
+// Mot de passe : 6 caractères min., au moins un chiffre et une majuscule
+function pwProblem(pw){if(pw.length<6)return 'Le mot de passe doit faire au moins 6 caractères.';if(!/\d/.test(pw))return 'Le mot de passe doit contenir au moins un chiffre.';if(!/\p{Lu}/u.test(pw))return 'Le mot de passe doit contenir au moins une majuscule.';return '';}
+function startDeckPick(){const k=UI.af.deck;return `<div class="sdecks">${ECO.startDecks.map(d=>`<button class="dtile ${k===d?'on':''}" style="--tc:${deckColor(d)}" data-a="afdeck:${d}"><div class="dt-name xo">${DECKS[d].name}</div><small>${esc(DECKS[d].style||'')}</small></button>`).join('')}</div>
+  <div class="sdcompo"><h3 class="xo grp" style="color:${deckColor(k)}">Contenu du ${DECKS[k].name}</h3>${deckCompoHTML(k)}</div>`;}
 function accMsg(){return `${ACC.err?`<p class="accerr">${esc(ACC.err)}</p>`:''}${ACC.busy?'<p class="muted cap">Patiente…</p>':''}`;}
 function renderCompte(sub){
   const head=navHead('params',sub==='creer'?'Créer un compte':sub==='connexion'?'Connexion':'Compte');
   if(ACC.off) return `<div class="page ctr">${head}<div class="box sbox"><h3 class="xo">Bientôt disponible</h3><p class="muted cap">Le serveur des comptes n'est pas encore configuré. Tu joues en invité : toutes les cartes et tous les decks sont disponibles.</p></div></div>`;
   if(!ACC.ready) return `<div class="page ctr">${head}<p class="muted cap">Chargement…</p></div>`;
-  if(sub==='creer'&&!ACC.user) return `<div class="page ctr">${head}<div class="box sbox"><h3 class="xo">Ton compte</h3>${accField('name','Nom')}${accField('pass','Mot de passe','password')}${accField('pass2','Confirmer','password')}
-    <p class="muted cap">Nom : 3 à 12 lettres ou chiffres, unique. Mot de passe : 6 caractères minimum.</p></div>
-    <div class="box sbox"><h3 class="xo">Deck de départ</h3>${startDeckPick()}</div>${accMsg()}
-    <div class="setact"><button class="primary xo" data-a="acccreate" ${ACC.busy?'disabled':''}>Créer le compte</button></div></div>`;
+  if(sub==='creer'&&!ACC.user&&UI.af.step!==2) return `<div class="page ctr">${head}<div class="box sbox"><h3 class="xo">Ton compte</h3>${accField('name','Nom')}${accField('pass','Mot de passe','password')}${accField('pass2','Confirmer','password')}
+    <p class="muted cap">Nom : 3 à 12 lettres ou chiffres, unique.<br>Mot de passe : 6 caractères minimum, dont au moins un chiffre et une majuscule.</p></div>${accMsg()}
+    <div class="setact"><button class="primary xo" data-a="accnext" ${ACC.busy?'disabled':''}>Continuer</button></div></div>`;
+  if(sub==='creer'&&!ACC.user) return `<div class="page ctr">${head}<div class="box sbox"><h3 class="xo">Deck de départ</h3><p class="muted cap" style="margin:0 0 12px">${esc(cleanName(UI.af.name))}, choisis ton premier deck. Les autres s'achètent au Shop.</p>${startDeckPick()}</div>${accMsg()}
+    <div class="setact"><button class="primary xo" data-a="acccreate" ${ACC.busy?'disabled':''}>Créer le compte</button></div><p class="cap"><button class="ghost sbtn" data-a="accprev">Modifier le nom ou le mot de passe</button></p></div>`;
   if(sub==='connexion'&&!ACC.user) return `<div class="page ctr">${head}<div class="box sbox"><h3 class="xo">Connexion</h3>${accField('name','Nom')}${accField('pass','Mot de passe','password')}</div>${accMsg()}
     <div class="setact"><button class="primary xo" data-a="acclogin" ${ACC.busy?'disabled':''}>Se connecter</button></div></div>`;
   if(!ACC.user) return `<div class="page ctr">${head}<div class="box sbox"><h3 class="xo">Mode invité</h3><p class="muted cap">Toutes les cartes et tous les decks sont disponibles, mais tu ne gagnes ni pièces ni points.</p>
@@ -1595,19 +1605,23 @@ function renderCompte(sub){
   const p=ACC.p, L=levelOf(p.points), pct=Math.round(L.rest/L.need*100);
   return `<div class="page ctr">${head}<div class="box sbox accpro"><div class="accname xo">${esc(p.name)}</div>
       <div class="lvl"><span class="xo">Niveau ${L.lv}</span><span class="muted">${L.rest} / ${L.need} points</span></div><div class="lvbar"><i style="width:${pct}%"></i></div>
-      <div class="accstats"><div><b>${p.coins}</b><span>${COIN} Pièces</span></div><div><b>${p.points}</b><span>Points</span></div><div><b>${p.wins||0}</b><span>Victoires</span></div></div></div>
-    <div class="box sbox"><h3 class="xo">Mes decks</h3><div class="dtiles">${ownedDecks().map(k=>deckTile(k,`go:cartes:decks:${k}`)).join('')}</div></div>${accMsg()}
+      <div class="accstats two"><div><b>${p.coins}</b><span>${COIN} Pièces</span></div><div><b>${p.wins||0}</b><span>Victoires</span></div></div></div>${accMsg()}
     <p class="cap"><button class="ghost sbtn" data-a="acclogout">Se déconnecter</button></p></div>`;
 }
 function renderShop(){
   const head=navHead('params','Shop');
+  const vk=UI.nav.params[1];
+  if(vk&&DECKS[vk]&&ACC.p){const own=ownsDeck(vk),ok=ACC.p.coins>=ECO.deckPrice,ask=UI.buyAsk===vk;
+    const btn=own?'<p class="muted cap">Déjà possédé</p>':`<button class="${ask?'primary':ok?'buy':'off'} xo shopbig" data-a="buydeck:${vk}" ${ok?'':'disabled'}>${ask?'Confirmer l\'achat':`Acheter · ${ECO.deckPrice} ${COIN}`}</button>`;
+    return `<div class="page ctr"><div class="ptop"><h2 style="color:${deckColor(vk)}">${deckLabel(vk)}</h2><div class="right wallet">${COIN} <b>${ACC.p.coins}</b></div></div><button class="backbtn" data-a="back:params"><span class="bchev">‹</span> Retour</button>
+      <div style="margin-bottom:14px">${btn}</div>${deckCompoHTML(vk)}${accMsg()}</div>`;}
   if(!ACC.p) return `<div class="page ctr">${head}<div class="box sbox"><h3 class="xo">Réservé aux comptes</h3><p class="muted cap">En invité, tout est déjà disponible. Crée un compte pour gagner des pièces et acheter des decks.</p></div>
     <div class="accbtns"><button class="primary xo" data-a="go:params:compte">${ACC.off?'Voir le compte':'Créer un compte'}</button></div></div>`;
   const left=DECK_ORDER.filter(k=>!ownsDeck(k)), c=ACC.p.coins;
   const item=k=>{const ok=c>=ECO.deckPrice, ask=UI.buyAsk===k;return `<div class="shopit" style="--tc:${deckColor(k)}"><div><div class="dt-name xo">${DECKS[k].name}</div><small class="muted">${esc(DECKS[k].style||'')}</small>
-      <div><button class="ghost sbtn" data-a="go:cartes:decks:${k}">Voir les cartes</button></div></div>
+      <div><button class="ghost sbtn" data-a="go:params:shop:${k}">Voir les cartes</button></div></div>
       <button class="${ask?'primary':ok?'buy':'off'} xo" data-a="buydeck:${k}" ${ok?'':'disabled'}>${ask?'Confirmer':`${ECO.deckPrice} ${COIN}`}</button></div>`;};
-  return `<div class="page ctr">${head}<div class="wallet">${COIN} <b>${c}</b> pièces</div>
+  return `<div class="page ctr"><div class="ptop"><h2>Shop</h2><div class="right wallet">${COIN} <b>${c}</b></div></div><button class="backbtn" data-a="back:params"><span class="bchev">‹</span> Retour</button>
     ${left.length?DECK_GROUPS.map(([g,t])=>{const ks=left.filter(k=>DECKS[k].group===g);return ks.length?`<div class="dgroup"><h3 class="xo grp">${t}</h3>${ks.map(item).join('')}</div>`:'';}).join(''):'<div class="box sbox"><p class="muted cap">Tu as déjà tous les decks !</p></div>'}${accMsg()}</div>`;
 }
 /* ---- Combat : menus ---- */
@@ -1618,7 +1632,9 @@ function deckChoice(i){
 // Nom du joueur : étiquette à gauche, champ à droite
 // Nom : majuscules, lettres et chiffres uniquement, 12 caractères max
 function cleanName(v){return String(v||'').toUpperCase().replace(/[^\p{L}\p{N}]/gu,'').slice(0,12);}
-function nameField(i){return `<label class="nfield"><span class="xo">Nom</span><input id="nm${i}" value="${esc(UI.names[i])}" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>`;}
+function nameField(i){
+  if(ACC.p&&UI.nav.combat[0]==='versus'){UI.names[i]=ACC.p.name;return `<div class="nfield"><span class="xo">Nom</span><span class="accname2 xo">${esc(ACC.p.name)}</span></div>`;}
+  return `<label class="nfield"><span class="xo">Nom</span><input id="nm${i}" value="${esc(UI.names[i])}" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>`;}
 function resolveDeck(i){const o=ownedDecks();return UI.rand[i]?o[Math.floor(Math.random()*o.length)]:UI.pick[i];}
 function deckChooser(i){
   const cur=UI.rand[i]?null:UI.pick[i], base=UI.nav.combat.join(':');
@@ -2134,7 +2150,7 @@ function act(fn){UNDO.push(JSON.stringify(G));if(UNDO.length>300)UNDO.shift();fn
 function saveNames(){[0,1].forEach(i=>{const el=$('#nm'+i);if(el)UI.names[i]=cleanName(el.value)||(i?'JOUEUR2':'JOUEUR1');});}
 const H = {
   tab(t){UI.colf=false;UI.sortOpen=false;if(UI.tab!==t)UI.nav[UI.tab]=[];else if(!(t==='combat'&&G))UI.nav[t]=[];UI.tab=t;window.scrollTo(0,0);render();},
-  go(tab,...path){path=path.filter(x=>x&&typeof x==='string');saveNames();NET.err='';ACC.err='';UI.buyAsk=null;UI.nav[tab]=path;window.scrollTo(0,0);render();},
+  go(tab,...path){path=path.filter(x=>x&&typeof x==='string');saveNames();if(UI.nav[tab]&&UI.tab!==tab){UI.tab=tab;UI.colf=false;UI.sortOpen=false;}NET.err='';ACC.err='';UI.buyAsk=null;UI.nav[tab]=path;window.scrollTo(0,0);render();},
   back(tab){saveNames();NET.err='';UI.nav[tab].pop();window.scrollTo(0,0);render();},
   choosedeck(i,k){if(!DECKS[k]||!ownsDeck(k))return;UI.pick[+i]=k;UI.rand[+i]=false;const n=UI.nav.combat,di=n.findIndex(x=>/^deck[01]$/.test(x));if(di>=0)UI.nav.combat=n.slice(0,di);window.scrollTo(0,0);render();},
   chooserand(i){UI.rand[+i]=true;const n=UI.nav.combat,di=n.findIndex(x=>/^deck[01]$/.test(x));if(di>=0)UI.nav.combat=n.slice(0,di);window.scrollTo(0,0);render();},
@@ -2143,7 +2159,7 @@ const H = {
   detail(id){UI.detail=id;render();},
   colf(){UI.colf=true;render();},
   closecolf(_,e,el){if(el.classList.contains('modal-bg')&&e.target!==el)return;UI.colf=false;render();},
-  colreset(){Object.assign(UI.col,{cat:[],type:[],stars:[]});render();},
+  colreset(){Object.assign(UI.col,{cat:[],type:[],stars:[],own:[]});render();},
   sortmenu(){UI.sortOpen=!UI.sortOpen;const f=$('#sortfab');if(f)f.innerHTML=sortFab();},
   sortset(v){if(!COL_SORTS.some(x=>x[0]===v))return;UI.col.sort=v;UI.sortOpen=false;const g=$('#colgrid');if(g)g.innerHTML=colGridHTML();const f=$('#sortfab');if(f)f.innerHTML=sortFab();},
   close(_,e,el){if(el.classList.contains('modal-bg')&&e.target!==el)return;UI.detail=null;render();},
@@ -2206,15 +2222,20 @@ const H = {
   acc(i){document.querySelectorAll('.acc').forEach(a=>{const on=a.dataset.acc===String(i)&&!a.classList.contains('open');a.classList.toggle('open',on);a.querySelector('.acch').setAttribute('aria-expanded',on);
     if(on)setTimeout(()=>{const r=a.getBoundingClientRect();if(r.top<70||r.top>innerHeight*.5)window.scrollBy({top:r.top-80,behavior:'smooth'});},230);});},
   afdeck(k){if(ECO.startDecks.includes(k)){UI.af.deck=k;render();}},
-  acccreate(){const name=cleanName(UI.af.name),pw=UI.af.pass||'',pw2=UI.af.pass2||'',deck=UI.af.deck;
+  afshow(){UI.af.show=!UI.af.show;render();},
+  accprev(){UI.af.step=1;ACC.err='';render();},
+  accnext(){const name=cleanName(UI.af.name),pw=UI.af.pass||'',pw2=UI.af.pass2||'';
     if(name.length<3){ACC.err='Le nom doit faire au moins 3 caractères.';return render();}
-    if(pw.length<6){ACC.err='Le mot de passe doit faire au moins 6 caractères.';return render();}
+    const pb=pwProblem(pw);if(pb){ACC.err=pb;return render();}
     if(pw!==pw2){ACC.err='Les deux mots de passe sont différents.';return render();}
-    accRun(async()=>{const {data:free,error:e0}=await SB.rpc('name_available',{p_name:name});if(e0)throw e0;if(!free)throw new Error('duplicate');
+    accRun(async()=>{const {data:free,error}=await SB.rpc('name_available',{p_name:name});if(error)throw error;if(!free)throw new Error('duplicate');UI.af.step=2;window.scrollTo(0,0);});},
+  acccreate(){const name=cleanName(UI.af.name),pw=UI.af.pass||'',deck=UI.af.deck;
+    if(name.length<3||pwProblem(pw)){UI.af.step=1;return render();}
+    accRun(async()=>{const {data:free,error:e0}=await SB.rpc('name_available',{p_name:name});if(e0)throw e0;if(!free){UI.af.step=1;throw new Error('duplicate');}
       const {data,error}=await SB.auth.signUp({email:accEmail(name),password:pw});if(error)throw error;
       if(!data.session)throw new Error("Compte créé mais pas connecté : désactive « Confirm email » dans Supabase (Authentication › Providers › Email).");
       ACC.user=data.session.user;const r=await SB.rpc('create_profile',{p_name:name,p_deck:deck});if(r.error)throw r.error;setProfile(r.data);
-      UI.af={deck:'vague'};UI.nav.params=['compte'];toast('Compte créé, bienvenue '+name+' !');});},
+      UI.af={deck:'vague',step:1};UI.nav.params=['compte'];toast('Compte créé, bienvenue '+name+' !');});},
   acclogin(){const name=cleanName(UI.af.name),pw=UI.af.pass||'';if(!name||!pw){ACC.err='Entre ton nom et ton mot de passe.';return render();}
     accRun(async()=>{const {data,error}=await SB.auth.signInWithPassword({email:accEmail(name),password:pw});if(error)throw error;
       ACC.user=data.user;await loadProfile();UI.af={deck:'vague'};UI.nav.params=['compte'];if(ACC.p)toast('Connecté : '+ACC.p.name);});},
@@ -2268,7 +2289,10 @@ function dispatch(a,args,e,el){
 }
 document.addEventListener('click',e=>{
   if(DRAG.suppress){DRAG.suppress=false;e.preventDefault();e.stopPropagation();return;}
-  const el=e.target.closest('[data-a]'); if(!el||el.disabled) return;
+  const el=e.target.closest('[data-a]');
+  if(UI.buyAsk&&!(el&&el.dataset.a==='buydeck:'+UI.buyAsk)){UI.buyAsk=null;if(!el||el.disabled){render();return;}}
+  if(UI.colf&&!e.target.closest('.fmodal')&&!(el&&el.dataset.a==='colf')){UI.colf=false;render();e.preventDefault();e.stopPropagation();return;}
+  if(!el||el.disabled) return;
   const [a,...args]=el.dataset.a.split(':');
   dispatch(a,args.map(String),e,el);
 },true);
