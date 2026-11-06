@@ -276,11 +276,11 @@ details summary{cursor:pointer;font-weight:700}
 .grid.c4 .card .cnt{top:-7px;right:-5px;font-size:10px;padding:0 5px}
 .grid.c4 .card{overflow:visible}
 .dt-name.xo{font-size:20px}
-.card.nown{filter:grayscale(1) brightness(.55)}.dtile.nown{filter:saturate(.55) brightness(.78);opacity:.72}
+.card.nown{filter:grayscale(1) brightness(.55)}.dtile.nown{filter:saturate(.55) brightness(.78);opacity:.72}.dtile.nown .dt-name{color:#6b7180}
 .coin{font-style:normal}
-.accf{margin:0 0 10px}.accf{min-width:0}.accf>span.xo{flex:0 0 96px;font-size:12.5px}.nfield .accin{flex:1 1 0;position:relative;min-width:0;display:block;padding:0;text-transform:none;letter-spacing:0;font-size:inherit}.accin input{width:100%;box-sizing:border-box}.accin input[data-af^=pass]{padding-right:76px}.eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);padding:5px 9px;font-size:12px;border:0;background:var(--panel2)}
+.accf{margin:0 0 10px}.accf{min-width:0}.accf>span.xo{flex:0 0 auto;font-size:12.5px;white-space:nowrap}.nfield .accin{flex:1 1 0;position:relative;min-width:0;display:block;padding:0;text-transform:none;letter-spacing:0;font-size:inherit}.accin input{width:100%;box-sizing:border-box}.accin input[data-af^=pass]{padding-right:76px}.eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);padding:5px 9px;font-size:12px;border:0;background:var(--panel2)}
 .accstats.two{grid-template-columns:1fr 1fr}.accname2{font-size:19px;padding:6px 2px}
-.sdcompo{margin-top:16px;padding-top:4px;border-top:1px solid var(--line)}.sdcompo h3.grp{font-size:18px;margin:14px 0 6px}
+.sdcompo .grid.c4{grid-template-columns:repeat(3,1fr)}.sdcompo{margin-top:16px;padding-top:4px;border-top:1px solid var(--line)}.sdcompo h3.grp{font-size:18px;margin:14px 0 6px}
 .accerr{color:#ffb3b3;text-align:center;margin:12px 0 0}
 .cap{text-align:center;margin:8px 0 0}
 .accbtns{display:flex;flex-direction:column;gap:10px;max-width:320px;margin:18px auto 0}.accbtns button{padding:12px;font-size:16px}
@@ -292,7 +292,7 @@ details summary{cursor:pointer;font-weight:700}
 .shopbig{padding:12px 22px;font-size:16px}
 .wallet{display:inline-block;margin:0;padding:6px 12px;border-radius:20px;background:var(--panel);border:1px solid var(--line);font-size:15px}
 .shopit{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;margin-bottom:10px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--tc);text-align:left}
-.shopit .dt-name{font-size:19px}.shopit small{display:block;margin:2px 0 6px}
+.shopit .dt-name{font-size:19px;margin-bottom:6px}.shopit small{display:block;margin:2px 0 6px}
 .shopit>button{flex:none;min-width:96px;padding:10px 12px;font-size:16px}.shopit>button.buy{background:#2b3346;border-color:#4a5674}.shopit>button.off{background:#262a34;color:#7d8597}
 .dgroup{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:4px 14px 16px;margin:0 0 16px}
 .dgroup h3.grp{margin:12px 0 12px}
@@ -301,7 +301,7 @@ details summary{cursor:pointer;font-weight:700}
 .fbtn{align-self:stretch;padding:9px 12px;font-weight:700}
 .fcount{display:inline-block;min-width:18px;padding:0 6px;margin-left:6px;border-radius:9px;background:var(--accent);color:#1a1a1a;font-size:11.5px;line-height:18px}
 .fmodal{max-width:420px;padding-bottom:28px}
-.modal-bg.fbg{pointer-events:none}.fbg .fmodal{pointer-events:auto}
+.modal-bg.fbg{touch-action:none;overscroll-behavior:contain}.fbg .fmodal{touch-action:none}.fbg .fmodal{pointer-events:auto}
 .fmodal .filters{margin-bottom:16px}
 .fbtns{display:flex;gap:8px;justify-content:center}
 .filters{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:0 0 12px;text-align:left}
@@ -591,7 +591,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.22.0';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.22.3';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1348,7 +1348,7 @@ function colCards(){
 function colGridHTML(){
   const cs=colCards();
   const own=ACC.p?cs.filter(c=>ownsCard(c.id)).length:null;
-  return `<p class="muted" style="margin:0 0 10px">${own!=null?`${own}/${cs.length}`:cs.length} carte${s_(cs.length)}${own!=null?' possédée'+s_(own):''}</p>`+
+  return `<p class="muted" style="margin:0 0 10px">${own!=null?`${own}/${cs.length}`:cs.length} carte${s_(cs.length)}</p>`+
     (cs.length?`<div class="grid compact">${cs.map(c=>cardHTML(c.id,{cls:'click'+(ownsCard(c.id)?'':' nown'),attrs:`data-a="detail:${c.id}"`})).join('')}</div>`:'<p class="muted">Aucune carte ne correspond.</p>');
 }
 function colSel(key,label,opts){const f=UI.col;return `<label>${label}<select data-col="${key}">${opts.map(([v,t])=>`<option value="${v}" ${f[key]===v?'selected':''}>${t}</option>`).join('')}</select></label>`;}
@@ -1373,10 +1373,10 @@ function colChk(key,label,opts,cls){
   return `<div class="fgroup ${cls||''}"><div class="flbl xo">${label}</div><div class="fchks">${opts.map(([v,t])=>`<label class="chk"><input type="checkbox" data-colchk="${key}:${v}" ${UI.col[key].includes(v)?'checked':''}><span>${t}</span></label>`).join('')}</div></div>`;
 }
 function renderColFilters(){
-  return `<div class="modal-bg fbg"><div class="modal fmodal"><h3 class="xo grp" style="margin:0 0 14px">Filtres</h3><div class="filters one">
+  return `<div class="modal-bg fbg" data-a="closecolf"><div class="modal fmodal"><h3 class="xo grp" style="margin:0 0 14px">Filtres</h3><div class="filters one">
+    ${colChk('stars','Étoiles',[['P','✯'],['M','✯✯'],['G','✯✯✯']])}
     ${colChk('cat','Catégorie',[['creature','Combattants'],['sort','Atouts'],['objet','Objets']])}
-    ${colChk('type','Type',TYPE_ORDER.map(t=>[t,TYPES[t].name]),'t3')}
-    ${colChk('stars','Étoiles',[['P','✯'],['M','✯✯'],['G','✯✯✯']])}${ACC.p?colChk('own','Possession',[['oui','Possédées'],['non','Non possédées']]):''}</div>
+    ${colChk('type','Type',TYPE_ORDER.map(t=>[t,TYPES[t].name]),'t3')}${ACC.p?colChk('own','Possession',[['oui','Possédées'],['non','Non possédées']]):''}</div>
     <div class="fbtns"><button class="ghost" data-a="colreset">Réinitialiser</button><button class="primary xo" data-a="closecolf">Voir les cartes</button></div></div></div>`;
 }
 
@@ -1583,7 +1583,7 @@ function accField(key,label,type){const v=UI.af[key]||'',pw=type==='password',sh
   return `<label class="nfield accf"><span class="xo">${label}</span><span class="accin"><input data-af="${key}" type="${show?'text':type||'text'}" value="${esc(v)}" ${pw?'autocomplete="new-password" autocapitalize="off"':'maxlength="12" autocapitalize="characters" autocomplete="username"'} spellcheck="false">${pw?`<button type="button" class="eye ghost" data-a="afshow" aria-label="${show?'Masquer':'Afficher'} le mot de passe">${show?'Masquer':'Voir'}</button>`:''}</span></label>`;}
 // Mot de passe : 6 caractères min., au moins un chiffre et une majuscule
 function pwProblem(pw){if(pw.length<6)return 'Le mot de passe doit faire au moins 6 caractères.';if(!/\d/.test(pw))return 'Le mot de passe doit contenir au moins un chiffre.';if(!/\p{Lu}/u.test(pw))return 'Le mot de passe doit contenir au moins une majuscule.';return '';}
-function startDeckPick(){const k=UI.af.deck;return `<div class="sdecks">${ECO.startDecks.map(d=>`<button class="dtile ${k===d?'on':''}" style="--tc:${deckColor(d)}" data-a="afdeck:${d}"><div class="dt-name xo">${DECKS[d].name}</div><small>${esc(DECKS[d].style||'')}</small></button>`).join('')}</div>
+function startDeckPick(){const k=UI.af.deck;return `<div class="sdecks">${ECO.startDecks.map(d=>`<button class="dtile ${k===d?'on':''}" style="--tc:${deckColor(d)}" data-a="afdeck:${d}"><div class="dt-name xo">${DECKS[d].name}</div></button>`).join('')}</div>
   <div class="sdcompo"><h3 class="xo grp" style="color:${deckColor(k)}">Contenu du ${DECKS[k].name}</h3>${deckCompoHTML(k)}</div>`;}
 function accMsg(){return `${ACC.err?`<p class="accerr">${esc(ACC.err)}</p>`:''}${ACC.busy?'<p class="muted cap">Patiente…</p>':''}`;}
 function renderCompte(sub){
@@ -1593,8 +1593,8 @@ function renderCompte(sub){
   if(sub==='creer'&&!ACC.user&&UI.af.step!==2) return `<div class="page ctr">${head}<div class="box sbox"><h3 class="xo">Ton compte</h3>${accField('name','Nom')}${accField('pass','Mot de passe','password')}${accField('pass2','Confirmer','password')}
     <p class="muted cap">Nom : 3 à 12 lettres ou chiffres, unique.<br>Mot de passe : 6 caractères minimum, dont au moins un chiffre et une majuscule.</p></div>${accMsg()}
     <div class="setact"><button class="primary xo" data-a="accnext" ${ACC.busy?'disabled':''}>Continuer</button></div></div>`;
-  if(sub==='creer'&&!ACC.user) return `<div class="page ctr">${head}<div class="box sbox"><h3 class="xo">Deck de départ</h3><p class="muted cap" style="margin:0 0 12px">${esc(cleanName(UI.af.name))}, choisis ton premier deck. Les autres s'achètent au Shop.</p>${startDeckPick()}</div>${accMsg()}
-    <div class="setact"><button class="primary xo" data-a="acccreate" ${ACC.busy?'disabled':''}>Créer le compte</button></div><p class="cap"><button class="ghost sbtn" data-a="accprev">Modifier le nom ou le mot de passe</button></p></div>`;
+  if(sub==='creer'&&!ACC.user) return `<div class="page ctr">${head}<div class="box sbox"><h3 class="xo">Deck de départ</h3><p class="muted cap" style="margin:0 0 12px">${esc(cleanName(UI.af.name))}, choisis ton premier deck.</p>${startDeckPick()}</div>${accMsg()}
+    <div class="setact"><button class="primary xo" data-a="acccreate" ${ACC.busy?'disabled':''}>Créer le compte</button></div></div>`;
   if(sub==='connexion'&&!ACC.user) return `<div class="page ctr">${head}<div class="box sbox"><h3 class="xo">Connexion</h3>${accField('name','Nom')}${accField('pass','Mot de passe','password')}</div>${accMsg()}
     <div class="setact"><button class="primary xo" data-a="acclogin" ${ACC.busy?'disabled':''}>Se connecter</button></div></div>`;
   if(!ACC.user) return `<div class="page ctr">${head}<div class="box sbox"><h3 class="xo">Mode invité</h3><p class="muted cap">Toutes les cartes et tous les decks sont disponibles, mais tu ne gagnes ni pièces ni points.</p>
@@ -1618,7 +1618,7 @@ function renderShop(){
   if(!ACC.p) return `<div class="page ctr">${head}<div class="box sbox"><h3 class="xo">Réservé aux comptes</h3><p class="muted cap">En invité, tout est déjà disponible. Crée un compte pour gagner des pièces et acheter des decks.</p></div>
     <div class="accbtns"><button class="primary xo" data-a="go:params:compte">${ACC.off?'Voir le compte':'Créer un compte'}</button></div></div>`;
   const left=DECK_ORDER.filter(k=>!ownsDeck(k)), c=ACC.p.coins;
-  const item=k=>{const ok=c>=ECO.deckPrice, ask=UI.buyAsk===k;return `<div class="shopit" style="--tc:${deckColor(k)}"><div><div class="dt-name xo">${DECKS[k].name}</div><small class="muted">${esc(DECKS[k].style||'')}</small>
+  const item=k=>{const ok=c>=ECO.deckPrice, ask=UI.buyAsk===k;return `<div class="shopit" style="--tc:${deckColor(k)}"><div><div class="dt-name xo">${DECKS[k].name}</div>
       <div><button class="ghost sbtn" data-a="go:params:shop:${k}">Voir les cartes</button></div></div>
       <button class="${ask?'primary':ok?'buy':'off'} xo" data-a="buydeck:${k}" ${ok?'':'disabled'}>${ask?'Confirmer':`${ECO.deckPrice} ${COIN}`}</button></div>`;};
   return `<div class="page ctr"><div class="ptop"><h2>Shop</h2><div class="right wallet">${COIN} <b>${c}</b></div></div><button class="backbtn" data-a="back:params"><span class="bchev">‹</span> Retour</button>
@@ -1633,7 +1633,7 @@ function deckChoice(i){
 // Nom : majuscules, lettres et chiffres uniquement, 12 caractères max
 function cleanName(v){return String(v||'').toUpperCase().replace(/[^\p{L}\p{N}]/gu,'').slice(0,12);}
 function nameField(i){
-  if(ACC.p&&UI.nav.combat[0]==='versus'){UI.names[i]=ACC.p.name;return `<div class="nfield"><span class="xo">Nom</span><span class="accname2 xo">${esc(ACC.p.name)}</span></div>`;}
+  if(ACC.p&&UI.nav.combat[0]==='versus'){UI.names[i]=ACC.p.name;return '';}
   return `<label class="nfield"><span class="xo">Nom</span><input id="nm${i}" value="${esc(UI.names[i])}" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>`;}
 function resolveDeck(i){const o=ownedDecks();return UI.rand[i]?o[Math.floor(Math.random()*o.length)]:UI.pick[i];}
 function deckChooser(i){
@@ -2151,7 +2151,8 @@ function saveNames(){[0,1].forEach(i=>{const el=$('#nm'+i);if(el)UI.names[i]=cle
 const H = {
   tab(t){UI.colf=false;UI.sortOpen=false;if(UI.tab!==t)UI.nav[UI.tab]=[];else if(!(t==='combat'&&G))UI.nav[t]=[];UI.tab=t;window.scrollTo(0,0);render();},
   go(tab,...path){path=path.filter(x=>x&&typeof x==='string');saveNames();if(UI.nav[tab]&&UI.tab!==tab){UI.tab=tab;UI.colf=false;UI.sortOpen=false;}NET.err='';ACC.err='';UI.buyAsk=null;UI.nav[tab]=path;window.scrollTo(0,0);render();},
-  back(tab){saveNames();NET.err='';UI.nav[tab].pop();window.scrollTo(0,0);render();},
+  back(tab){if(tab==='params'&&UI.nav.params[0]==='compte'&&UI.nav.params.length>1){UI.af={deck:'vague',step:1};ACC.err='';UI.nav.params=['compte'];window.scrollTo(0,0);return render();}
+    saveNames();NET.err='';UI.nav[tab].pop();window.scrollTo(0,0);render();},
   choosedeck(i,k){if(!DECKS[k]||!ownsDeck(k))return;UI.pick[+i]=k;UI.rand[+i]=false;const n=UI.nav.combat,di=n.findIndex(x=>/^deck[01]$/.test(x));if(di>=0)UI.nav.combat=n.slice(0,di);window.scrollTo(0,0);render();},
   chooserand(i){UI.rand[+i]=true;const n=UI.nav.combat,di=n.findIndex(x=>/^deck[01]$/.test(x));if(di>=0)UI.nav.combat=n.slice(0,di);window.scrollTo(0,0);render();},
   pickrand(i){saveNames();UI.rand[+i]=!UI.rand[+i];render();},
@@ -2291,7 +2292,6 @@ document.addEventListener('click',e=>{
   if(DRAG.suppress){DRAG.suppress=false;e.preventDefault();e.stopPropagation();return;}
   const el=e.target.closest('[data-a]');
   if(UI.buyAsk&&!(el&&el.dataset.a==='buydeck:'+UI.buyAsk)){UI.buyAsk=null;if(!el||el.disabled){render();return;}}
-  if(UI.colf&&!e.target.closest('.fmodal')&&!(el&&el.dataset.a==='colf')){UI.colf=false;render();e.preventDefault();e.stopPropagation();return;}
   if(!el||el.disabled) return;
   const [a,...args]=el.dataset.a.split(':');
   dispatch(a,args.map(String),e,el);
@@ -2406,6 +2406,10 @@ document.addEventListener('change',e=>{if(e.target.closest('[data-col]')){colUpd
     const g=$('#colgrid');if(g)g.innerHTML=colGridHTML();const c=$('#fcount');if(c)c.innerHTML=colCountTxt();return;}const o=e.target.closest('[data-opt]');if(o)UI[o.dataset.opt]=o.checked;});
 function colUpdate(e){const el=e.target.closest('[data-col]');if(!el)return false;UI.col[el.dataset.col]=el.value;const g=$('#colgrid');if(g)g.innerHTML=colGridHTML();const c=$('#fcount');if(c)c.innerHTML=colCountTxt();return true;}
 document.addEventListener('input',e=>{if(e.target.dataset&&e.target.dataset.af){const el=e.target,k=el.dataset.af;if(k==='name'){const v=cleanName(el.value);if(v!==el.value)el.value=v;}UI.af[k]=el.value;return;}if(/^nm[01]$/.test(e.target.id||'')){const el=e.target,v=cleanName(el.value);if(v!==el.value){const pos=Math.min(v.length,el.selectionStart||v.length);el.value=v;try{el.setSelectionRange(pos,pos);}catch(_){}}return;}if(colUpdate(e))return;const n=e.target.closest('[data-note]');if(n&&HIST[+n.dataset.note])HIST[+n.dataset.note].notes=n.value;});
+// Fenêtre Filtres ouverte : la collection derrière ne bouge pas
+document.addEventListener('wheel',e=>{if(UI.colf&&UI.tab==='cartes')e.preventDefault();},{passive:false});
+document.addEventListener('touchmove',e=>{if(UI.colf&&UI.tab==='cartes')e.preventDefault();},{passive:false});
+
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&UI.colf){UI.colf=false;render();return;}if(e.key==='Escape'&&(UI.detail||UI.exportText!==null||UI.sheet||UI.mmodal||UI.gmenu)){UI.detail=null;UI.exportText=null;UI.sheet=null;UI.mmodal=null;UI.gmenu=false;render();}});
 /* =========================================================
    RÉSEAU (en ligne, 2 appareils) — PeerJS, l'hôte est l'arbitre
