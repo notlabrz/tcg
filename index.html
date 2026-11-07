@@ -33,18 +33,18 @@ button.primary{background:var(--accent);color:#1a1400;border-color:var(--accent)
 button.ghost{background:transparent}
 input,select,textarea{font:inherit;color:inherit;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
 header{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:18px;padding:calc(10px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right)) 10px calc(18px + env(safe-area-inset-left));background:#0d0f13;border-bottom:1px solid var(--line)}
-.hacc{display:flex;align-items:center;gap:9px;background:none;border:0;padding:0;margin:0;min-width:0;color:var(--text);text-align:left;cursor:pointer;border-radius:0}
+.hacc{display:flex;flex-direction:row-reverse;margin-left:auto!important;align-items:center;gap:9px;background:none;border:0;padding:0;margin:0;min-width:0;color:var(--text);text-align:left;cursor:pointer;border-radius:0}
 .hacc:hover{background:none}
 .havatar{flex:none;width:34px;height:34px;border-radius:50%;background:var(--panel2) center/cover;border:2px solid var(--line);display:grid;place-items:center;color:#5b6273;overflow:hidden}
 .havatar svg{width:20px;height:20px}
 .hacc.on .havatar{border-color:var(--accent)}
-.hinfo{display:flex;flex-direction:column;gap:3px;min-width:0}
+.hinfo{display:flex;flex-direction:column;align-items:flex-end;gap:3px;min-width:0;text-align:right}
 .hname{font-size:13px;font-weight:800;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
-.hlv{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--muted);line-height:1}
+.hlv{display:flex;flex-direction:row-reverse;align-items:center;gap:6px;font-size:10.5px;color:var(--muted);line-height:1}
 .hlv b{color:var(--accent);font-weight:800;white-space:nowrap}
 .hbar{width:84px;height:6px;border-radius:4px;background:var(--panel2);border:1px solid var(--line);overflow:hidden}.hbar i{display:block;height:100%;background:var(--accent)}
 .hguest{font-size:13px;color:var(--muted);font-weight:700}
-header h1{margin:0 0 0 auto;font-size:17px;letter-spacing:3px;white-space:nowrap}
+header h1{margin:0;font-size:17px;letter-spacing:3px;white-space:nowrap}
 header h1 span{color:#3b8ff0}
 .tabs{display:flex;gap:6px}
 .tabs button{border-radius:999px;padding:6px 18px}
@@ -295,6 +295,10 @@ details summary{cursor:pointer;font-weight:700}
 .accbtns{display:flex;flex-direction:column;gap:10px;max-width:320px;margin:18px auto 0}.accbtns button{padding:12px;font-size:16px}
 .sdecks{display:grid;grid-template-columns:1fr 1fr;gap:10px}.sdecks .dtile small{display:block;font-size:11.5px;color:var(--muted);margin-top:4px;font-weight:500}
 .accpro{text-align:center}.accname{font-size:30px;margin:2px 0 12px}
+.pavatar{width:92px;height:92px;margin:4px auto 10px;border-radius:50%;background:var(--panel2);border:3px solid var(--accent);display:grid;place-items:center;color:#5b6273}.pavatar svg{width:52px;height:52px}
+.accline{display:flex;justify-content:space-between;align-items:center;background:var(--panel2);border-radius:10px;padding:11px 14px;margin-top:10px;font-size:14px}.accline span{color:var(--muted)}.accline b{font-size:20px}
+.accline.coins{margin-top:16px}.accline.coins b{color:var(--accent)}
+.accrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .lvl{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;margin-bottom:6px}.lvl .xo{font-size:18px}
 .lvbar{height:10px;border-radius:6px;background:var(--bg);border:1px solid var(--line);overflow:hidden}.lvbar i{display:block;height:100%;background:var(--accent);border-radius:6px}
 .accstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}.accstats div{background:var(--panel2);border-radius:10px;padding:10px 4px}.accstats b{display:block;font-size:22px}.accstats span{font-size:12px;color:var(--muted)}
@@ -584,8 +588,8 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 </head>
 <body>
 <header>
-  <button id="hacc" class="hacc" data-a="go:params:compte" aria-label="Compte"></button>
   <h1>DC <span>TCG</span></h1>
+  <button id="hacc" class="hacc" data-a="go:params:compte" aria-label="Compte"></button>
 </header>
 <main id="app"></main>
 <nav class="bottombar">
@@ -601,7 +605,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.23.0';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.24.0';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1262,7 +1266,7 @@ function render(){
   if(typeof DRAG!=='undefined'&&DRAG.on){DRAG.later=true;return;} // pas de rendu pendant un glisser (il est fait au lâcher)
   if(typeof hidePop==='function') hidePop();
   if(typeof checkReward==='function') checkReward();
-  const ha=$('#hacc'); if(ha&&typeof levelOf==='function'){const av='<span class="havatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8.5" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></span>';
+  const ha=$('#hacc'); if(ha&&typeof levelOf==='function'){const av=`<span class="havatar">${AVATAR_SVG}</span>`;
     if(ACC.p){const L=levelOf(ACC.p.points);ha.className='hacc on';ha.innerHTML=`${av}<span class="hinfo"><span class="hname">${esc(ACC.p.name)}</span><span class="hlv"><b>Niv. ${L.lv}</b><span class="hbar"><i style="width:${Math.round(L.rest/L.need*100)}%"></i></span></span></span>`;}
     else{ha.className='hacc';ha.innerHTML=`${av}<span class="hguest">Compte invité</span>`;}}
   document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===UI.tab));
@@ -1585,12 +1589,14 @@ async function loadProfile(){if(!SB||!ACC.user)return;const {data,error}=await S
 async function accRun(fn){if(ACC.busy)return;ACC.busy=true;ACC.err='';render();try{await fn();}catch(e){ACC.err=accErr(e);}ACC.busy=false;render();}
 // Victoire en Versus en ligne : +50 pièces, +100 points (une seule fois par match)
 function checkReward(){
-  if(!SB||!ACC.p||!G||!G.online||G.phase!=='matchover'||G.lastWinner!==MY_SEAT) return;
+  if(!SB||!ACC.p||!G||!G.online||G.phase!=='matchover') return;
   const key=[G.start,G.round,G.names.join('|')].join(':'); if(ACC.rewarded.has(key)) return; ACC.rewarded.add(key);
+  if(G.lastWinner!==MY_SEAT){SB.rpc('record_loss',{p_match:key}).then(({data,error})=>{if(!error&&data){setProfile(data);render();}});return;}
   const before=levelOf(ACC.p.points).lv;
   SB.rpc('record_win',{p_match:key}).then(({data,error})=>{if(error)return;setProfile(data);const lv=levelOf(data.points).lv;
     toast(`Victoire : +${ECO.winCoins} pièces · +${ECO.winPoints} points`+(lv>before?` · Niveau ${lv} !`:''));render();});
 }
+const AVATAR_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8.5" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>';
 const COIN='<span class="coin" aria-hidden="true">🪙</span>';
 function accField(key,label,type){const v=UI.af[key]||'',pw=type==='password',show=pw&&UI.af.show;
   return `<label class="nfield accf"><span class="xo">${label}</span><span class="accin"><input data-af="${key}" type="${show?'text':type||'text'}" value="${esc(v)}" ${pw?'autocomplete="new-password" autocapitalize="off"':'maxlength="12" autocapitalize="characters" autocomplete="username"'} spellcheck="false">${pw?`<button type="button" class="eye ghost" data-a="afshow" aria-label="${show?'Masquer':'Afficher'} le mot de passe">${show?'Masquer':'Voir'}</button>`:''}</span></label>`;}
@@ -1616,9 +1622,10 @@ function renderCompte(sub){
   if(!ACC.p) return `<div class="page ctr">${head}<div class="box sbox"><h3 class="xo">Deck de départ</h3><p class="muted cap">Dernière étape : choisis ton deck de départ.</p>${startDeckPick()}</div>${accMsg()}
     <div class="setact"><button class="primary xo" data-a="accfinish" ${ACC.busy?'disabled':''}>Valider</button></div><p class="cap"><button class="ghost sbtn" data-a="acclogout">Se déconnecter</button></p></div>`;
   const p=ACC.p, L=levelOf(p.points), pct=Math.round(L.rest/L.need*100);
-  return `<div class="page ctr">${head}<div class="box sbox accpro"><div class="accname xo">${esc(p.name)}</div>
+  return `<div class="page ctr">${head}<div class="box sbox accpro"><div class="pavatar">${AVATAR_SVG}</div><div class="accname xo">${esc(p.name)}</div>
       <div class="lvl"><span class="xo">Niveau ${L.lv}</span><span class="muted">${L.rest} / ${L.need} points</span></div><div class="lvbar"><i style="width:${pct}%"></i></div>
-      <div class="accstats two"><div><b>${p.coins}</b><span>${COIN} Pièces</span></div><div><b>${p.wins||0}</b><span>Victoires</span></div></div></div>${accMsg()}
+      <div class="accline coins"><span>${COIN} Pièces</span><b>${p.coins}</b></div>
+      <div class="accrow"><div class="accline"><span>Victoires</span><b>${p.wins||0}</b></div><div class="accline"><span>Défaites</span><b>${p.losses||0}</b></div></div></div>${accMsg()}
     <p class="cap"><button class="ghost sbtn" data-a="acclogout">Se déconnecter</button></p></div>`;
 }
 function renderShop(){
