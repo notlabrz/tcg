@@ -297,7 +297,15 @@ details summary{cursor:pointer;font-weight:700}
 .accpro{text-align:center}.accname{font-size:30px;margin:2px 0 12px}
 .pavatar{width:92px;height:92px;margin:4px auto 10px;border-radius:50%;background:var(--panel2);border:3px solid var(--accent);display:grid;place-items:center;color:#5b6273}.pavatar svg{width:52px;height:52px}
 .accline{display:flex;justify-content:space-between;align-items:center;background:var(--panel2);border-radius:10px;padding:11px 14px;margin-top:10px;font-size:14px}.accline span{color:var(--muted)}.accline b{font-size:20px}
-.accline.coins{margin-top:16px}.accline.coins b{color:var(--accent)}
+.accline.coins{margin-top:16px}.accline b.ac{color:var(--accent)}.accline b small{font-size:.6em;color:var(--muted);font-weight:600}
+.sxcnt{font-size:14px;font-style:normal;margin-left:4px}
+.achs{display:flex;flex-direction:column;gap:8px;text-align:left}
+.ach{display:flex;align-items:center;gap:10px;background:var(--panel2);border-radius:10px;padding:9px 12px}
+.abadge{flex:none;width:30px;height:30px;border-radius:50%;border:2px dashed #3d4352;display:grid;place-items:center;font-size:15px;color:#1a1400}
+.ach.ok .abadge{border:0;background:var(--accent)}
+.ainfo{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}.atit{font-size:13.5px;font-weight:600}.ach:not(.ok) .atit{color:#aab0bd}
+.abar{height:5px;border-radius:3px;background:var(--bg);overflow:hidden}.abar i{display:block;height:100%;background:var(--accent)}.ach.ok .abar{display:none}
+.aval{flex:none;font-size:12.5px;color:var(--muted);font-weight:700}.ach.ok .aval{color:var(--accent)}
 .accrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .lvl{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;margin-bottom:6px}.lvl .xo{font-size:18px}
 .lvbar{height:10px;border-radius:6px;background:var(--bg);border:1px solid var(--line);overflow:hidden}.lvbar i{display:block;height:100%;background:var(--accent);border-radius:6px}
@@ -605,7 +613,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.24.3';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.25.0';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1597,6 +1605,16 @@ function checkReward(){
     toast(`Victoire : +${ECO.winCoins} pièces · +${ECO.winPoints} points`+(lv>before?` · Niveau ${lv} !`:''));render();});
 }
 const AVATAR_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8.5" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>';
+// Succès : défis à atteindre (récompenses à définir)
+const ACHIEVEMENTS=[
+  {k:'decks',n:3,t:'Obtenir 3 decks'},{k:'decks',n:5,t:'Obtenir 5 decks'},{k:'decks',n:8,t:'Obtenir 8 decks'},
+  {k:'cards',n:30,t:'Obtenir 30 cartes'},{k:'cards',n:50,t:'Obtenir 50 cartes'},{k:'cards',n:80,t:'Obtenir 80 cartes'},
+  {k:'wins',n:1,t:'1 victoire en Versus'},{k:'wins',n:5,t:'5 victoires en Versus'},{k:'wins',n:8,t:'8 victoires en Versus'},{k:'wins',n:15,t:'15 victoires en Versus'},
+  {k:'streak',n:3,t:"3 victoires d'affilée"},{k:'streak',n:5,t:"5 victoires d'affilée"},{k:'streak',n:8,t:"8 victoires d'affilée"}];
+function ownedCardCount(){return Object.keys(CARDS).filter(ownsCard).length;}
+function achVal(a,p){return a.k==='decks'?p.decks.length:a.k==='cards'?ownedCardCount():a.k==='wins'?(p.wins||0):(p.best_streak||0);}
+function achHTML(p){return `<div class="achs">${ACHIEVEMENTS.map(a=>{const v=Math.min(achVal(a,p),a.n),ok=v>=a.n;
+  return `<div class="ach ${ok?'ok':''}"><span class="abadge">${ok?'★':''}</span><span class="ainfo"><span class="atit">${a.t}</span><span class="abar"><i style="width:${Math.round(v/a.n*100)}%"></i></span></span><span class="aval">${ok?'Obtenu':`${v}/${a.n}`}</span></div>`;}).join('')}</div>`;}
 const COIN='<span class="coin" aria-hidden="true">🪙</span>';
 function accField(key,label,type){const v=UI.af[key]||'',pw=type==='password',show=pw&&UI.af.show;
   return `<label class="nfield accf"><span class="xo">${label}</span><span class="accin"><input data-af="${key}" type="${show?'text':type||'text'}" value="${esc(v)}" ${pw?'autocomplete="new-password" autocapitalize="off"':'maxlength="12" autocapitalize="characters" autocomplete="username"'} spellcheck="false">${pw?`<button type="button" class="eye ghost" data-a="afshow" aria-label="${show?'Masquer':'Afficher'} le mot de passe">${show?'Masquer':'Voir'}</button>`:''}</span></label>`;}
@@ -1622,8 +1640,10 @@ function renderCompte(sub){
   const p=ACC.p, L=levelOf(p.points), pct=Math.round(L.rest/L.need*100);
   return `<div class="page ctr">${head}<div class="box sbox accpro"><div class="pavatar">${AVATAR_SVG}</div><div class="accname xo">${esc(p.name)}</div>
       <div class="lvl"><span class="xo">Niveau ${L.lv}</span><span class="muted">${L.rest} / ${L.need} points</span></div><div class="lvbar"><i style="width:${pct}%"></i></div>
-      <div class="accline coins"><span>${COIN} Pièces</span><b>${p.coins}</b></div>
-      <div class="accrow"><div class="accline"><span>Victoires</span><b>${p.wins||0}</b></div><div class="accline"><span>Défaites</span><b>${p.losses||0}</b></div></div></div>${accMsg()}
+      <div class="accline coins"><span>Cartes possédées</span><b class="wh">${ownedCardCount()}<small>/${Object.keys(CARDS).length}</small></b></div>
+      <div class="accline"><span>${COIN} Pièces</span><b class="ac">${p.coins}</b></div>
+      <div class="accrow"><div class="accline"><span>Victoires</span><b>${p.wins||0}</b></div><div class="accline"><span>Défaites</span><b>${p.losses||0}</b></div></div></div>
+    <div class="box sbox"><h3 class="xo">Succès <span class="muted sxcnt">${ACHIEVEMENTS.filter(a=>achVal(a,p)>=a.n).length}/${ACHIEVEMENTS.length}</span></h3>${achHTML(p)}</div>${accMsg()}
     <p class="cap"><button class="ghost sbtn" data-a="acclogout">Se déconnecter</button></p></div>`;
 }
 function renderShop(){
