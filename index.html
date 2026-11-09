@@ -620,7 +620,18 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 .pkaskin{display:flex;flex-direction:column;align-items:center;gap:26px}
 .tokgrp{padding-top:14px}.pkask{cursor:default}
 .pack.sel{box-shadow:0 0 0 3px var(--accent),0 14px 40px #000a}
-.pkgo{padding:11px 40px;font-size:18px}.pkcost{margin:-6px 0 0;font-size:13px}
+.pkgo{padding:11px 40px;font-size:18px}
+.pkask.opening .pkgo{visibility:hidden}
+.pkanim{position:relative}
+.pkask.opening .pack{animation:none;transform:none}
+.pkask.opening .pack::before{animation:pktear .35s ease-in forwards}
+@keyframes pktear{to{transform:translate(25%,-140%) rotate(-14deg);opacity:0}}
+.pkask.opening .pack{animation:pkdown .65s .85s cubic-bezier(.5,0,.9,.5) forwards}
+@keyframes pkdown{to{transform:translateY(120vh)}}
+.pkfly{position:absolute;left:12%;right:12%;top:8%;aspect-ratio:777/1072;border-radius:10px;background:linear-gradient(160deg,#2a3a8f,#a12d5e);border:2px solid #c9ced8;box-shadow:0 6px 20px #0009;z-index:0;animation:pkfly .55s .35s cubic-bezier(.2,.8,.3,1) forwards}
+.pkfly.f2{animation-delay:.45s;--r:-6deg}.pkfly.f3{animation-delay:.55s;--r:6deg}
+@keyframes pkfly{to{transform:translateY(-62%) rotate(var(--r,0deg))}}
+.pkanim .pack{position:relative;z-index:1}.pkcost{margin:-6px 0 0;font-size:13px}
 .pbox{display:flex;align-items:stretch;gap:0;background:var(--panel);border:1px solid var(--line);border-radius:14px;margin-top:4px;min-width:220px}
 .pfree{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 16px}
 .ptok{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 16px;border-left:1px solid var(--line);line-height:1.15}
@@ -639,7 +650,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 .pnew.big{top:-14px;font-size:13px;padding:4px 12px}
 .pkhint{color:#cfd3db;margin:0;font-size:14px}
 .pkend{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;max-width:420px;width:100%;text-align:center;cursor:default}
-.pkend h3{margin:0 0 14px}.pkgrid{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-bottom:18px}.pkmini{position:relative}.pkmini .card.mini{width:72px}
+.pkend h3{margin:0 0 24px}.pkgrid{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-bottom:18px}.pkmini{position:relative}.pkmini .card.mini{width:72px}
 </style>
 </head>
 <body>
@@ -662,7 +673,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.28.1';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.29.0';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1333,7 +1344,7 @@ function render(){
   render.hk=hk; if(hsl){const m2=$('.mhand');if(m2)m2.scrollLeft=hsl;} // garde la position de la main entre deux affichages du même tour
   const inMatch=UI.tab==='combat'&&!!G; document.body.classList.toggle('inmatch',inMatch);
   if(!inMatch){UI.gmenu=false;UI.sheet=null;if(UI.mmodal)UI.mmodal=null;}
-  $('#modal').innerHTML = UI.pack?renderPackOpen():UI.packAsk&&UI.tab==='home'?renderPackAsk():UI.logoutAsk&&UI.tab==='params'?`<div class="modal-bg" data-a="logoutno"><div class="modal qmodal"><h3 class="xo">Se déconnecter ?</h3><div class="qbtns"><button data-a="logoutno">Non</button><button class="primary xo" data-a="acclogout">Oui</button></div></div></div>`:UI.detail?renderDetail(UI.detail):UI.colf&&UI.tab==='cartes'?renderColFilters():UI.exportText!==null?renderExport():UI.confirmQuit&&inMatch?renderQuitModal():inMatch&&G.pending[0]&&G.pending[0].kind==='deckpick'&&mine_(G.pending[0].p)?renderDeckpick():UI.bigc&&UI.mmodal&&inMatch?cardView(UI.bigc,'','closebig'):UI.mmodal&&inMatch?renderMatchModal():UI.sheet&&inMatch?renderSheet():'';
+  $('#modal').innerHTML = UI.pack?renderPackOpen():(UI.packAsk||UI.packOpening)&&UI.tab==='home'?renderPackAsk():UI.logoutAsk&&UI.tab==='params'?`<div class="modal-bg" data-a="logoutno"><div class="modal qmodal"><h3 class="xo">Se déconnecter ?</h3><div class="qbtns"><button data-a="logoutno">Non</button><button class="primary xo" data-a="acclogout">Oui</button></div></div></div>`:UI.detail?renderDetail(UI.detail):UI.colf&&UI.tab==='cartes'?renderColFilters():UI.exportText!==null?renderExport():UI.confirmQuit&&inMatch?renderQuitModal():inMatch&&G.pending[0]&&G.pending[0].kind==='deckpick'&&mine_(G.pending[0].p)?renderDeckpick():UI.bigc&&UI.mmodal&&inMatch?cardView(UI.bigc,'','closebig'):UI.mmodal&&inMatch?renderMatchModal():UI.sheet&&inMatch?renderSheet():'';
   if(inMatch) sizeBoard();
   fitArt();
   if(NET.role==='host'&&G&&G.online) netBroadcast();
@@ -1677,7 +1688,8 @@ function accField(key,label,type){const v=UI.af[key]||'',pw=type==='password',sh
   return `<label class="nfield accf"><span class="xo">${label}</span><span class="accin"><input data-af="${key}" type="${show?'text':type||'text'}" value="${esc(v)}" ${pw?'autocomplete="new-password" autocapitalize="off"':'maxlength="12" autocapitalize="characters" autocomplete="username"'} spellcheck="false">${pw?`<button type="button" class="eye ghost" data-a="afshow" aria-label="${show?'Masquer':'Afficher'} le mot de passe">${show?'Masquer':'Voir'}</button>`:''}</span></label>`;}
 // Mot de passe : 6 caractères min., au moins un chiffre et une majuscule
 function pwProblem(pw){if(pw.length<6)return 'Le mot de passe doit faire au moins 6 caractères.';if(!/\d/.test(pw))return 'Le mot de passe doit contenir au moins un chiffre.';if(!/\p{Lu}/u.test(pw))return 'Le mot de passe doit contenir au moins une majuscule.';return '';}
-function startDeckPick(){const k=UI.af.deck;return `<div class="sdecks">${ECO.startDecks.map(d=>`<button class="dtile ${k===d?'on':''}" style="--tc:${deckColor(d)}" data-a="afdeck:${d}"><div class="dt-name xo">${DECKS[d].name}</div></button>`).join('')}</div>
+function startDeckPick(withBtn){const k=UI.af.deck;return `<div class="sdecks">${ECO.startDecks.map(d=>`<button class="dtile ${k===d?'on':''}" style="--tc:${deckColor(d)}" data-a="afdeck:${d}"><div class="dt-name xo">${DECKS[d].name}</div></button>`).join('')}</div>
+  ${withBtn?`${accMsg()}<div class="setact" style="margin-top:16px"><button class="primary xo" data-a="acccreate" ${ACC.busy?'disabled':''}>Créer le compte</button></div>`:''}
   <div class="sdcompo"><h3 class="xo grp" style="color:${deckColor(k)}">Contenu du ${DECKS[k].name}</h3>${deckCompoHTML(k)}</div>`;}
 function accMsg(){return `${ACC.err?`<p class="accerr">${esc(ACC.err)}</p>`:''}${ACC.busy?'<p class="muted cap">Merci de patienter…</p>':''}`;}
 function renderCompte(sub){
@@ -1686,8 +1698,7 @@ function renderCompte(sub){
   if(!ACC.ready) return `<div class="page ctr">${head}<p class="muted cap">Chargement…</p></div>`;
   if(sub==='creer'&&!ACC.user&&UI.af.step!==2) return `<div class="page ctr">${head}<div class="box sbox">${accField('name','Nom')}${accField('pass','Mot de passe','password')}${accField('pass2','Confirmer','password')}</div>${accMsg()}
     <div class="setact"><button class="primary xo" data-a="accnext" ${ACC.busy?'disabled':''}>Continuer</button></div></div>`;
-  if(sub==='creer'&&!ACC.user) return `<div class="page ctr">${head}<div class="box sbox"><h3 class="xo">Deck de départ</h3><p class="muted cap" style="margin:0 0 12px">${esc(cleanName(UI.af.name))}, choisis ton premier deck.</p>${startDeckPick()}</div>${accMsg()}
-    <div class="setact"><button class="primary xo" data-a="acccreate" ${ACC.busy?'disabled':''}>Créer le compte</button></div></div>`;
+  if(sub==='creer'&&!ACC.user) return `<div class="page ctr">${head}<div class="box sbox"><h3 class="xo">Deck de départ</h3><p class="muted cap" style="margin:0 0 12px">${esc(cleanName(UI.af.name))}, choisis ton premier deck.</p>${startDeckPick(true)}</div></div>`;
   if(sub==='connexion'&&!ACC.user) return `<div class="page ctr">${head}<div class="box sbox">${accField('name','Nom')}${accField('pass','Mot de passe','password')}</div>${accMsg()}
     <div class="setact"><button class="primary xo" data-a="acclogin" ${ACC.busy?'disabled':''}>Se connecter</button></div></div>`;
   if(!ACC.user) return `<div class="page ctr">${head}<div class="box sbox"><h3 class="xo" style="margin-bottom:0">Mode invité</h3></div>${accMsg()}
@@ -1753,9 +1764,9 @@ function renderHome(){
       <div id="ptimer">${packTimerHTML()}</div>${accMsg()}</div>
     ${menu}<button class="serbtn xo" data-a="sermenu">Extension <span class="chev">▴</span></button></div>`;
 }
-function renderPackAsk(){const ser=SERIES.find(x=>x.k===UI.series)||SERIES[0],st=packState(),tok=!st.avail;
-  return `<div class="modal-bg pkbg pkask" data-a="packcancel"><div class="pkaskin">${packVisual(ser,'sel')}
-    <button class="primary xo pkgo" data-a="openpack">Ouvrir</button></div></div>`;}
+function renderPackAsk(){const ser=SERIES.find(x=>x.k===UI.series)||SERIES[0],op=UI.packOpening;
+  return `<div class="modal-bg pkbg pkask ${op?'opening':''}" ${op?'':'data-a="packcancel"'}><div class="pkaskin"><div class="pkanim">${op?'<i class="pkfly f1"></i><i class="pkfly f2"></i><i class="pkfly f3"></i>':''}${packVisual(ser,'sel')}</div>
+    <button class="primary xo pkgo" data-a="openpack" ${op?'disabled':''}>Ouvrir</button></div></div>`;}
 // Fenêtre d'ouverture : 5 cartes empilées, on touche pour révéler la suivante
 function renderPackOpen(){
   const P=UI.pack; if(!P) return '';
@@ -2405,13 +2416,16 @@ const H = {
   packask(){if(!ACC.p){UI.nav.params=['compte'];UI.tab='params';return render();}
     if(!canOpen()){const st=packState();toast(st.next?'Prochain pack dans '+fmtLeft(st.next-Date.now()):'Aucun pack disponible');return;}UI.packAsk=true;render();},
   packcancel(_,e,el){if(e.target.closest('.pkgo'))return;UI.packAsk=false;render();},
-  openpack(){UI.packAsk=false;
-    if(!ACC.p){UI.nav.params=['compte'];UI.tab='params';return render();}
-    if(!canOpen()){render();return;}
-    if(ACC.busy)return;
-    accRun(async()=>{const r=await SB.rpc('open_pack',{p_series:UI.series});if(r.error)throw r.error;
+  async openpack(){
+    if(!ACC.p){UI.packAsk=false;UI.nav.params=['compte'];UI.tab='params';return render();}
+    if(!canOpen()||UI.packOpening){UI.packAsk=false;render();return;}
+    UI.packOpening=true;render();const t0=Date.now();
+    try{const r=await SB.rpc('open_pack',{p_series:UI.series});if(r.error)throw r.error;
       const cards=r.data.cards, seen=new Set(), isNew=cards.map(id=>{const n=!ownsCard(id)&&!seen.has(id);seen.add(id);return n;});
-      setProfile(r.data.profile);UI.pack={cards,isNew,i:0};});},
+      await new Promise(res=>setTimeout(res,Math.max(0,1700-(Date.now()-t0)))); // laisse l'animation se jouer
+      setProfile(r.data.profile);UI.pack={cards,isNew,i:0};
+    }catch(e){toast(accErr(e));}
+    UI.packOpening=false;UI.packAsk=false;render();},
   packnext(_,e){if(!UI.pack)return;UI.pack.i++;render();},
   packdone(){UI.pack=null;render();},
   buytok(n){n=+n;if(!ACC.p||![1,20,100].includes(n))return;if(UI.buyAsk!=='t'+n){UI.buyAsk='t'+n;return render();}UI.buyAsk=null;
