@@ -596,7 +596,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 .havatar,.pavatar{border:0!important;background:none!important;color:#8a90a0}
 .hacc.on .havatar,.pavatar{box-shadow:0 0 0 2px var(--accent);padding:0;box-sizing:border-box}.pavatar{box-shadow:0 0 0 3px var(--accent)}
 .card.art .aser{right:9.5%;top:92.8%;transform:translateY(-50%);font-size:3.2cqw;color:#4d4d4d;font-weight:600}
-.home{position:relative;min-height:calc(100vh - 150px);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.home{position:fixed;left:0;right:0;top:calc(57px + env(safe-area-inset-top));bottom:calc(64px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;padding:0 16px;box-sizing:border-box}
 .hshop{position:fixed;top:calc(64px + env(safe-area-inset-top));right:calc(16px + env(safe-area-inset-right));z-index:20;padding:7px 16px;border-radius:20px;background:var(--panel);border:1px solid var(--line);font-size:15px}.hcart{font-size:17px}
 .hpack{display:flex;flex-direction:column;align-items:center;gap:14px}
 .packbtn{background:none;border:0;padding:0;border-radius:18px;cursor:pointer}.packbtn:hover{background:none}
@@ -613,7 +613,15 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 .serbtn{position:fixed;right:16px;bottom:calc(72px + env(safe-area-inset-bottom));padding:8px 14px;border-radius:20px;font-size:14px;z-index:20}
 .sermenu{position:fixed;right:16px;bottom:calc(116px + env(safe-area-inset-bottom));z-index:35;background:var(--panel);border:1px solid #5a6480;border-radius:12px;padding:6px;display:flex;flex-direction:column;min-width:130px}
 .sermenu button{border:0;background:transparent;text-align:left;padding:8px 10px;border-radius:8px}.sermenu button.on{background:var(--panel2);color:var(--accent);font-weight:700}
-.pkbg{flex-direction:column;gap:16px;cursor:pointer}
+.pkbg{flex-direction:column;gap:16px;cursor:pointer;background:#0d0f13;touch-action:none;z-index:70}
+.pkcur{display:flex;flex-direction:column;align-items:flex-start;gap:8px;touch-action:none;user-select:none}
+.pnewtag{background:var(--accent);color:#1a1400;font-weight:800;font-size:13px;padding:4px 12px;border-radius:10px}.pnewtag.off{visibility:hidden}
+.pkback{margin-top:34px}
+.pkopen{height:44px;display:flex;align-items:center}.pkopen button{padding:10px 34px;font-size:17px}
+.packbtn.ask .pack{animation:none;transform:scale(1.04);box-shadow:0 0 0 3px var(--accent),0 14px 40px #000a}
+.pminis{display:flex;gap:6px;min-height:26px;align-items:center}
+.pmini{width:17px;height:25px;border-radius:3px;background:linear-gradient(160deg,#2a3a8f,#5b2a8f 50%,#a12d5e);border:1.5px solid #c9ced8;box-shadow:0 2px 6px #0007}
+.ptime{min-height:20px;font-size:16px;color:var(--muted)}
 .pkstack{position:relative;display:grid;place-items:center}
 .pkback{position:absolute;width:min(290px,66vw);aspect-ratio:777/1072;border-radius:14px;background:linear-gradient(160deg,#2a3a8f,#a12d5e);border:3px solid #c9ced8;transform:translate(calc(var(--o)*6px),calc(var(--o)*-6px)) rotate(calc(var(--o)*1.5deg));opacity:.9}
 .pkcur{position:relative;animation:pkin .25s ease-out}
@@ -646,7 +654,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.26.1';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.27.0';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1718,8 +1726,8 @@ function fmtLeft(ms){ms=Math.max(0,ms);const s=Math.floor(ms/1000),h=Math.floor(
 function packTimerHTML(){
   if(!ACC.p) return `<p class="ptime muted">Crée un compte pour ouvrir des packs</p>`;
   const st=packState();
-  return `<div class="pdots">${Array.from({length:PACK.max},(_,i)=>`<i class="${i<st.avail?'on':''}"></i>`).join('')}</div>
-    <p class="ptime">${st.avail?`<b>${st.avail} pack${s_(st.avail)} gratuit${s_(st.avail)}</b>`:'Aucun pack disponible'}${st.next?` · prochain dans <span class="mono">${fmtLeft(st.next-Date.now())}</span>`:' · réserve pleine'}</p>`;
+  return `<div class="pminis" aria-label="${st.avail} pack${s_(st.avail)} gratuit${s_(st.avail)}">${Array.from({length:st.avail},()=>'<i class="pmini"></i>').join('')}</div>
+    <p class="ptime mono">${st.next?fmtLeft(st.next-Date.now()):''}</p>`;
 }
 function packVisual(ser,cls){return `<div class="pack ${cls||''}"><div class="pshine"></div><div class="plogo">DC <span>TCG</span></div><div class="pser xo">${esc(ser.name)}</div><div class="pcnt">5 cartes</div></div>`;}
 function renderHome(){
@@ -1727,22 +1735,29 @@ function renderHome(){
   const menu=UI.serOpen?`<div class="sortbg" data-a="sermenu"></div><div class="sermenu">${SERIES.map(x=>`<button class="${x.k===ser.k?'on':''}" data-a="setser:${x.k}">${esc(x.name)}</button>`).join('')}</div>`:'';
   return `<div class="page ctr home">
     <button class="hshop xo" data-a="go:params:shop">Shop</button>
-    <div class="hpack"><button class="packbtn ${can?'can':''}" data-a="openpack" aria-label="Ouvrir un pack ${esc(ser.name)}">${packVisual(ser)}</button>
+    <div class="hpack"><button class="packbtn ${can?'can':''} ${UI.packAsk?'ask':''}" data-a="packask" aria-label="Pack ${esc(ser.name)}">${packVisual(ser)}</button>
+      <div class="pkopen">${UI.packAsk&&can?`<button class="primary xo" data-a="openpack">Ouvrir</button>`:''}</div>
       <div id="ptimer">${packTimerHTML()}</div>${accMsg()}</div>
     ${menu}<button class="serbtn xo" data-a="sermenu">Extension <span class="chev">▴</span></button></div>`;
 }
 // Fenêtre d'ouverture : 5 cartes empilées, on touche pour révéler la suivante
 function renderPackOpen(){
   const P=UI.pack; if(!P) return '';
-  if(P.i>=P.cards.length) return `<div class="modal-bg pkbg"><div class="pkend"><h3 class="xo">Ton pack</h3>
-    <div class="pkgrid">${P.cards.map((id,j)=>`<div class="pkmini">${cardHTML(id,{cls:'mini'})}${P.isNew[j]?'<span class="pnew">Nouvelle</span>':''}</div>`).join('')}</div>
+  if(P.i>=P.cards.length) return `<div class="modal-bg pkbg"><div class="pkend"><h3 class="xo">Résumé d'ouverture</h3>
+    <div class="pkgrid">${P.cards.map((id,j)=>`<div class="pkmini">${cardHTML(id,{cls:'mini'})}${P.isNew[j]?'<span class="pnew">Nouveau</span>':''}</div>`).join('')}</div>
     <button class="primary xo" data-a="packdone">Terminer</button></div></div>`;
   const left=P.cards.length-P.i, id=P.cards[P.i];
   return `<div class="modal-bg pkbg" data-a="packnext"><div class="pkstack">
     ${Array.from({length:Math.min(left-1,4)},(_,j)=>`<div class="pkback" style="--o:${j+1}"></div>`).reverse().join('')}
-    <div class="pkcur" data-a="packnext">${cardArt(id,{})}${P.isNew[P.i]?'<span class="pnew big">Nouvelle carte</span>':''}</div></div>
-    <p class="pkhint">${P.i+1} / ${P.cards.length} · touche pour ${left>1?'la suivante':'voir le résumé'}</p></div>`;
+    <div class="pkcur" data-a="packnext"><span class="pnewtag ${P.isNew[P.i]?'':'off'}">Nouveau</span>${cardArt(id,{})}</div></div></div>`;
 }
+const PSW={x:null,y:null};
+document.addEventListener('pointerdown',e=>{PSW.x=UI.pack&&e.target.closest&&e.target.closest('.pkbg')?e.clientX:null;PSW.y=e.clientY;},true);
+document.addEventListener('pointermove',e=>{if(PSW.x==null||!UI.pack)return;const c=$('.pkcur');if(c)c.style.transform=`translateX(${e.clientX-PSW.x}px) rotate(${(e.clientX-PSW.x)/25}deg)`;},true);
+document.addEventListener('pointerup',e=>{if(PSW.x==null||!UI.pack)return;const dx=e.clientX-PSW.x;PSW.x=null;const c=$('.pkcur');
+  if(Math.abs(dx)>45){DRAG.suppress=true;setTimeout(()=>{DRAG.suppress=false;},350);if(c){c.style.transition='transform .18s ease-in,opacity .18s';c.style.transform=`translateX(${dx>0?120:-120}vw) rotate(${dx>0?20:-20}deg)`;c.style.opacity='0';}
+    setTimeout(()=>{if(UI.pack){UI.pack.i++;render();}},170);}
+  else if(c)c.style.transform='';},true);
 setInterval(()=>{if(UI.tab==='home'&&ACC.p&&!UI.pack){const t=$('#ptimer');if(t){const was=t.dataset.av,st=packState();t.innerHTML=packTimerHTML();if(was!==undefined&&+was!==st.avail)render();t.dataset.av=st.avail;}}},1000);
 /* ---- Combat : menus ---- */
 function deckChoice(i){
@@ -2371,7 +2386,9 @@ const H = {
     accRun(async()=>{const r=await SB.rpc('buy_deck',{p_deck:k});if(r.error)throw r.error;setProfile(r.data);toast(DECKS[k].name+' débloqué !');});},
   sermenu(){UI.serOpen=!UI.serOpen;render();},
   setser(k){if(SERIES.some(x=>x.k===k))UI.series=k;UI.serOpen=false;render();},
-  openpack(){
+  packask(){if(!ACC.p){UI.nav.params=['compte'];UI.tab='params';return render();}
+    const st=packState();if(!st.avail){toast('Prochain pack dans '+fmtLeft(st.next-Date.now()));return;}UI.packAsk=!UI.packAsk;render();},
+  openpack(){UI.packAsk=false;
     if(!ACC.p){UI.nav.params=['compte'];UI.tab='params';return render();}
     const st=packState();if(!st.avail){toast('Prochain pack dans '+fmtLeft(st.next-Date.now()));return;}
     if(ACC.busy)return;
