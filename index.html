@@ -617,11 +617,19 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 .pkcur{display:flex;flex-direction:column;align-items:flex-start;gap:8px;touch-action:none;user-select:none}
 .pnewtag{background:var(--accent);color:#1a1400;font-weight:800;font-size:13px;padding:4px 12px;border-radius:10px}.pnewtag.off{visibility:hidden}
 .pkback{margin-top:34px}
-.pkopen{height:44px;display:flex;align-items:center}.pkopen button{padding:10px 34px;font-size:17px}
+.pkaskin{display:flex;flex-direction:column;align-items:center;gap:26px}
+.tokgrp{padding-top:14px}.pkask{cursor:default}
+.pack.sel{box-shadow:0 0 0 3px var(--accent),0 14px 40px #000a}
+.pkgo{padding:11px 40px;font-size:18px}.pkcost{margin:-6px 0 0;font-size:13px}
+.pbox{display:flex;align-items:stretch;gap:0;background:var(--panel);border:1px solid var(--line);border-radius:14px;margin-top:4px;min-width:220px}
+.pfree{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 16px}
+.ptok{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 16px;border-left:1px solid var(--line);line-height:1.15}
+.ptok b{font-size:22px;color:var(--accent)}.ptok span{font-size:12px;color:var(--muted)}.ptok small{font-size:11px;color:var(--muted);margin-top:2px}
+.shopit.tok{border-left-color:var(--accent);padding:10px 14px}.shopit.tok .dt-name{margin:0;font-size:17px}
 .packbtn.ask .pack{animation:none;transform:scale(1.04);box-shadow:0 0 0 3px var(--accent),0 14px 40px #000a}
 .pminis{display:flex;gap:6px;min-height:26px;align-items:center}
 .pmini{width:17px;height:25px;border-radius:3px;background:linear-gradient(160deg,#2a3a8f,#5b2a8f 50%,#a12d5e);border:1.5px solid #c9ced8;box-shadow:0 2px 6px #0007}
-.ptime{min-height:20px;font-size:16px;color:var(--muted)}
+.ptime{min-height:18px;font-size:15px;color:var(--muted);margin:0}
 .pkstack{position:relative;display:grid;place-items:center}
 .pkback{position:absolute;width:min(290px,66vw);aspect-ratio:777/1072;border-radius:14px;background:linear-gradient(160deg,#2a3a8f,#a12d5e);border:3px solid #c9ced8;transform:translate(calc(var(--o)*6px),calc(var(--o)*-6px)) rotate(calc(var(--o)*1.5deg));opacity:.9}
 .pkcur{position:relative;animation:pkin .25s ease-out}
@@ -642,8 +650,8 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 <main id="app"></main>
 <nav class="bottombar">
   <button data-a="tab:home" data-tab="home" title="Home" aria-label="Home"><span class="ic ico" style="--ic:var(--ic-home);--icf:var(--icf-home)"></span></button>
-  <button data-a="tab:combat" data-tab="combat" title="Match" aria-label="Match"><span class="ic ico" style="--ic:var(--ic-versus);--icf:var(--icf-versus)"></span></button>
   <button data-a="tab:cartes" data-tab="cartes" title="Collection" aria-label="Collection"><span class="ic ico" style="--ic:var(--ic-card);--icf:var(--icf-card)"></span></button>
+  <button data-a="tab:combat" data-tab="combat" title="Match" aria-label="Match"><span class="ic ico" style="--ic:var(--ic-versus);--icf:var(--icf-versus)"></span></button>
   <button data-a="tab:params" data-tab="params" title="Paramètres" aria-label="Paramètres"><span class="ic ico" style="--ic:var(--ic-gear);--icf:var(--icf-gear)"></span></button>
 </nav>
 <div id="modal"></div>
@@ -654,7 +662,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.27.0';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.28.1';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1325,7 +1333,7 @@ function render(){
   render.hk=hk; if(hsl){const m2=$('.mhand');if(m2)m2.scrollLeft=hsl;} // garde la position de la main entre deux affichages du même tour
   const inMatch=UI.tab==='combat'&&!!G; document.body.classList.toggle('inmatch',inMatch);
   if(!inMatch){UI.gmenu=false;UI.sheet=null;if(UI.mmodal)UI.mmodal=null;}
-  $('#modal').innerHTML = UI.pack?renderPackOpen():UI.logoutAsk&&UI.tab==='params'?`<div class="modal-bg" data-a="logoutno"><div class="modal qmodal"><h3 class="xo">Se déconnecter ?</h3><div class="qbtns"><button data-a="logoutno">Non</button><button class="primary xo" data-a="acclogout">Oui</button></div></div></div>`:UI.detail?renderDetail(UI.detail):UI.colf&&UI.tab==='cartes'?renderColFilters():UI.exportText!==null?renderExport():UI.confirmQuit&&inMatch?renderQuitModal():inMatch&&G.pending[0]&&G.pending[0].kind==='deckpick'&&mine_(G.pending[0].p)?renderDeckpick():UI.bigc&&UI.mmodal&&inMatch?cardView(UI.bigc,'','closebig'):UI.mmodal&&inMatch?renderMatchModal():UI.sheet&&inMatch?renderSheet():'';
+  $('#modal').innerHTML = UI.pack?renderPackOpen():UI.packAsk&&UI.tab==='home'?renderPackAsk():UI.logoutAsk&&UI.tab==='params'?`<div class="modal-bg" data-a="logoutno"><div class="modal qmodal"><h3 class="xo">Se déconnecter ?</h3><div class="qbtns"><button data-a="logoutno">Non</button><button class="primary xo" data-a="acclogout">Oui</button></div></div></div>`:UI.detail?renderDetail(UI.detail):UI.colf&&UI.tab==='cartes'?renderColFilters():UI.exportText!==null?renderExport():UI.confirmQuit&&inMatch?renderQuitModal():inMatch&&G.pending[0]&&G.pending[0].kind==='deckpick'&&mine_(G.pending[0].p)?renderDeckpick():UI.bigc&&UI.mmodal&&inMatch?cardView(UI.bigc,'','closebig'):UI.mmodal&&inMatch?renderMatchModal():UI.sheet&&inMatch?renderSheet():'';
   if(inMatch) sizeBoard();
   fitArt();
   if(NET.role==='host'&&G&&G.online) netBroadcast();
@@ -1620,6 +1628,7 @@ function accEmail(name){const b=new TextEncoder().encode(name.toLowerCase());ret
 function accErr(e){const m=String((e&&(e.message||e.error_description))||e||'');
   if(/already registered|already exists|duplicate|profiles_name_key/i.test(m))return 'Ce nom de compte est déjà pris.';
   if(/invalid login|invalid credentials/i.test(m))return 'Nom ou mot de passe incorrect.';
+  if(/quantité invalide/.test(m))return 'Quantité invalide.';
   if(/aucun pack disponible/.test(m))return 'Aucun pack disponible pour le moment.';
   if(/pièces insuffisantes/.test(m))return "Pas assez de pièces.";
   if(/déjà possédé/.test(m))return 'Tu as déjà ce deck.';
@@ -1707,14 +1716,18 @@ function renderShop(){
   const item=k=>{const ok=c>=ECO.deckPrice, ask=UI.buyAsk===k;return `<div class="shopit" style="--tc:${deckColor(k)}"><div><div class="dt-name xo">${DECKS[k].name}</div>
       <div><button class="ghost sbtn" data-a="go:params:shop:${k}">Voir les cartes</button></div></div>
       <button class="${ask?'primary':ok?'buy':'off'} xo" data-a="buydeck:${k}" ${ok?'':'disabled'}>${ask?'Confirmer':`${ECO.deckPrice} ${COIN}`}</button></div>`;};
+  const tq=[[1,'1 jeton'],[20,'20 jetons · 1 pack'],[100,'100 jetons · 5 packs']];
+  const tokens=`<div class="dgroup tokgrp">
+    ${tq.map(([n,l])=>{const pr=n*PACK.tokenPrice,ok=c>=pr,ask=UI.buyAsk==='t'+n;return `<div class="shopit tok"><div class="dt-name xo">${l}</div><button class="${ask?'primary':ok?'buy':'off'} xo" data-a="buytok:${n}" ${ok?'':'disabled'}>${ask?'Confirmer':`${pr} ${COIN}`}</button></div>`;}).join('')}</div>`;
   return `<div class="page ctr"><div class="ptop"><h2>Shop</h2><div class="right wallet">${COIN} <b>${c}</b></div></div><button class="backbtn" data-a="back:params"><span class="bchev">‹</span> Retour</button>
-    ${left.length?DECK_GROUPS.map(([g,t])=>{const ks=left.filter(k=>DECKS[k].group===g);return ks.length?`<div class="dgroup"><h3 class="xo grp">${t}</h3>${ks.map(item).join('')}</div>`:'';}).join(''):'<div class="box sbox"><p class="muted cap">Tu as déjà tous les decks !</p></div>'}${accMsg()}</div>`;
+    ${tokens}${left.length?`<div class="dgroup"><h3 class="xo grp">Decks</h3>${left.map(item).join('')}</div>`:'<div class="box sbox"><p class="muted cap">Tu as déjà tous les decks !</p></div>'}${accMsg()}</div>`;
 }
 /* =========================================================
    HOME · packs (série 1)
    ========================================================= */
 const SERIES=[{k:'s1',name:'Série 1'}];
-const PACK={max:5,every:3600e3};
+const PACK={max:5,every:3600e3,tokens:20,tokenPrice:5};
+const canOpen=()=>{const st=packState();return !!st&&(st.avail>0||(ACC.p.tokens||0)>=PACK.tokens);};
 // Packs gratuits disponibles (1 par heure, 5 en réserve) d'après le profil serveur
 function packState(){
   const p=ACC.p; if(!p) return null;
@@ -1725,21 +1738,24 @@ function packState(){
 function fmtLeft(ms){ms=Math.max(0,ms);const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return (h?h+':':'')+String(m).padStart(h?2:1,'0')+':'+String(x).padStart(2,'0');}
 function packTimerHTML(){
   if(!ACC.p) return `<p class="ptime muted">Crée un compte pour ouvrir des packs</p>`;
-  const st=packState();
-  return `<div class="pminis" aria-label="${st.avail} pack${s_(st.avail)} gratuit${s_(st.avail)}">${Array.from({length:st.avail},()=>'<i class="pmini"></i>').join('')}</div>
-    <p class="ptime mono">${st.next?fmtLeft(st.next-Date.now()):''}</p>`;
+  const st=packState(), t=ACC.p.tokens||0;
+  return `<div class="pbox"><div class="pfree"><div class="pminis" aria-label="${st.avail} pack${s_(st.avail)} gratuit${s_(st.avail)}">${st.avail?Array.from({length:st.avail},()=>'<i class="pmini"></i>').join(''):'<span class="muted">Aucun pack gratuit</span>'}</div>
+    <p class="ptime mono">${st.next?fmtLeft(st.next-Date.now()):'Réserve pleine'}</p></div>
+    ${t?`<div class="ptok"><b>${t}</b><span>jeton${s_(t)}</span><small>${t>=PACK.tokens?`${Math.floor(t/PACK.tokens)} pack${s_(Math.floor(t/PACK.tokens))}`:`${PACK.tokens-t} pour 1 pack`}</small></div>`:''}</div>`;
 }
 function packVisual(ser,cls){return `<div class="pack ${cls||''}"><div class="pshine"></div><div class="plogo">DC <span>TCG</span></div><div class="pser xo">${esc(ser.name)}</div><div class="pcnt">5 cartes</div></div>`;}
 function renderHome(){
-  const ser=SERIES.find(x=>x.k===UI.series)||SERIES[0], st=packState(), can=!!(st&&st.avail);
+  const ser=SERIES.find(x=>x.k===UI.series)||SERIES[0], can=!!ACC.p&&canOpen();
   const menu=UI.serOpen?`<div class="sortbg" data-a="sermenu"></div><div class="sermenu">${SERIES.map(x=>`<button class="${x.k===ser.k?'on':''}" data-a="setser:${x.k}">${esc(x.name)}</button>`).join('')}</div>`:'';
   return `<div class="page ctr home">
     <button class="hshop xo" data-a="go:params:shop">Shop</button>
-    <div class="hpack"><button class="packbtn ${can?'can':''} ${UI.packAsk?'ask':''}" data-a="packask" aria-label="Pack ${esc(ser.name)}">${packVisual(ser)}</button>
-      <div class="pkopen">${UI.packAsk&&can?`<button class="primary xo" data-a="openpack">Ouvrir</button>`:''}</div>
+    <div class="hpack"><button class="packbtn ${can?'can':''}" data-a="packask" aria-label="Pack ${esc(ser.name)}">${packVisual(ser)}</button>
       <div id="ptimer">${packTimerHTML()}</div>${accMsg()}</div>
     ${menu}<button class="serbtn xo" data-a="sermenu">Extension <span class="chev">▴</span></button></div>`;
 }
+function renderPackAsk(){const ser=SERIES.find(x=>x.k===UI.series)||SERIES[0],st=packState(),tok=!st.avail;
+  return `<div class="modal-bg pkbg pkask" data-a="packcancel"><div class="pkaskin">${packVisual(ser,'sel')}
+    <button class="primary xo pkgo" data-a="openpack">Ouvrir</button></div></div>`;}
 // Fenêtre d'ouverture : 5 cartes empilées, on touche pour révéler la suivante
 function renderPackOpen(){
   const P=UI.pack; if(!P) return '';
@@ -2387,16 +2403,19 @@ const H = {
   sermenu(){UI.serOpen=!UI.serOpen;render();},
   setser(k){if(SERIES.some(x=>x.k===k))UI.series=k;UI.serOpen=false;render();},
   packask(){if(!ACC.p){UI.nav.params=['compte'];UI.tab='params';return render();}
-    const st=packState();if(!st.avail){toast('Prochain pack dans '+fmtLeft(st.next-Date.now()));return;}UI.packAsk=!UI.packAsk;render();},
+    if(!canOpen()){const st=packState();toast(st.next?'Prochain pack dans '+fmtLeft(st.next-Date.now()):'Aucun pack disponible');return;}UI.packAsk=true;render();},
+  packcancel(_,e,el){if(e.target.closest('.pkgo'))return;UI.packAsk=false;render();},
   openpack(){UI.packAsk=false;
     if(!ACC.p){UI.nav.params=['compte'];UI.tab='params';return render();}
-    const st=packState();if(!st.avail){toast('Prochain pack dans '+fmtLeft(st.next-Date.now()));return;}
+    if(!canOpen()){render();return;}
     if(ACC.busy)return;
     accRun(async()=>{const r=await SB.rpc('open_pack',{p_series:UI.series});if(r.error)throw r.error;
       const cards=r.data.cards, seen=new Set(), isNew=cards.map(id=>{const n=!ownsCard(id)&&!seen.has(id);seen.add(id);return n;});
       setProfile(r.data.profile);UI.pack={cards,isNew,i:0};});},
   packnext(_,e){if(!UI.pack)return;UI.pack.i++;render();},
   packdone(){UI.pack=null;render();},
+  buytok(n){n=+n;if(!ACC.p||![1,20,100].includes(n))return;if(UI.buyAsk!=='t'+n){UI.buyAsk='t'+n;return render();}UI.buyAsk=null;
+    accRun(async()=>{const r=await SB.rpc('buy_tokens',{p_n:n});if(r.error)throw r.error;setProfile(r.data);toast(`+${n} jeton${s_(n)}`);});},
   swapsel(){if(G.phase!=='actions'||G.pending.length)return;const t=swapTargets();if(!t.length)return;G.pending.push({kind:'target',what:'swap',p:G.cur,options:t});render();},
   swap(uid){if(G.phase!=='actions'||G.pending.length||!swapOk(+uid))return;act(()=>doSwap(+uid));},
   attack(kind){kind=kind==='spe'?'spe':'base';if(canAttack(kind))act(()=>doAttack(kind));},
@@ -2441,7 +2460,7 @@ function dispatch(a,args,e,el){
 document.addEventListener('click',e=>{
   if(DRAG.suppress){DRAG.suppress=false;e.preventDefault();e.stopPropagation();return;}
   const el=e.target.closest('[data-a]');
-  if(UI.buyAsk&&!(el&&el.dataset.a==='buydeck:'+UI.buyAsk)){UI.buyAsk=null;if(!el||el.disabled){render();return;}}
+  if(UI.buyAsk&&!(el&&(el.dataset.a==='buydeck:'+UI.buyAsk||el.dataset.a==='buytok:'+String(UI.buyAsk).slice(1)))){UI.buyAsk=null;if(!el||el.disabled){render();return;}}
   if(!el||el.disabled) return;
   const [a,...args]=el.dataset.a.split(':');
   dispatch(a,args.map(String),e,el);
