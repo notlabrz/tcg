@@ -682,6 +682,10 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 .avpick .avgrid{grid-template-columns:repeat(3,1fr)}
 .avpick .avit{cursor:pointer}.avpick .avit .avn{margin-top:2px}
 .lbadge{flex:none;width:26px;display:flex;justify-content:center}.lbadge .abadge2{width:26px}.lbadge .abadge2 svg{width:18px;height:18px}.lbadge .astars{font-size:7px}
+.avpick h3{font-size:22px!important}.avpick .avit{padding:12px 4px}
+.achl{min-height:34px}.achl .lbadge{height:30px;align-items:center}
+.achl .ltit{display:flex;flex-direction:column;gap:2px}.lrew{font-size:11.5px;color:var(--accent)}
+.pkgosub{display:block;font-size:11.5px;font-weight:700;letter-spacing:.2px;margin-top:2px}
 </style>
 </head>
 <body>
@@ -704,7 +708,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.31.0';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.31.2';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1376,7 +1380,7 @@ function render(){
   const inMatch=UI.tab==='combat'&&!!G; document.body.classList.toggle('inmatch',inMatch);
   if(!inMatch){UI.gmenu=false;UI.sheet=null;if(UI.mmodal)UI.mmodal=null;}
   $('#modal').innerHTML = UI.avPick&&UI.tab==='params'&&ACC.p?`<div class="modal-bg" data-a="avclose"><div class="modal avpick"><h3 class="xo">Photo de profil</h3><div class="avgrid">${[{k:'',n:'Base'},...AVATARS.filter(a=>(ACC.p.avatars||[]).includes(a.k))].map(a=>{const on=(ACC.p.avatar||'')===a.k;
-    return `<div class="avit ${on?'on':''}" data-a="setav:${a.k||'base'}"><span class="shopav">${a.k?avatarHTML(a.k):AVATAR_SVG}</span><span class="avn">${a.n}</span></div>`;}).join('')}</div></div></div>`:UI.pack?renderPackOpen():(UI.packAsk||UI.packOpening)&&UI.tab==='home'?renderPackAsk():UI.logoutAsk&&UI.tab==='params'?`<div class="modal-bg" data-a="logoutno"><div class="modal qmodal"><h3 class="xo">Se déconnecter ?</h3><div class="qbtns"><button data-a="logoutno">Non</button><button class="primary xo" data-a="acclogout">Oui</button></div></div></div>`:UI.detail?renderDetail(UI.detail):UI.colf&&UI.tab==='cartes'?renderColFilters():UI.exportText!==null?renderExport():UI.confirmQuit&&inMatch?renderQuitModal():inMatch&&G.pending[0]&&G.pending[0].kind==='deckpick'&&mine_(G.pending[0].p)?renderDeckpick():UI.bigc&&UI.mmodal&&inMatch?cardView(UI.bigc,'','closebig'):UI.mmodal&&inMatch?renderMatchModal():UI.sheet&&inMatch?renderSheet():'';
+    return `<div class="avit ${on?'on':''}" data-a="setav:${a.k||'base'}"><span class="shopav">${a.k?avatarHTML(a.k):AVATAR_SVG}</span></div>`;}).join('')}</div></div></div>`:UI.pack?renderPackOpen():(UI.packAsk||UI.packOpening)&&UI.tab==='home'?renderPackAsk():UI.logoutAsk&&UI.tab==='params'?`<div class="modal-bg" data-a="logoutno"><div class="modal qmodal"><h3 class="xo">Se déconnecter ?</h3><div class="qbtns"><button data-a="logoutno">Non</button><button class="primary xo" data-a="acclogout">Oui</button></div></div></div>`:UI.detail?renderDetail(UI.detail):UI.colf&&UI.tab==='cartes'?renderColFilters():UI.exportText!==null?renderExport():UI.confirmQuit&&inMatch?renderQuitModal():inMatch&&G.pending[0]&&G.pending[0].kind==='deckpick'&&mine_(G.pending[0].p)?renderDeckpick():UI.bigc&&UI.mmodal&&inMatch?cardView(UI.bigc,'','closebig'):UI.mmodal&&inMatch?renderMatchModal():UI.sheet&&inMatch?renderSheet():'';
   if(inMatch) sizeBoard();
   fitArt();
   if(NET.role==='host'&&G&&G.online) netBroadcast();
@@ -1722,6 +1726,8 @@ const ACH_IC={decks:'<rect x="5" y="3" width="11" height="15" rx="2"/><path d="M
   wins:'<path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8M9 17h6"/>',
   streak:'<path d="M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-3.5 2-5 .8 1.5 1.6 2 2.5 2C11 8 11 5.5 12 3z"/>'};
 const METALS=['#8a90a0','#c27c43','#d7dce4','#f2c230'];
+// Récompense d'un palier (provisoire) : 50 pièces × numéro du palier
+function achReward(ti){return 50*(ti+1);}
 function achBadge(k,n){const m=n?METALS[Math.min(3,Math.floor((n-1)/3))]:'#4a5060',st=n?((n-1)%3)+1:0;
   return `<span class="abadge2" style="color:${m}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">${ACH_IC[k]||''}</svg><span class="astars">${'★'.repeat(st)}</span></span>`;}
 function achHTML(p){
@@ -1730,7 +1736,7 @@ function achHTML(p){
   return `<div class="achs">${shown.map(a=>{const v=Math.min(achVal(a,p),a.n),ok=v>=a.n;
   const done=ACHIEVEMENTS.filter(x=>x.k===a.k&&achVal(x,p)>=x.n).length;
   const tiers=ACHIEVEMENTS.filter(x=>x.k===a.k), open=UI.achOpen===a.k;
-  const list=open?`<div class="achlist">${tiers.slice(0,Math.min(tiers.length,done+1)).map((x,ti)=>{const v=Math.min(achVal(x,p),x.n),o=v>=x.n;return `<div class="achl ${o?'ok':''}"><span class="lbadge">${achBadge(a.k,o?ti+1:0)}</span><span class="ltit">${x.t}</span><span class="lval">${o?'Obtenu':`${v}/${x.n}`}</span></div>`;}).join('')}</div>`:'';
+  const list=open?`<div class="achlist">${tiers.slice(0,Math.min(tiers.length,done+1)).map((x,ti)=>{const v=Math.min(achVal(x,p),x.n),o=v>=x.n;return `<div class="achl ${o?'ok':''}"><span class="lbadge">${achBadge(a.k,o?ti+1:0)}</span><span class="ltit">${x.t}${o?'':`<small class="lrew">Récompense : ${achReward(ti)} ${COIN}</small>`}</span><span class="lval">${o?'Obtenu':`${v}/${x.n}`}</span></div>`;}).join('')}</div>`:'';
   return `<div class="ach ${ok?'ok':''} ${open?'open':''}" data-a="achopen:${a.k}">${achBadge(a.k,done)}<span class="ainfo"><span class="atit">${a.t}</span><span class="abar"><i style="width:${Math.round(v/a.n*100)}%"></i></span></span><span class="aval">${ok?'Obtenu':`${v}/${a.n}`}</span><span class="achev">▾</span></div>${list}`;}).join('')}</div>`;}
 const COIN='<span class="coin" aria-hidden="true">🪙</span>';
 function accField(key,label,type){const v=UI.af[key]||'',pw=type==='password',show=pw&&UI.af.show;
@@ -1812,7 +1818,7 @@ function packTimerHTML(){
     <p class="ptime mono">${st.next?fmtLeft(st.next-Date.now()):'Réserve pleine'}</p></div>
     ${t?`<div class="ptok" aria-label="${t} jeton${s_(t)} booster">${JETON}<b>${t}</b></div>`:''}</div>`;
 }
-function packVisual(ser,cls){return `<div class="pack ${cls||''}" ${cls?'':`style="animation-delay:-${(Date.now()%2400)/1000}s"`} role="img" aria-label="Booster ${esc(ser.name)}"><i class="pimg"></i><i class="pshine"></i></div>`;}
+function packVisual(ser,cls){return `<div class="pack ${cls||''}" ${cls?'':`style="animation-delay:-${(Date.now()%2400)/1000}s"`} role="img" aria-label="Booster ${esc(ser.name)}"><i class="pimg"></i><i class="pshine" ${cls?'':`style="animation-delay:-${(Date.now()%3500)/1000}s"`}></i></div>`;}
 function renderHome(){
   const ser=SERIES.find(x=>x.k===UI.series)||SERIES[0], can=!!ACC.p&&canOpen();
   const menu=UI.serOpen?`<div class="sortbg" data-a="sermenu"></div><div class="sermenu">${SERIES.map(x=>`<button class="${x.k===ser.k?'on':''}" data-a="setser:${x.k}">${esc(x.name)}</button>`).join('')}</div>`:'';
@@ -1824,7 +1830,7 @@ function renderHome(){
 }
 function renderPackAsk(){const ser=SERIES.find(x=>x.k===UI.series)||SERIES[0],op=UI.packOpening;
   return `<div class="modal-bg pkbg pkask ${op?'opening':''}" ${op?'':'data-a="packcancel"'}><div class="pkaskin"><div class="pkanim">${op?'<i class="pkfly f1"></i><i class="pkfly f2"></i><i class="pkfly f3"></i>':''}${packVisual(ser,'sel')}</div>
-    <button class="primary xo pkgo" data-a="openpack" ${op?'disabled':''}>Ouvrir</button></div></div>`;}
+    <button class="primary xo pkgo" data-a="openpack" ${op?'disabled':''} ${ACC.p&&!packState().avail?'style="line-height:1.15;padding:9px 34px"':''}>${ACC.p&&!packState().avail?'Ouvrir<small class="pkgosub">avec les jetons booster</small>':'Ouvrir'}</button></div></div>`;}
 // Fenêtre d'ouverture : 5 cartes empilées, on touche pour révéler la suivante
 function renderPackOpen(){
   const P=UI.pack; if(!P) return '';
