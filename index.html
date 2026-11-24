@@ -620,7 +620,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 .pnewtag{background:var(--accent);color:#1a1400;font-weight:800;font-size:13px;padding:4px 12px;border-radius:10px}.pnewtag.off{visibility:hidden}
 .pkback{margin-top:34px}
 .pkaskin{display:flex;flex-direction:column;align-items:center;gap:26px}
-.tokgrp{padding-top:14px}.pkask{cursor:default}
+.pkask{cursor:default}
 .pack.sel{filter:drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 14px 26px #000c)}
 .pkgo{padding:11px 40px;font-size:18px}
 .pkask.opening .pkgo{visibility:hidden}
@@ -665,17 +665,23 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 .tokstep{display:flex;align-items:center;gap:8px}.tsb{width:38px;height:38px;border-radius:50%;padding:0;font-size:22px;line-height:1;display:grid;place-items:center}
 .tokq{display:flex;align-items:center;gap:6px;min-width:64px;justify-content:center}.tokq b{font-size:20px}
 .tokgo{min-width:96px;padding:10px 12px;font-size:16px}.tokgo.buy{background:#2b3346;border-color:#4a5674}.tokgo.off{background:#262a34;color:#7d8597}
-.avgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.avgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .avit{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}.avit.on{border-color:var(--accent)}
 .shopav{width:52px;height:52px;border-radius:50%;color:#8a90a0;display:block}.shopav .avc{font-size:26px}
 .avn{font-size:12.5px;font-weight:600}.avit button{padding:6px 4px;font-size:12.5px;width:100%;border-radius:9px}.avit button.buy{background:#2b3346;border-color:#4a5674}.avit button.off{background:#262a34;color:#7d8597}
-.tokgrp h3.grp{margin-top:12px}
+
 .pmini{width:16px;height:23px;border-radius:3px;background:linear-gradient(160deg,#9aa0ad,#5c616c);border:1.5px solid #d7dce4;box-shadow:0 2px 5px #0007}
 .jeton::after{background:none!important;width:8px!important;height:8px;aspect-ratio:auto!important;border-radius:2px;border:2px solid #8a6200;box-sizing:border-box;transform:translate(-50%,-50%) rotate(45deg)!important}
 .astars:empty{display:none}
 .ach{cursor:pointer}.ach .achev{flex:none;color:var(--muted);font-size:12px;transition:transform .15s}.ach.open .achev{transform:rotate(180deg)}
 .achlist{display:flex;flex-direction:column;gap:4px;margin:-2px 0 2px;padding:8px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
 .achl{display:flex;align-items:center;gap:10px;font-size:13px;padding:3px 0}.achl .lmark{flex:none;width:18px;text-align:center;color:#4a5060}.achl.ok .lmark{color:var(--accent)}.achl:not(.ok) .ltit{color:#8a90a0}.achl .lval{margin-left:auto;font-size:12px;color:var(--muted)}
+.pmini{border:0!important;border-radius:0!important;box-shadow:none!important;width:16px!important;height:24px!important;background:linear-gradient(160deg,#b4b9c4,#6a6f7a)!important;filter:drop-shadow(0 2px 3px #0008);clip-path:polygon(0 8%,12.5% 0,25% 8%,37.5% 0,50% 8%,62.5% 0,75% 8%,87.5% 0,100% 8%,100% 92%,87.5% 100%,75% 92%,62.5% 100%,50% 92%,37.5% 100%,25% 92%,12.5% 100%,0 92%)}
+.pavatar{cursor:pointer}
+.avpick{max-width:360px;text-align:center}.avpick h3{margin:0 0 14px}
+.avpick .avgrid{grid-template-columns:repeat(3,1fr)}
+.avpick .avit{cursor:pointer}.avpick .avit .avn{margin-top:2px}
+.lbadge{flex:none;width:26px;display:flex;justify-content:center}.lbadge .abadge2{width:26px}.lbadge .abadge2 svg{width:18px;height:18px}.lbadge .astars{font-size:7px}
 </style>
 </head>
 <body>
@@ -698,7 +704,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.30.2';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.31.0';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1369,7 +1375,8 @@ function render(){
   render.hk=hk; if(hsl){const m2=$('.mhand');if(m2)m2.scrollLeft=hsl;} // garde la position de la main entre deux affichages du même tour
   const inMatch=UI.tab==='combat'&&!!G; document.body.classList.toggle('inmatch',inMatch);
   if(!inMatch){UI.gmenu=false;UI.sheet=null;if(UI.mmodal)UI.mmodal=null;}
-  $('#modal').innerHTML = UI.pack?renderPackOpen():(UI.packAsk||UI.packOpening)&&UI.tab==='home'?renderPackAsk():UI.logoutAsk&&UI.tab==='params'?`<div class="modal-bg" data-a="logoutno"><div class="modal qmodal"><h3 class="xo">Se déconnecter ?</h3><div class="qbtns"><button data-a="logoutno">Non</button><button class="primary xo" data-a="acclogout">Oui</button></div></div></div>`:UI.detail?renderDetail(UI.detail):UI.colf&&UI.tab==='cartes'?renderColFilters():UI.exportText!==null?renderExport():UI.confirmQuit&&inMatch?renderQuitModal():inMatch&&G.pending[0]&&G.pending[0].kind==='deckpick'&&mine_(G.pending[0].p)?renderDeckpick():UI.bigc&&UI.mmodal&&inMatch?cardView(UI.bigc,'','closebig'):UI.mmodal&&inMatch?renderMatchModal():UI.sheet&&inMatch?renderSheet():'';
+  $('#modal').innerHTML = UI.avPick&&UI.tab==='params'&&ACC.p?`<div class="modal-bg" data-a="avclose"><div class="modal avpick"><h3 class="xo">Photo de profil</h3><div class="avgrid">${[{k:'',n:'Base'},...AVATARS.filter(a=>(ACC.p.avatars||[]).includes(a.k))].map(a=>{const on=(ACC.p.avatar||'')===a.k;
+    return `<div class="avit ${on?'on':''}" data-a="setav:${a.k||'base'}"><span class="shopav">${a.k?avatarHTML(a.k):AVATAR_SVG}</span><span class="avn">${a.n}</span></div>`;}).join('')}</div></div></div>`:UI.pack?renderPackOpen():(UI.packAsk||UI.packOpening)&&UI.tab==='home'?renderPackAsk():UI.logoutAsk&&UI.tab==='params'?`<div class="modal-bg" data-a="logoutno"><div class="modal qmodal"><h3 class="xo">Se déconnecter ?</h3><div class="qbtns"><button data-a="logoutno">Non</button><button class="primary xo" data-a="acclogout">Oui</button></div></div></div>`:UI.detail?renderDetail(UI.detail):UI.colf&&UI.tab==='cartes'?renderColFilters():UI.exportText!==null?renderExport():UI.confirmQuit&&inMatch?renderQuitModal():inMatch&&G.pending[0]&&G.pending[0].kind==='deckpick'&&mine_(G.pending[0].p)?renderDeckpick():UI.bigc&&UI.mmodal&&inMatch?cardView(UI.bigc,'','closebig'):UI.mmodal&&inMatch?renderMatchModal():UI.sheet&&inMatch?renderSheet():'';
   if(inMatch) sizeBoard();
   fitArt();
   if(NET.role==='host'&&G&&G.online) netBroadcast();
@@ -1695,7 +1702,7 @@ function checkReward(){
     toast(`Victoire : +${ECO.winCoins} pièces · +${ECO.winPoints} points`+(lv>before?` · Niveau ${lv} !`:''));render();});
 }
 // Photos de profil : base (invité = avec cercle, connecté = sans) + photos achetables au Shop
-const AVATARS=[{k:'flamme',n:'Flamme',e:'🔥',bg:'#5a2418'},{k:'goutte',n:'Goutte',e:'💧',bg:'#173a5c'},{k:'feuille',n:'Feuille',e:'🍃',bg:'#1e4a26'}];
+const AVATARS=[{k:'flamme',n:'Flamme',e:'🔥',bg:'#5a2418'},{k:'goutte',n:'Goutte',e:'💧',bg:'#173a5c'},{k:'feuille',n:'Feuille',e:'🍃',bg:'#1e4a26'},{k:'eclair',n:'Éclair',e:'⚡',bg:'#4a4214'},{k:'roc',n:'Roc',e:'🪨',bg:'#3a3631'},{k:'lune',n:'Lune',e:'🌙',bg:'#1f2547'}];
 const AVATAR_PRICE=100;
 function avatarHTML(k){const a=AVATARS.find(x=>x.k===k);if(a)return `<i class="avc" style="background:${a.bg}">${a.e}</i>`;return `<i class="avimg ${ACC.p?'nr':''}"></i>`;}
 const AVATAR_SVG='<i class="avimg"></i>';
@@ -1723,7 +1730,7 @@ function achHTML(p){
   return `<div class="achs">${shown.map(a=>{const v=Math.min(achVal(a,p),a.n),ok=v>=a.n;
   const done=ACHIEVEMENTS.filter(x=>x.k===a.k&&achVal(x,p)>=x.n).length;
   const tiers=ACHIEVEMENTS.filter(x=>x.k===a.k), open=UI.achOpen===a.k;
-  const list=open?`<div class="achlist">${tiers.map(x=>{const v=Math.min(achVal(x,p),x.n),o=v>=x.n;return `<div class="achl ${o?'ok':''}"><span class="lmark">${o?'★':'○'}</span><span class="ltit">${x.t}</span><span class="lval">${o?'Obtenu':`${v}/${x.n}`}</span></div>`;}).join('')}</div>`:'';
+  const list=open?`<div class="achlist">${tiers.slice(0,Math.min(tiers.length,done+1)).map((x,ti)=>{const v=Math.min(achVal(x,p),x.n),o=v>=x.n;return `<div class="achl ${o?'ok':''}"><span class="lbadge">${achBadge(a.k,o?ti+1:0)}</span><span class="ltit">${x.t}</span><span class="lval">${o?'Obtenu':`${v}/${x.n}`}</span></div>`;}).join('')}</div>`:'';
   return `<div class="ach ${ok?'ok':''} ${open?'open':''}" data-a="achopen:${a.k}">${achBadge(a.k,done)}<span class="ainfo"><span class="atit">${a.t}</span><span class="abar"><i style="width:${Math.round(v/a.n*100)}%"></i></span></span><span class="aval">${ok?'Obtenu':`${v}/${a.n}`}</span><span class="achev">▾</span></div>${list}`;}).join('')}</div>`;}
 const COIN='<span class="coin" aria-hidden="true">🪙</span>';
 function accField(key,label,type){const v=UI.af[key]||'',pw=type==='password',show=pw&&UI.af.show;
@@ -1748,7 +1755,7 @@ function renderCompte(sub){
   if(!ACC.p) return `<div class="page ctr">${head}<div class="box sbox"><h3 class="xo">Deck de départ</h3><p class="muted cap">Dernière étape : choisis ton deck de départ.</p>${startDeckPick()}</div>${accMsg()}
     <div class="setact"><button class="primary xo" data-a="accfinish" ${ACC.busy?'disabled':''}>Valider</button></div><p class="cap"><button class="ghost sbtn" data-a="logoutask">Se déconnecter</button></p></div>`;
   const p=ACC.p, L=levelOf(p.points), pct=Math.round(L.rest/L.need*100);
-  return `<div class="page ctr">${head}<div class="box sbox accpro"><div class="pavatar">${avatarHTML(p.avatar)}</div><div class="accname xo">${esc(p.name)}</div>
+  return `<div class="page ctr">${head}<div class="box sbox accpro"><div class="pavatar" data-a="avpick" role="button" aria-label="Changer de photo de profil">${avatarHTML(p.avatar)}</div><div class="accname xo">${esc(p.name)}</div>
       <div class="lvl"><span class="xo">Niveau ${L.lv}</span><span class="muted">${L.rest} / ${L.need} points</span></div><div class="lvbar"><i style="width:${pct}%"></i></div>
       <div class="accline coins"><span>Cartes totales possédées</span><b>${ownedCardCount()}</b></div>
       <div class="accline"><span>${COIN} Pièces</span><b class="ac">${p.coins}</b></div>
@@ -1776,10 +1783,10 @@ function renderShop(){
     <div class="tokstep"><button class="tsb" data-a="tokq:-1" aria-label="Moins">−</button><div class="tokq">${JETON}<b>${tq}</b></div><button class="tsb" data-a="tokq:1" aria-label="Plus">+</button></div>
     <button class="${tok?'primary':tq?'buy':'off'} xo tokgo" data-a="buytok" data-buy="tok" ${tq?'':'disabled'}>${tok?'Confirmer':`${tq*PACK.tokenPrice} ${COIN}`}</button></div></div>`;
   const own=ACC.p.avatars||[], cur=ACC.p.avatar||'';
-  const avs=`<div class="dgroup"><h3 class="xo grp">Photos de profil</h3><div class="avgrid">
-    ${[{k:'',n:'Base'},...AVATARS].map(a=>{const has=!a.k||own.includes(a.k),on=cur===a.k,ask=UI.buyAsk==='av'+a.k,ok=c>=AVATAR_PRICE;
-      const btn=on?'<button class="off" disabled>Équipée</button>':has?`<button class="buy" data-a="setav:${a.k||'base'}">Équiper</button>`:`<button class="${ask?'primary':ok?'buy':'off'} xo" data-a="buyav:${a.k}" data-buy="av${a.k}" ${ok?'':'disabled'}>${ask?'Confirmer':`${AVATAR_PRICE} ${COIN}`}</button>`;
-      return `<div class="avit ${on?'on':''}"><span class="shopav">${a.k?avatarHTML(a.k):AVATAR_SVG}</span><span class="avn">${a.n}</span>${btn}</div>`;}).join('')}</div></div>`;
+  const sale=AVATARS.filter(a=>!own.includes(a.k));
+  const avs=`<div class="dgroup"><h3 class="xo grp">Photos de profil</h3>${sale.length?`<div class="avgrid">
+    ${sale.map(a=>{const ask=UI.buyAsk==='av'+a.k,ok=c>=AVATAR_PRICE;
+      return `<div class="avit"><span class="shopav">${avatarHTML(a.k)}</span><span class="avn">${a.n}</span><button class="${ask?'primary':ok?'buy':'off'} xo" data-a="buyav:${a.k}" data-buy="av${a.k}" ${ok?'':'disabled'}>${ask?'Confirmer':`${AVATAR_PRICE} ${COIN}`}</button></div>`;}).join('')}</div>`:'<p class="muted cap" style="margin:0 0 6px">Tu as toutes les photos !</p>'}</div>`;
   return `<div class="page ctr"><div class="ptop"><h2>Shop</h2><div class="right wallet">${COIN} <b>${c}</b></div></div><button class="backbtn" data-a="back:params"><span class="bchev">‹</span> Retour</button>
     ${tokens}${avs}${left.length?`<div class="dgroup"><h3 class="xo grp">Decks</h3>${left.map(item).join('')}</div>`:'<div class="box sbox"><p class="muted cap">Tu as déjà tous les decks !</p></div>'}${accMsg()}</div>`;
 }
@@ -1805,7 +1812,7 @@ function packTimerHTML(){
     <p class="ptime mono">${st.next?fmtLeft(st.next-Date.now()):'Réserve pleine'}</p></div>
     ${t?`<div class="ptok" aria-label="${t} jeton${s_(t)} booster">${JETON}<b>${t}</b></div>`:''}</div>`;
 }
-function packVisual(ser,cls){return `<div class="pack ${cls||''}" role="img" aria-label="Booster ${esc(ser.name)}"><i class="pimg"></i><i class="pshine"></i></div>`;}
+function packVisual(ser,cls){return `<div class="pack ${cls||''}" ${cls?'':`style="animation-delay:-${(Date.now()%2400)/1000}s"`} role="img" aria-label="Booster ${esc(ser.name)}"><i class="pimg"></i><i class="pshine"></i></div>`;}
 function renderHome(){
   const ser=SERIES.find(x=>x.k===UI.series)||SERIES[0], can=!!ACC.p&&canOpen();
   const menu=UI.serOpen?`<div class="sortbg" data-a="sermenu"></div><div class="sermenu">${SERIES.map(x=>`<button class="${x.k===ser.k?'on':''}" data-a="setser:${x.k}">${esc(x.name)}</button>`).join('')}</div>`:'';
@@ -2480,13 +2487,15 @@ const H = {
     UI.packOpening=false;UI.packAsk=false;render();},
   packnext(_,e){if(!UI.pack)return;UI.pack.i++;render();},
   packdone(){UI.pack=null;render();},
+  avpick(){UI.avPick=true;render();},
+  avclose(_,e,el){if(e.target!==el)return;UI.avPick=false;render();},
   achopen(k){UI.achOpen=UI.achOpen===k?null:k;render();},
   tokq(d){UI.buyAsk=null;const m=Math.floor(((ACC.p&&ACC.p.coins)||0)/PACK.tokenPrice);UI.tokQ=Math.max(m?1:0,Math.min(m,(UI.tokQ||0)+(+d)));render();},
   buytok(){const n=UI.tokQ|0;if(!ACC.p||n<1||n*PACK.tokenPrice>ACC.p.coins)return;if(UI.buyAsk!=='tok'){UI.buyAsk='tok';return render();}UI.buyAsk=null;
     accRun(async()=>{const r=await SB.rpc('buy_tokens',{p_n:n});if(r.error)throw r.error;setProfile(r.data);UI.tokQ=null;toast(`+${n} jeton${s_(n)}`);});},
   buyav(k){if(!ACC.p||!AVATARS.some(a=>a.k===k))return;if(UI.buyAsk!=='av'+k){UI.buyAsk='av'+k;return render();}UI.buyAsk=null;
     accRun(async()=>{const r=await SB.rpc('buy_avatar',{p_av:k});if(r.error)throw r.error;setProfile(r.data);toast('Photo de profil débloquée !');});},
-  setav(k){if(!ACC.p)return;accRun(async()=>{const r=await SB.rpc('set_avatar',{p_av:k==='base'?null:k});if(r.error)throw r.error;setProfile(r.data);});},
+  setav(k){if(!ACC.p)return;UI.avPick=false;if((ACC.p.avatar||'base')===k){return render();}accRun(async()=>{const r=await SB.rpc('set_avatar',{p_av:k==='base'?null:k});if(r.error)throw r.error;setProfile(r.data);});},
   swapsel(){if(G.phase!=='actions'||G.pending.length)return;const t=swapTargets();if(!t.length)return;G.pending.push({kind:'target',what:'swap',p:G.cur,options:t});render();},
   swap(uid){if(G.phase!=='actions'||G.pending.length||!swapOk(+uid))return;act(()=>doSwap(+uid));},
   attack(kind){kind=kind==='spe'?'spe':'base';if(canAttack(kind))act(()=>doAttack(kind));},
