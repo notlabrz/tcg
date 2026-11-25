@@ -690,6 +690,16 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 .gitems{display:flex;gap:18px;align-items:center;font-size:15px}.gitems span{display:inline-flex;align-items:center;gap:6px}.gitems b{font-size:19px}
 .giftbtn{min-width:110px;padding:10px 12px;font-size:16px}.giftbtn.off{background:#262a34;color:#9aa0ad;opacity:1}
 .dkbuy{padding:11px 22px;font-size:15.5px}.dkbuy.off{background:#262a34;color:#9aa0ad;border-color:#363c4a;opacity:1}
+.pkask:not(.opening) .pack::before{transform:translateX(var(--tear,0)) rotate(var(--tearr,0deg));transform-origin:left bottom;transition:transform .08s}
+.pkask .pack{touch-action:none}
+.dfg{position:relative}.dfold{position:absolute;top:10px;right:10px;width:32px;height:32px;padding:0;border-radius:50%;background:transparent;border:0;color:var(--muted);font-size:17px;line-height:1;transition:transform .15s}.dfold:hover{background:var(--panel2)}
+.dfg.folded .dfold{transform:rotate(90deg)}.dfg.folded{padding-bottom:4px}
+.dkbuy{padding:8px 16px!important;font-size:14px!important}
+.avcircles{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin:4px 0 6px}
+.avcir{width:64px;height:64px;padding:0;border-radius:50%;background:none;border:0;cursor:pointer;box-shadow:0 0 0 2px #363c4a}.avcir:hover{background:none}
+.avcir .shopav{width:64px;height:64px}.avcir .shopav .avc{font-size:32px}
+.avcir.cur{box-shadow:0 0 0 2px var(--accent)}.avcir.sel{box-shadow:0 0 0 3px #fff}
+.avok{margin-top:14px;padding:10px 20px;font-size:15px}
 </style>
 </head>
 <body>
@@ -712,7 +722,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.32.1';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.33.0';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1290,7 +1300,7 @@ function doAttack(kind){
   else G.actions-=atkCost();
   const k=attackCalc(kind,coin);
   log(`⚔ ${nm(a)} attaque ${nm(d)} (${kind==='spe'?'attaque spéciale '+speLabel(card):'attaque de base'}) : ${k.txt}.`);
-  if(!k.miss) damage(1-p,d,k.dmg,p);
+  if(!k.miss){G.maxHit=G.maxHit||[0,0];G.maxHit[p]=Math.max(G.maxHit[p]||0,k.dmg);damage(1-p,d,k.dmg,p);}
   if(!k.miss&&!mine(1-p).includes(d)&&abIs(card,'frenesie')&&A.champion===a){
     const g=heal(a,card.abX);log(`✦ Frénésie : ${card.name} récupère ${g} DEF (${curDef(a)}/${maxDef(a)}).`,'good');}
   G.after='end';
@@ -1383,8 +1393,9 @@ function render(){
   render.hk=hk; if(hsl){const m2=$('.mhand');if(m2)m2.scrollLeft=hsl;} // garde la position de la main entre deux affichages du même tour
   const inMatch=UI.tab==='combat'&&!!G; document.body.classList.toggle('inmatch',inMatch);
   if(!inMatch){UI.gmenu=false;UI.sheet=null;if(UI.mmodal)UI.mmodal=null;}
-  $('#modal').innerHTML = UI.avPick&&UI.tab==='params'&&ACC.p?`<div class="modal-bg" data-a="avclose"><div class="modal avpick"><h3 class="xo">Photo de profil</h3><div class="avgrid">${[{k:'',n:'Base'},...AVATARS.filter(a=>(ACC.p.avatars||[]).includes(a.k))].map(a=>{const on=(ACC.p.avatar||'')===a.k;
-    return `<div class="avit ${on?'on':''}" data-a="setav:${a.k||'base'}"><span class="shopav">${a.k?avatarHTML(a.k):AVATAR_SVG}</span></div>`;}).join('')}</div></div></div>`:UI.pack?renderPackOpen():(UI.packAsk||UI.packOpening)&&UI.tab==='home'?renderPackAsk():UI.logoutAsk&&UI.tab==='params'?`<div class="modal-bg" data-a="logoutno"><div class="modal qmodal"><h3 class="xo">Se déconnecter ?</h3><div class="qbtns"><button data-a="logoutno">Non</button><button class="primary xo" data-a="acclogout">Oui</button></div></div></div>`:UI.detail?renderDetail(UI.detail):UI.colf&&UI.tab==='cartes'?renderColFilters():UI.exportText!==null?renderExport():UI.confirmQuit&&inMatch?renderQuitModal():inMatch&&G.pending[0]&&G.pending[0].kind==='deckpick'&&mine_(G.pending[0].p)?renderDeckpick():UI.bigc&&UI.mmodal&&inMatch?cardView(UI.bigc,'','closebig'):UI.mmodal&&inMatch?renderMatchModal():UI.sheet&&inMatch?renderSheet():'';
+  $('#modal').innerHTML = UI.avPick&&UI.tab==='params'&&ACC.p?`<div class="modal-bg" data-a="avclose"><div class="modal avpick"><h3 class="xo">Photo de profil</h3><div class="avcircles">${[{k:'',n:'Base'},...AVATARS.filter(a=>(ACC.p.avatars||[]).includes(a.k))].map(a=>{const cur=(ACC.p.avatar||'')===a.k,sel=(UI.avSel??(ACC.p.avatar||''))===a.k;
+    return `<button class="avcir ${sel?'sel':''} ${cur?'cur':''}" data-a="avsel:${a.k||'base'}" aria-label="${a.n}"><span class="shopav">${a.k?avatarHTML(a.k):AVATAR_SVG}</span></button>`;}).join('')}</div>
+    ${UI.avSel!=null&&UI.avSel!==(ACC.p.avatar||'')?`<button class="primary xo avok" data-a="setav:${UI.avSel||'base'}">Changer la photo de profil</button>`:''}</div></div>`:UI.pack?renderPackOpen():(UI.packAsk||UI.packOpening)&&UI.tab==='home'?renderPackAsk():UI.logoutAsk&&UI.tab==='params'?`<div class="modal-bg" data-a="logoutno"><div class="modal qmodal"><h3 class="xo">Se déconnecter ?</h3><div class="qbtns"><button data-a="logoutno">Non</button><button class="primary xo" data-a="acclogout">Oui</button></div></div></div>`:UI.detail?renderDetail(UI.detail):UI.colf&&UI.tab==='cartes'?renderColFilters():UI.exportText!==null?renderExport():UI.confirmQuit&&inMatch?renderQuitModal():inMatch&&G.pending[0]&&G.pending[0].kind==='deckpick'&&mine_(G.pending[0].p)?renderDeckpick():UI.bigc&&UI.mmodal&&inMatch?cardView(UI.bigc,'','closebig'):UI.mmodal&&inMatch?renderMatchModal():UI.sheet&&inMatch?renderSheet():'';
   if(inMatch) sizeBoard();
   fitArt();
   if(NET.role==='host'&&G&&G.online) netBroadcast();
@@ -1440,11 +1451,12 @@ function renderCartes(){
   const nav=UI.nav.cartes;
   if(!nav.length||nav[0]==='collection') return renderCollection();
   if(nav[0]==='decks'&&nav.length===1){
-    const tiles=DECK_GROUPS.map(([g,t])=>`<div class="dgroup"><h3 class="xo grp">${t}</h3><div class="dtiles">${DECK_ORDER.filter(k=>DECKS[k].group===g).map(k=>deckTile(k,`go:cartes:decks:${k}`)).join('')}</div></div>`).join('');
+    const fold=UI.dfold||{};
+    const tiles=DECK_GROUPS.map(([g,t])=>`<div class="dgroup dfg ${fold[g]?'folded':''}"><button class="dfold" data-a="dfold:${g}" aria-label="${fold[g]?'Afficher':'Masquer'} la liste">▾</button><h3 class="xo grp">${t}</h3>${fold[g]?'':`<div class="dtiles">${DECK_ORDER.filter(k=>DECKS[k].group===g).map(k=>deckTile(k,`go:cartes:decks:${k}`)).join('')}</div>`}</div>`).join('');
     return `<div class="page ctr">${navHead('cartes','Decks')}${tiles}</div>`;
   }
   const k=nav[1];
-  const dbtn=ACC.p?(ownsDeck(k)?'<button class="off dkbuy" disabled>Possédé</button>':`<button class="primary xo dkbuy" data-a="go:params:shop:${k}">Acheter dans le shop</button>`):'';
+  const dbtn=ACC.p?(ownsDeck(k)?'<button class="off dkbuy xo" disabled>Possédé</button>':`<button class="primary xo dkbuy" data-a="go:params:shop:${k}">Acheter dans le shop</button>`):'';
   return `<div class="page ctr">${navHead('cartes',`<span style="color:${deckColor(k)}">${deckLabel(k)}</span>`)}${dbtn?`<div style="margin-bottom:14px">${dbtn}</div>`:''}${deckCompoHTML(k)}</div>`;
 }
 /* ---- Collection : filtres et tri ---- */
@@ -1706,6 +1718,7 @@ async function accRun(fn){if(ACC.busy)return;ACC.busy=true;ACC.err='';render();t
 function checkReward(){
   if(!SB||!ACC.p||!G||!G.online||G.phase!=='matchover') return;
   const key=[G.start,G.round,G.names.join('|')].join(':'); if(ACC.rewarded.has(key)) return; ACC.rewarded.add(key);
+  const hit=(G.maxHit&&G.maxHit[MY_SEAT])||0; if(hit>(ACC.p.best_hit||0)) SB.rpc('record_hit',{p_n:hit}).then(({data,error})=>{if(!error&&data){setProfile(data);render();}});
   if(G.lastWinner!==MY_SEAT){SB.rpc('record_loss',{p_match:key}).then(({data,error})=>{if(!error&&data){setProfile(data);render();}});return;}
   const before=levelOf(ACC.p.points).lv;
   SB.rpc('record_win',{p_match:key}).then(({data,error})=>{if(error)return;setProfile(data);const lv=levelOf(data.points).lv;
@@ -1742,7 +1755,7 @@ function achHTML(p){
   return `<div class="achs">${shown.map(a=>{const v=Math.min(achVal(a,p),a.n),ok=v>=a.n;
   const done=ACHIEVEMENTS.filter(x=>x.k===a.k&&achVal(x,p)>=x.n).length;
   const tiers=ACHIEVEMENTS.filter(x=>x.k===a.k), open=UI.achOpen===a.k;
-  const list=open?`<div class="achlist">${tiers.slice(0,Math.min(tiers.length,done+1)).map((x,ti)=>{const v=Math.min(achVal(x,p),x.n),o=v>=x.n;return `<div class="achl ${o?'ok':''}"><span class="lbadge">${achBadge(a.k,o?ti+1:0)}</span><span class="ltit">${x.t}${o?'':`<small class="lrew">Récompense : ${achReward(ti)} ${COIN}</small>`}</span><span class="lval">${o?'Obtenu':`${v}/${x.n}`}</span></div>`;}).join('')}</div>`:'';
+  const list=open?`<div class="achlist">${tiers.slice(0,Math.min(tiers.length,done+1)).map((x,ti)=>{const v=Math.min(achVal(x,p),x.n),o=v>=x.n;return `<div class="achl ${o?'ok':''}"><span class="lbadge">${achBadge(a.k,o?ti+1:done)}</span><span class="ltit">${x.t}${o?'':`<small class="lrew">Récompense : ${achReward(ti)} ${COIN}</small>`}</span><span class="lval">${o?'Obtenu':`${v}/${x.n}`}</span></div>`;}).join('')}</div>`:'';
   return `<div class="ach ${ok?'ok':''} ${open?'open':''}" data-a="achopen:${a.k}">${achBadge(a.k,done)}<span class="ainfo"><span class="atit">${a.t}</span><span class="abar"><i style="width:${Math.round(v/a.n*100)}%"></i></span></span><span class="aval">${ok?'Obtenu':`${v}/${a.n}`}</span><span class="achev">▾</span></div>${list}`;}).join('')}</div>`;}
 const COIN='<span class="coin" aria-hidden="true">🪙</span>';
 function accField(key,label,type){const v=UI.af[key]||'',pw=type==='password',show=pw&&UI.af.show;
@@ -1772,7 +1785,11 @@ function renderCompte(sub){
       <div class="accline coins"><span>Cartes totales possédées</span><b>${ownedCardCount()}</b></div>
       <div class="accline"><span>${COIN} Pièces</span><b class="ac">${p.coins}</b></div>
       <div class="accline"><span class="jtl">${JETON} Jetons booster</span><b>${p.tokens||0}</b></div>
-      <div class="accrow"><div class="accline"><span>Victoires</span><b>${p.wins||0}</b></div><div class="accline"><span>Défaites</span><b>${p.losses||0}</b></div></div></div>
+</div>
+    <div class="box sbox"><h3 class="xo">Statistiques</h3>
+      <div class="accrow"><div class="accline"><span>Victoires</span><b>${p.wins||0}</b></div><div class="accline"><span>Défaites</span><b>${p.losses||0}</b></div></div>
+      <div class="accline"><span>Victoires d'affilée (record)</span><b>${p.best_streak||0}</b></div>
+      <div class="accline"><span>Plus gros dégât infligé</span><b>${p.best_hit||0}</b></div></div>
     <div class="box sbox"><h3 class="xo">Succès</h3>${achHTML(p)}</div>${accMsg()}
     <p class="cap"><button class="ghost sbtn" data-a="logoutask">Se déconnecter</button></p></div>`;
 }
@@ -1859,6 +1876,13 @@ function renderPackOpen(){
     ${Array.from({length:Math.min(left-1,4)},(_,j)=>`<div class="pkback" style="--o:${j+1}"></div>`).reverse().join('')}
     <div class="pkcur" data-a="packnext"><span class="pnewtag ${P.isNew[P.i]?'':'off'}">Nouveau</span>${cardArt(id,{})}</div></div></div>`;
 }
+// Ouverture en déchirant : glisser le long de la bande crantée du haut du booster
+const TEAR={x0:null,w:0,el:null};
+document.addEventListener('pointerdown',e=>{const pk=UI.packAsk&&!UI.packOpening&&e.target.closest&&e.target.closest('.pkask .pack');if(!pk)return;
+  const r=pk.getBoundingClientRect();if(e.clientY-r.top>r.height*.16)return;TEAR.x0=e.clientX;TEAR.w=r.width;TEAR.el=pk;try{pk.setPointerCapture(e.pointerId);}catch(_){}},true);
+document.addEventListener('pointermove',e=>{if(TEAR.x0==null)return;const dx=e.clientX-TEAR.x0;TEAR.el.style.setProperty('--tear',dx+'px');TEAR.el.style.setProperty('--tearr',(dx/12)+'deg');
+  if(Math.abs(dx)>TEAR.w*.5){TEAR.x0=null;DRAG.suppress=true;setTimeout(()=>{DRAG.suppress=false;},400);H.openpack();}},true);
+document.addEventListener('pointerup',()=>{if(TEAR.x0==null)return;if(TEAR.el){TEAR.el.style.removeProperty('--tear');TEAR.el.style.removeProperty('--tearr');DRAG.suppress=true;setTimeout(()=>{DRAG.suppress=false;},300);}TEAR.x0=null;},true);
 const PSW={x:null,y:null};
 document.addEventListener('pointerdown',e=>{PSW.x=UI.pack&&e.target.closest&&e.target.closest('.pkbg')?e.clientX:null;PSW.y=e.clientY;},true);
 document.addEventListener('pointermove',e=>{if(PSW.x==null||!UI.pack)return;const c=$('.pkcur');if(c)c.style.transform=`translateX(${e.clientX-PSW.x}px) rotate(${(e.clientX-PSW.x)/25}deg)`;},true);
@@ -2509,8 +2533,10 @@ const H = {
     UI.packOpening=false;UI.packAsk=false;render();},
   packnext(_,e){if(!UI.pack)return;UI.pack.i++;render();},
   packdone(){UI.pack=null;render();},
-  avpick(){UI.avPick=true;render();},
+  avpick(){UI.avPick=true;UI.avSel=null;render();},
+  avsel(k){UI.avSel=k==='base'?'':k;render();},
   avclose(_,e,el){if(e.target!==el)return;UI.avPick=false;render();},
+  dfold(g){UI.dfold=UI.dfold||{};UI.dfold[g]=!UI.dfold[g];render();},
   achopen(k){UI.achOpen=UI.achOpen===k?null:k;render();},
   claimgift(){if(!ACC.p||giftNext())return;accRun(async()=>{const r=await SB.rpc('claim_gift');if(r.error)throw r.error;setProfile(r.data);toast(`Cadeau récupéré : +${GIFT.coins} pièce · +${GIFT.tokens} jeton`);});},
   tokq(d){UI.buyAsk=null;const m=Math.floor(((ACC.p&&ACC.p.coins)||0)/PACK.tokenPrice);UI.tokQ=Math.max(m?1:0,Math.min(m,(UI.tokQ||0)+(+d)));render();},
@@ -2518,7 +2544,7 @@ const H = {
     accRun(async()=>{const r=await SB.rpc('buy_tokens',{p_n:n});if(r.error)throw r.error;setProfile(r.data);UI.tokQ=null;toast(`+${n} jeton${s_(n)}`);});},
   buyav(k){if(!ACC.p||!AVATARS.some(a=>a.k===k))return;if(UI.buyAsk!=='av'+k){UI.buyAsk='av'+k;return render();}UI.buyAsk=null;
     accRun(async()=>{const r=await SB.rpc('buy_avatar',{p_av:k});if(r.error)throw r.error;setProfile(r.data);toast('Photo de profil débloquée !');});},
-  setav(k){if(!ACC.p)return;UI.avPick=false;if((ACC.p.avatar||'base')===k){return render();}accRun(async()=>{const r=await SB.rpc('set_avatar',{p_av:k==='base'?null:k});if(r.error)throw r.error;setProfile(r.data);});},
+  setav(k){if(!ACC.p)return;UI.avPick=false;UI.avSel=null;if((ACC.p.avatar||'base')===k){return render();}accRun(async()=>{const r=await SB.rpc('set_avatar',{p_av:k==='base'?null:k});if(r.error)throw r.error;setProfile(r.data);});},
   swapsel(){if(G.phase!=='actions'||G.pending.length)return;const t=swapTargets();if(!t.length)return;G.pending.push({kind:'target',what:'swap',p:G.cur,options:t});render();},
   swap(uid){if(G.phase!=='actions'||G.pending.length||!swapOk(+uid))return;act(()=>doSwap(+uid));},
   attack(kind){kind=kind==='spe'?'spe':'base';if(canAttack(kind))act(()=>doAttack(kind));},
