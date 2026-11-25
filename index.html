@@ -690,7 +690,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 .gitems{display:flex;gap:18px;align-items:center;font-size:15px}.gitems span{display:inline-flex;align-items:center;gap:6px}.gitems b{font-size:19px}
 .giftbtn{min-width:110px;padding:10px 12px;font-size:16px}.giftbtn.off{background:#262a34;color:#9aa0ad;opacity:1}
 .dkbuy{padding:11px 22px;font-size:15.5px}.dkbuy.off{background:#262a34;color:#9aa0ad;border-color:#363c4a;opacity:1}
-.pkask:not(.opening) .pack::before{transform:translateX(var(--tear,0)) rotate(var(--tearr,0deg));transform-origin:left bottom;transition:transform .08s}
+.pkask:not(.opening) .pack::before{transform:translateY(var(--teary,0)) rotate(var(--tearr,0deg));transform-origin:var(--tearo,right bottom);transition:transform .08s}
 .pkask .pack{touch-action:none}
 .dfg{position:relative}.dfold{position:absolute;top:10px;right:10px;width:32px;height:32px;padding:0;border-radius:50%;background:transparent;border:0;color:var(--muted);font-size:17px;line-height:1;transition:transform .15s}.dfold:hover{background:var(--panel2)}
 .dfg.folded .dfold{transform:rotate(90deg)}.dfg.folded{padding-bottom:4px}
@@ -700,6 +700,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 .avcir .shopav{width:64px;height:64px}.avcir .shopav .avc{font-size:32px}
 .avcir.cur{box-shadow:0 0 0 2px var(--accent)}.avcir.sel{box-shadow:0 0 0 3px #fff}
 .avok{margin-top:14px;padding:10px 20px;font-size:15px}
+.pack.tearing .pimg{clip-path:inset(7% 0 0 0)}.pack.tearing .pshine{display:none}
 </style>
 </head>
 <body>
@@ -722,7 +723,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.33.0';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.33.1';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1456,7 +1457,7 @@ function renderCartes(){
     return `<div class="page ctr">${navHead('cartes','Decks')}${tiles}</div>`;
   }
   const k=nav[1];
-  const dbtn=ACC.p?(ownsDeck(k)?'<button class="off dkbuy xo" disabled>Possédé</button>':`<button class="primary xo dkbuy" data-a="go:params:shop:${k}">Acheter dans le shop</button>`):'';
+  const dbtn=ACC.p?(ownsDeck(k)?'<button class="off dkbuy xo" disabled>Possédé</button>':`<button class="primary xo dkbuy" data-a="shopdecks">Acheter dans le shop</button>`):'';
   return `<div class="page ctr">${navHead('cartes',`<span style="color:${deckColor(k)}">${deckLabel(k)}</span>`)}${dbtn?`<div style="margin-bottom:14px">${dbtn}</div>`:''}${deckCompoHTML(k)}</div>`;
 }
 /* ---- Collection : filtres et tri ---- */
@@ -1755,7 +1756,7 @@ function achHTML(p){
   return `<div class="achs">${shown.map(a=>{const v=Math.min(achVal(a,p),a.n),ok=v>=a.n;
   const done=ACHIEVEMENTS.filter(x=>x.k===a.k&&achVal(x,p)>=x.n).length;
   const tiers=ACHIEVEMENTS.filter(x=>x.k===a.k), open=UI.achOpen===a.k;
-  const list=open?`<div class="achlist">${tiers.slice(0,Math.min(tiers.length,done+1)).map((x,ti)=>{const v=Math.min(achVal(x,p),x.n),o=v>=x.n;return `<div class="achl ${o?'ok':''}"><span class="lbadge">${achBadge(a.k,o?ti+1:done)}</span><span class="ltit">${x.t}${o?'':`<small class="lrew">Récompense : ${achReward(ti)} ${COIN}</small>`}</span><span class="lval">${o?'Obtenu':`${v}/${x.n}`}</span></div>`;}).join('')}</div>`:'';
+  const list=open?`<div class="achlist">${tiers.slice(0,Math.min(tiers.length,done+1)).map((x,ti)=>{const v=Math.min(achVal(x,p),x.n),o=v>=x.n;return `<div class="achl ${o?'ok':''}"><span class="lbadge">${achBadge(a.k,o||done?ti+1:0)}</span><span class="ltit">${x.t}${o?'':`<small class="lrew">Récompense : ${achReward(ti)} ${COIN}</small>`}</span><span class="lval">${o?'Obtenu':`${v}/${x.n}`}</span></div>`;}).join('')}</div>`:'';
   return `<div class="ach ${ok?'ok':''} ${open?'open':''}" data-a="achopen:${a.k}">${achBadge(a.k,done)}<span class="ainfo"><span class="atit">${a.t}</span><span class="abar"><i style="width:${Math.round(v/a.n*100)}%"></i></span></span><span class="aval">${ok?'Obtenu':`${v}/${a.n}`}</span><span class="achev">▾</span></div>${list}`;}).join('')}</div>`;}
 const COIN='<span class="coin" aria-hidden="true">🪙</span>';
 function accField(key,label,type){const v=UI.af[key]||'',pw=type==='password',show=pw&&UI.af.show;
@@ -1787,7 +1788,7 @@ function renderCompte(sub){
       <div class="accline"><span class="jtl">${JETON} Jetons booster</span><b>${p.tokens||0}</b></div>
 </div>
     <div class="box sbox"><h3 class="xo">Statistiques</h3>
-      <div class="accrow"><div class="accline"><span>Victoires</span><b>${p.wins||0}</b></div><div class="accline"><span>Défaites</span><b>${p.losses||0}</b></div></div>
+      <div class="accline"><span>Victoires</span><b>${p.wins||0}</b></div>
       <div class="accline"><span>Victoires d'affilée (record)</span><b>${p.best_streak||0}</b></div>
       <div class="accline"><span>Plus gros dégât infligé</span><b>${p.best_hit||0}</b></div></div>
     <div class="box sbox"><h3 class="xo">Succès</h3>${achHTML(p)}</div>${accMsg()}
@@ -1828,7 +1829,7 @@ function renderShop(){
     ${sale.map(a=>{const ask=UI.buyAsk==='av'+a.k,ok=c>=AVATAR_PRICE;
       return `<div class="avit"><span class="shopav">${avatarHTML(a.k)}</span><span class="avn">${a.n}</span><button class="${ask?'primary':ok?'buy':'off'} xo" data-a="buyav:${a.k}" data-buy="av${a.k}" ${ok?'':'disabled'}>${ask?'Confirmer':`${AVATAR_PRICE} ${COIN}`}</button></div>`;}).join('')}</div>`:'<p class="muted cap" style="margin:0 0 6px">Tu as toutes les photos !</p>'}</div>`;
   return `<div class="page ctr"><div class="ptop"><h2>Shop</h2><div class="right wallet">${COIN} <b>${c}</b></div></div><button class="backbtn" data-a="back:params"><span class="bchev">‹</span> Retour</button>
-    ${giftHTML()}${tokens}${avs}${left.length?`<div class="dgroup"><h3 class="xo grp">Decks</h3>${left.map(item).join('')}</div>`:'<div class="box sbox"><p class="muted cap">Tu as déjà tous les decks !</p></div>'}${accMsg()}</div>`;
+    ${giftHTML()}${tokens}${avs}${left.length?`<div class="dgroup" id="shopdecks"><h3 class="xo grp">Decks</h3>${left.map(item).join('')}</div>`:'<div class="box sbox"><p class="muted cap">Tu as déjà tous les decks !</p></div>'}${accMsg()}</div>`;
 }
 /* =========================================================
    HOME · packs (série 1)
@@ -1880,9 +1881,11 @@ function renderPackOpen(){
 const TEAR={x0:null,w:0,el:null};
 document.addEventListener('pointerdown',e=>{const pk=UI.packAsk&&!UI.packOpening&&e.target.closest&&e.target.closest('.pkask .pack');if(!pk)return;
   const r=pk.getBoundingClientRect();if(e.clientY-r.top>r.height*.16)return;TEAR.x0=e.clientX;TEAR.w=r.width;TEAR.el=pk;try{pk.setPointerCapture(e.pointerId);}catch(_){}},true);
-document.addEventListener('pointermove',e=>{if(TEAR.x0==null)return;const dx=e.clientX-TEAR.x0;TEAR.el.style.setProperty('--tear',dx+'px');TEAR.el.style.setProperty('--tearr',(dx/12)+'deg');
-  if(Math.abs(dx)>TEAR.w*.5){TEAR.x0=null;DRAG.suppress=true;setTimeout(()=>{DRAG.suppress=false;},400);H.openpack();}},true);
-document.addEventListener('pointerup',()=>{if(TEAR.x0==null)return;if(TEAR.el){TEAR.el.style.removeProperty('--tear');TEAR.el.style.removeProperty('--tearr');DRAG.suppress=true;setTimeout(()=>{DRAG.suppress=false;},300);}TEAR.x0=null;},true);
+document.addEventListener('pointermove',e=>{if(TEAR.x0==null)return;const dx=e.clientX-TEAR.x0,pr=Math.min(1,Math.abs(dx)/(TEAR.w*.92)),st=TEAR.el.style;
+  // la bande se soulève depuis le côté où commence le geste, comme un emballage qu'on déchire
+  st.setProperty('--tearo',dx>=0?'right bottom':'left bottom');st.setProperty('--tearr',(dx>=0?1:-1)*pr*22+'deg');st.setProperty('--teary',-pr*14+'px');TEAR.el.classList.add('tearing');
+  if(pr>=1){TEAR.x0=null;DRAG.suppress=true;setTimeout(()=>{DRAG.suppress=false;},400);H.openpack();}},true);
+document.addEventListener('pointerup',()=>{if(TEAR.x0==null)return;if(TEAR.el){['--tearo','--tearr','--teary'].forEach(v=>TEAR.el.style.removeProperty(v));TEAR.el.classList.remove('tearing');DRAG.suppress=true;setTimeout(()=>{DRAG.suppress=false;},300);}TEAR.x0=null;},true);
 const PSW={x:null,y:null};
 document.addEventListener('pointerdown',e=>{PSW.x=UI.pack&&e.target.closest&&e.target.closest('.pkbg')?e.clientX:null;PSW.y=e.clientY;},true);
 document.addEventListener('pointermove',e=>{if(PSW.x==null||!UI.pack)return;const c=$('.pkcur');if(c)c.style.transform=`translateX(${e.clientX-PSW.x}px) rotate(${(e.clientX-PSW.x)/25}deg)`;},true);
@@ -2536,6 +2539,7 @@ const H = {
   avpick(){UI.avPick=true;UI.avSel=null;render();},
   avsel(k){UI.avSel=k==='base'?'':k;render();},
   avclose(_,e,el){if(e.target!==el)return;UI.avPick=false;render();},
+  shopdecks(){H.go('params','shop');requestAnimationFrame(()=>{const e=document.getElementById('shopdecks'),hd=document.querySelector('header');if(e)window.scrollTo(0,e.getBoundingClientRect().top+window.scrollY-(hd?hd.offsetHeight:0)-12);});},
   dfold(g){UI.dfold=UI.dfold||{};UI.dfold[g]=!UI.dfold[g];render();},
   achopen(k){UI.achOpen=UI.achOpen===k?null:k;render();},
   claimgift(){if(!ACC.p||giftNext())return;accRun(async()=>{const r=await SB.rpc('claim_gift');if(r.error)throw r.error;setProfile(r.data);toast(`Cadeau récupéré : +${GIFT.coins} pièce · +${GIFT.tokens} jeton`);});},
