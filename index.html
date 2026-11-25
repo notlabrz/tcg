@@ -713,15 +713,19 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 .cface{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:grid;place-items:center;
   background:radial-gradient(circle at 34% 28%,color-mix(in srgb,var(--cc) 30%,#fff) 0,var(--cc) 48%,color-mix(in srgb,var(--cc) 55%,#000) 100%);
   box-shadow:inset 0 0 0 5px color-mix(in srgb,var(--cc) 62%,#000),inset 0 0 0 8px color-mix(in srgb,var(--cc) 45%,#fff),inset 0 0 0 10px color-mix(in srgb,var(--cc) 70%,#000),inset 0 -8px 16px #0005,0 10px 26px #000a}
-.cface.back{transform:rotateX(180deg)}
+.cface.front{transform:translateZ(7px)}.cface.back{transform:rotateX(180deg) translateZ(7px)}
+.cedge{position:absolute;inset:0;border-radius:50%;background:color-mix(in srgb,var(--cc) 45%,#000);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--cc) 30%,#000)}
+.cedge:nth-child(odd){background:color-mix(in srgb,var(--cc) 58%,#000)}
 .cface svg{width:56%;height:56%;color:color-mix(in srgb,var(--cc) 22%,#fff);filter:drop-shadow(0 2px 0 #0006)}
 .cface.back span{font-size:70px;line-height:1;color:color-mix(in srgb,var(--cc) 22%,#fff);text-shadow:0 2px 0 #0006;margin-top:-4px}
 .cfmsg{margin-top:26px;font-size:30px;color:#fff;opacity:0;transform:translateY(8px);animation:cfmsg .35s 2s forwards;text-align:center;padding:0 16px}
 @keyframes cfmsg{to{opacity:1;transform:none}}
 /* Photo de profil dans la barre des joueurs */
-.pbav{flex:0 0 auto;width:22px;height:22px;border-radius:50%;overflow:hidden;color:#8a90a0;background:#2a303c;display:block;margin-left:-2px}
-.pbar.avr .pbav{margin:0 -2px 0 0}.pbav .avc{font-size:12px}
-.board .pbav{width:20px;height:20px}.board .pbav .avc{font-size:11px}
+.pbw{display:flex;align-items:center;max-width:100%;min-width:0}.pbw.r{flex-direction:row-reverse;align-self:flex-end}
+.pbav{position:relative;z-index:1;flex:0 0 auto;width:36px;height:36px;border-radius:50%;overflow:hidden;color:#8a90a0;background:#2a303c;display:block;box-shadow:0 0 0 2px var(--line),0 3px 8px #0008}
+.pbw.on .pbav{box-shadow:0 0 0 2px var(--accent),0 3px 8px #0008}.pbav .avc{font-size:20px}
+.pbw .pbar{align-self:center!important;min-width:0;margin-left:-12px;padding-left:15px!important}.pbw.r .pbar{margin:0 -12px 0 0;padding:3px 15px 3px 5px!important}
+.board .sinfo .pbw{align-self:flex-end}
 </style>
 </head>
 <body>
@@ -744,7 +748,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.34.0';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.34.2';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -977,7 +981,7 @@ function checkFlip(){
   const txt=G.online?(mine?'Tu commences':'L\'adversaire commence'):`${esc(G.names[G.first])} commence`;
   const el=document.createElement('div');el.id='coinflip';el.className='cflip';
   el.innerHTML=`<style>@keyframes cfspin{from{transform:rotateX(0)}to{transform:rotateX(${360*6+(mine?0:180)}deg)}}</style>
-    <div class="cftoss"><div class="coin3d" style="--cc:${deckColor(k)}">${coinFaces(k)}</div></div><div class="cfshadow"></div><div class="cfmsg xo">${txt}</div>`;
+    <div class="cftoss"><div class="coin3d" style="--cc:${deckColor(k)}">${Array.from({length:13},(_,i)=>`<i class="cedge" style="transform:translateZ(${i-6}px)"></i>`).join('')}${coinFaces(k)}</div></div><div class="cfshadow"></div><div class="cfmsg xo">${txt}</div>`;
   document.body.appendChild(el);
   let gone=false;const close=()=>{if(gone)return;gone=true;el.classList.add('out');setTimeout(()=>el.remove(),350);};
   setTimeout(()=>el.addEventListener('click',close),2000);setTimeout(close,3800);
@@ -2051,9 +2055,9 @@ function barAv(p){const k=G.avatars&&G.avatars[p],a=AVATARS.find(x=>x.k===k);
   return `<span class="pbav">${a?`<i class="avc" style="background:${a.bg}">${a.e}</i>`:'<i class="avimg nr"></i>'}</span>`;}
 function mBar(p,right){
   const P=PL(p),k=G.decks[p],on=G.cur===p&&!isOver()&&G.phase!=='setup';
-  return `<div class="pbar ${on?'on':''} ${right?'avr':''}">${right?'':barAv(p)}<span class="nm">${esc(G.names[p])}</span>
+  return `<div class="pbw ${right?'r':''} ${on?'on':''}">${barAv(p)}<div class="pbar ${on?'on':''} ${right?'avr':''}"><span class="nm">${esc(G.names[p])}</span>
     ${G.target>1?`<span class="wins" title="Manches gagnées">${'●'.repeat(G.wins[p])}${'○'.repeat(Math.max(0,G.target-G.wins[p]))}</span>`:''}
-    <span class="st">✯ ${P.trophies}<small>/${G.win}</small></span>${right?barAv(p):''}</div>${P.piedFerme?`<div class="flags">${P.piedFerme?'<span class="flag">Pied ferme</span>':''}</div>`:''}`;
+    <span class="st">✯ ${P.trophies}<small>/${G.win}</small></span></div></div>${P.piedFerme?`<div class="flags">${P.piedFerme?'<span class="flag">Pied ferme</span>':''}</div>`:''}`;
 }
 // Le joueur p peut-il agir maintenant sur cet appareil (son tour, phase d'actions, rien en attente) ?
 function canPlayNow(p){return !!G&&G.phase==='actions'&&!G.pending.length&&!G.handoff&&p===G.cur&&mine_(p);}
