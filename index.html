@@ -723,7 +723,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.33.2';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.33.3';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1864,7 +1864,7 @@ function renderHome(){
     ${menu}<button class="serbtn xo" data-a="sermenu">Extension <span class="chev">▴</span></button></div>`;
 }
 function renderPackAsk(){const ser=SERIES.find(x=>x.k===UI.series)||SERIES[0],op=UI.packOpening;
-  return `<div class="modal-bg pkbg pkask ${op?'opening':''}" ${op?'':'data-a="packcancel"'}><div class="pkaskin"><div class="pkanim">${op?'<i class="pkfly f1"></i><i class="pkfly f2"></i><i class="pkfly f3"></i>':''}${packVisual(ser,'sel')}</div>
+  return `<div class="modal-bg pkbg pkask ${op?'opening':''}" ${op?'':'data-a="packcancel"'}><div class="pkaskin"><div class="pkanim">${op?'<i class="pkfly f1"></i><i class="pkfly f2"></i><i class="pkfly f3"></i>':''}${packVisual(ser,'ask')}</div>
     <button class="primary xo pkgo" data-a="openpack" ${op?'disabled':''} ${ACC.p&&!packState().avail?'style="line-height:1.15;padding:9px 34px"':''}>${ACC.p&&!packState().avail?'Ouvrir<small class="pkgosub">avec les jetons booster</small>':'Ouvrir'}</button></div></div>`;}
 // Fenêtre d'ouverture : 5 cartes empilées, on touche pour révéler la suivante
 function renderPackOpen(){
