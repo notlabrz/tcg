@@ -686,6 +686,10 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 .achl{min-height:34px}.achl .lbadge{height:30px;align-items:center}
 .achl .ltit{display:flex;flex-direction:column;gap:2px}.lrew{font-size:11.5px;color:var(--accent)}
 .pkgosub{display:block;font-size:11.5px;font-weight:700;letter-spacing:.2px;margin-top:2px}
+.gift{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--good,#4ade80)}
+.gitems{display:flex;gap:18px;align-items:center;font-size:15px}.gitems span{display:inline-flex;align-items:center;gap:6px}.gitems b{font-size:19px}
+.giftbtn{min-width:110px;padding:10px 12px;font-size:16px}.giftbtn.off{background:#262a34;color:#9aa0ad;opacity:1}
+.dkbuy{padding:11px 22px;font-size:15.5px}.dkbuy.off{background:#262a34;color:#9aa0ad;border-color:#363c4a;opacity:1}
 </style>
 </head>
 <body>
@@ -708,7 +712,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.31.2';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.32.1';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1418,7 +1422,7 @@ function menu(items){
   return `<div class="menu">${items.map(([a,label,sub,dis])=>`<button data-a="${a}" ${dis?'disabled':''}>${label}<small>${dis?'Bientôt disponible':sub||''}</small></button>`).join('')}</div>`;
 }
 function deckTile(k,action,on){
-  return `<button class="dtile ${on?'on':''} ${ownsDeck(k)?'':'nown'}" style="--tc:${deckColor(k)}" data-a="${action}">
+  return `<button class="dtile ${on?'on':''} ${ownsDeck(k)||String(action).startsWith('go:cartes')?'':'nown'}" style="--tc:${deckColor(k)}" data-a="${action}">
       <div class="dt-name xo">${DECKS[k].name}</div></button>`;
 }
 function deckCompoHTML(k){
@@ -1426,7 +1430,7 @@ function deckCompoHTML(k){
   const groups=[['Combattants ✯',id=>C(id).size==='P'],['Combattants ✯✯',id=>C(id).size==='M'],['Combattants ✯✯✯',id=>C(id).size==='G'],
     ['Atouts',id=>C(id).cat==='sort'],['Objets',id=>C(id).cat==='objet']];
   const tot=list.reduce((t,[,c])=>t+c,0);
-  return `<p class="muted" style="margin-top:0">${TYPES[DECKS[k].type].name}${DECKS[k].style?' · '+DECKS[k].style:''} · ${tot} cartes · cliquez sur une carte pour le détail</p>`+groups.map(([title,f])=>{
+  return groups.map(([title,f])=>{
     const items=list.filter(([id])=>f(id)); const n=items.reduce((t,[,c])=>t+c,0);
     if(!items.length) return '';
     return `<h3>${title} <span class="muted">(${n})</span></h3><div class="grid compact c4">${items.map(([id,c])=>cardHTML(id,{count:c,cls:'click'+(ownsCard(id)?'':' nown'),attrs:`data-a="detail:${id}"`})).join('')}</div>`;
@@ -1440,7 +1444,8 @@ function renderCartes(){
     return `<div class="page ctr">${navHead('cartes','Decks')}${tiles}</div>`;
   }
   const k=nav[1];
-  return `<div class="page ctr">${navHead('cartes',`<span style="color:${deckColor(k)}">${deckLabel(k)}</span>`)}${deckCompoHTML(k)}</div>`;
+  const dbtn=ACC.p?(ownsDeck(k)?'<button class="off dkbuy" disabled>Possédé</button>':`<button class="primary xo dkbuy" data-a="go:params:shop:${k}">Acheter dans le shop</button>`):'';
+  return `<div class="page ctr">${navHead('cartes',`<span style="color:${deckColor(k)}">${deckLabel(k)}</span>`)}${dbtn?`<div style="margin-bottom:14px">${dbtn}</div>`:''}${deckCompoHTML(k)}</div>`;
 }
 /* ---- Collection : filtres et tri ---- */
 const norm=t=>String(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
@@ -1675,6 +1680,7 @@ function accEmail(name){const b=new TextEncoder().encode(name.toLowerCase());ret
 function accErr(e){const m=String((e&&(e.message||e.error_description))||e||'');
   if(/already registered|already exists|duplicate|profiles_name_key/i.test(m))return 'Ce nom de compte est déjà pris.';
   if(/invalid login|invalid credentials/i.test(m))return 'Nom ou mot de passe incorrect.';
+  if(/déjà récupéré/.test(m))return 'Cadeau déjà récupéré aujourd\'hui.';
   if(/photo non possédée/.test(m))return 'Tu ne possèdes pas cette photo.';
   if(/déjà possédée/.test(m))return 'Tu as déjà cette photo.';
   if(/quantité invalide/.test(m))return 'Quantité invalide.';
@@ -1770,6 +1776,17 @@ function renderCompte(sub){
     <div class="box sbox"><h3 class="xo">Succès</h3>${achHTML(p)}</div>${accMsg()}
     <p class="cap"><button class="ghost sbtn" data-a="logoutask">Se déconnecter</button></p></div>`;
 }
+// Cadeau quotidien : 1 pièce + 1 jeton par jour, remis à zéro à minuit (ne se cumule pas)
+const GIFT={every:864e5,coins:1,tokens:1};
+// remise à zéro à minuit (heure de Paris), comme le serveur
+function parisParts(d){const o={};new Intl.DateTimeFormat('fr-FR',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(d).forEach(x=>o[x.type]=x.value);return o;}
+function giftNext(){if(!ACC.p||!ACC.p.gift_at)return 0;const n=parisParts(new Date()),g=parisParts(new Date(ACC.p.gift_at));
+  if(n.year+n.month+n.day!==g.year+g.month+g.day)return 0;
+  return Date.now()+(86400-(+n.hour*3600+ +n.minute*60+ +n.second))*1000;}
+function giftHTML(){const nx=giftNext();
+  return `<div class="dgroup"><h3 class="xo grp">Cadeaux quotidiens</h3><div class="gift"><div class="gitems"><span>${COIN} <b>${GIFT.coins}</b></span><span>${JETON} <b>${GIFT.tokens}</b></span></div>
+    ${nx?`<button class="off giftbtn" disabled><span id="gifttimer" class="mono">${fmtLeft(nx-Date.now())}</span></button>`:`<button class="primary xo giftbtn" data-a="claimgift">Récupérer</button>`}</div></div>`;}
+setInterval(()=>{const t=$('#gifttimer');if(!t)return;const nx=giftNext();if(!nx)render();else t.textContent=fmtLeft(nx-Date.now());},1000);
 function renderShop(){
   const head=navHead('params','Shop');
   const vk=UI.nav.params[1];
@@ -1794,7 +1811,7 @@ function renderShop(){
     ${sale.map(a=>{const ask=UI.buyAsk==='av'+a.k,ok=c>=AVATAR_PRICE;
       return `<div class="avit"><span class="shopav">${avatarHTML(a.k)}</span><span class="avn">${a.n}</span><button class="${ask?'primary':ok?'buy':'off'} xo" data-a="buyav:${a.k}" data-buy="av${a.k}" ${ok?'':'disabled'}>${ask?'Confirmer':`${AVATAR_PRICE} ${COIN}`}</button></div>`;}).join('')}</div>`:'<p class="muted cap" style="margin:0 0 6px">Tu as toutes les photos !</p>'}</div>`;
   return `<div class="page ctr"><div class="ptop"><h2>Shop</h2><div class="right wallet">${COIN} <b>${c}</b></div></div><button class="backbtn" data-a="back:params"><span class="bchev">‹</span> Retour</button>
-    ${tokens}${avs}${left.length?`<div class="dgroup"><h3 class="xo grp">Decks</h3>${left.map(item).join('')}</div>`:'<div class="box sbox"><p class="muted cap">Tu as déjà tous les decks !</p></div>'}${accMsg()}</div>`;
+    ${giftHTML()}${tokens}${avs}${left.length?`<div class="dgroup"><h3 class="xo grp">Decks</h3>${left.map(item).join('')}</div>`:'<div class="box sbox"><p class="muted cap">Tu as déjà tous les decks !</p></div>'}${accMsg()}</div>`;
 }
 /* =========================================================
    HOME · packs (série 1)
@@ -1849,7 +1866,6 @@ document.addEventListener('pointerup',e=>{if(PSW.x==null||!UI.pack)return;const 
   if(Math.abs(dx)>45){DRAG.suppress=true;setTimeout(()=>{DRAG.suppress=false;},350);if(c){c.style.transition='transform .18s ease-in,opacity .18s';c.style.transform=`translateX(${dx>0?120:-120}vw) rotate(${dx>0?20:-20}deg)`;c.style.opacity='0';}
     setTimeout(()=>{if(UI.pack){UI.pack.i++;render();}},170);}
   else if(c)c.style.transform='';},true);
-window.addEventListener('scroll',()=>{if(UI.achOpen){UI.achOpen=null;render();}},{passive:true});
 setInterval(()=>{if(UI.tab==='home'&&ACC.p&&!UI.pack){const t=$('#ptimer');if(t){const was=t.dataset.av,st=packState();t.innerHTML=packTimerHTML();if(was!==undefined&&+was!==st.avail)render();t.dataset.av=st.avail;}}},1000);
 /* ---- Combat : menus ---- */
 function deckChoice(i){
@@ -2496,6 +2512,7 @@ const H = {
   avpick(){UI.avPick=true;render();},
   avclose(_,e,el){if(e.target!==el)return;UI.avPick=false;render();},
   achopen(k){UI.achOpen=UI.achOpen===k?null:k;render();},
+  claimgift(){if(!ACC.p||giftNext())return;accRun(async()=>{const r=await SB.rpc('claim_gift');if(r.error)throw r.error;setProfile(r.data);toast(`Cadeau récupéré : +${GIFT.coins} pièce · +${GIFT.tokens} jeton`);});},
   tokq(d){UI.buyAsk=null;const m=Math.floor(((ACC.p&&ACC.p.coins)||0)/PACK.tokenPrice);UI.tokQ=Math.max(m?1:0,Math.min(m,(UI.tokQ||0)+(+d)));render();},
   buytok(){const n=UI.tokQ|0;if(!ACC.p||n<1||n*PACK.tokenPrice>ACC.p.coins)return;if(UI.buyAsk!=='tok'){UI.buyAsk='tok';return render();}UI.buyAsk=null;
     accRun(async()=>{const r=await SB.rpc('buy_tokens',{p_n:n});if(r.error)throw r.error;setProfile(r.data);UI.tokQ=null;toast(`+${n} jeton${s_(n)}`);});},
