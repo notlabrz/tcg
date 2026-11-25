@@ -701,6 +701,27 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 .avcir.cur{box-shadow:0 0 0 2px var(--accent)}.avcir.sel{box-shadow:0 0 0 3px #fff}
 .avok{margin-top:14px;padding:10px 20px;font-size:15px}
 .pack.tearing .pimg{clip-path:inset(7% 0 0 0)}.pack.tearing .pshine{display:none}
+/* Lancer de pièce de début de match */
+.cflip{position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#05070bcc;animation:cffade .25s;transition:opacity .35s}
+.cflip.out{opacity:0}
+@keyframes cffade{from{opacity:0}}
+.cftoss{perspective:900px;animation:cftoss 2s both}
+@keyframes cftoss{0%{transform:translateY(40px) scale(.85);animation-timing-function:cubic-bezier(.2,.7,.4,1)}45%{transform:translateY(-150px) scale(1.12);animation-timing-function:cubic-bezier(.6,0,.8,.4)}86%{transform:translateY(0) scale(1);animation-timing-function:ease-out}93%{transform:translateY(-14px)}100%{transform:translateY(0)}}
+.cfshadow{width:110px;height:16px;margin-top:10px;border-radius:50%;background:radial-gradient(#000a,transparent 70%);animation:cfsh 2s both}
+@keyframes cfsh{0%{transform:scale(.8)}45%{transform:scale(.45);opacity:.4}86%,100%{transform:scale(1);opacity:1}}
+.coin3d{width:132px;height:132px;position:relative;transform-style:preserve-3d;animation:cfspin 2s cubic-bezier(.12,.55,.25,1) both}
+.cface{position:absolute;inset:0;border-radius:50%;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:grid;place-items:center;
+  background:radial-gradient(circle at 34% 28%,color-mix(in srgb,var(--cc) 30%,#fff) 0,var(--cc) 48%,color-mix(in srgb,var(--cc) 55%,#000) 100%);
+  box-shadow:inset 0 0 0 5px color-mix(in srgb,var(--cc) 62%,#000),inset 0 0 0 8px color-mix(in srgb,var(--cc) 45%,#fff),inset 0 0 0 10px color-mix(in srgb,var(--cc) 70%,#000),inset 0 -8px 16px #0005,0 10px 26px #000a}
+.cface.back{transform:rotateX(180deg)}
+.cface svg{width:56%;height:56%;color:color-mix(in srgb,var(--cc) 22%,#fff);filter:drop-shadow(0 2px 0 #0006)}
+.cface.back span{font-size:70px;line-height:1;color:color-mix(in srgb,var(--cc) 22%,#fff);text-shadow:0 2px 0 #0006;margin-top:-4px}
+.cfmsg{margin-top:26px;font-size:30px;color:#fff;opacity:0;transform:translateY(8px);animation:cfmsg .35s 2s forwards;text-align:center;padding:0 16px}
+@keyframes cfmsg{to{opacity:1;transform:none}}
+/* Photo de profil dans la barre des joueurs */
+.pbav{flex:0 0 auto;width:22px;height:22px;border-radius:50%;overflow:hidden;color:#8a90a0;background:#2a303c;display:block;margin-left:-2px}
+.pbar.avr .pbav{margin:0 -2px 0 0}.pbav .avc{font-size:12px}
+.board .pbav{width:20px;height:20px}.board .pbav .avc{font-size:11px}
 </style>
 </head>
 <body>
@@ -723,7 +744,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.33.3';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.34.0';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -937,6 +958,30 @@ const esc = s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function expand(list){const r=[];list.forEach(([id,n])=>{for(let i=0;i<n;i++)r.push(id);});return r;}
 function coin(){return Math.random()<.5;}
+// Pièce de chaque deck (lancer de début de match) : symbole du deck sur la face, étoile au revers
+const COIN_IC={
+  wave:'<path d="M2 9.5c2.5 0 2.5-2.5 5-2.5s2.5 2.5 5 2.5 2.5-2.5 5-2.5 2.5 2.5 5 2.5M2 16c2.5 0 2.5-2.5 5-2.5s2.5 2.5 5 2.5 2.5-2.5 5-2.5 2.5 2.5 5 2.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>',
+  sprout:'<path d="M12 21.5V12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M12 13.5C12 8.5 8.5 5.5 3.5 5.5c0 4.5 3.5 8 8.5 8zM12 11.5c0-4.5 3.5-8 8.5-8 0 4.5-3.5 8-8.5 8z"/>',
+  flame:'<path d="M12 1.8c1.2 3.6 5.6 6.2 5.6 11.6a5.6 5.6 0 0 1-11.2 0c0-2.8 1.6-4.5 2.8-5.6.2 2.1 1 3.3 2.1 3.9-.6-3.4.3-6.7.7-9.9z"/>',
+  drop:'<path d="M12 2C9 6.8 5.6 10.5 5.6 14.4a6.4 6.4 0 0 0 12.8 0C18.4 10.5 15 6.8 12 2z"/>',
+  bolt:'<path d="M13.5 1.5 4 13.5h6.2L9 22.5l10-12.6h-6.3l.8-8.4z"/>',
+  rock:'<path d="M7.5 5.5 12.5 3l6 3.5 3 7-3.5 6.5H8l-5.5-5 1.5-6.5z"/>',
+  leaf:'<path d="M20.5 3.5C10.5 3.5 4 8.5 4 16c0 1.5.3 2.9.9 4.2 1.2-4.3 4.2-7.9 9.1-10.2-3.9 3-6.4 6.5-7.4 10.6 8.7 0 13.9-6.4 13.9-17.1z"/>'};
+const DECK_COIN={vague:'wave',seve:'sprout',feu:'flame',eau:'drop',elec:'bolt',roche:'rock',plante:'leaf'};
+function coinFaces(k){return `<div class="cface front"><svg viewBox="0 0 24 24" fill="currentColor">${COIN_IC[DECK_COIN[k]||'drop']}</svg></div><div class="cface back"><span>✯</span></div>`;}
+// Affiche une fois par match le lancer de pièce : chaque joueur voit la pièce de son propre deck
+function checkFlip(){
+  if(!G||!G.flip||UI.flipSeen===G.flip||UI.tab!=='combat'||document.getElementById('coinflip')) return;
+  UI.flipSeen=G.flip;
+  const me=G.online?MY_SEAT:0, mine=G.first===me, k=G.decks[me];
+  const txt=G.online?(mine?'Tu commences':'L\'adversaire commence'):`${esc(G.names[G.first])} commence`;
+  const el=document.createElement('div');el.id='coinflip';el.className='cflip';
+  el.innerHTML=`<style>@keyframes cfspin{from{transform:rotateX(0)}to{transform:rotateX(${360*6+(mine?0:180)}deg)}}</style>
+    <div class="cftoss"><div class="coin3d" style="--cc:${deckColor(k)}">${coinFaces(k)}</div></div><div class="cfshadow"></div><div class="cfmsg xo">${txt}</div>`;
+  document.body.appendChild(el);
+  let gone=false;const close=()=>{if(gone)return;gone=true;el.classList.add('out');setTimeout(()=>el.remove(),350);};
+  setTimeout(()=>el.addEventListener('click',close),2000);setTimeout(close,3800);
+}
 const C = id=>CARDS[id];
 const s_ = n=>n>1?'s':'';
 function abLabel(c){return c.ab?`${ABIL[c.ab].name}${c.abX?' '+c.abX:''}`:'';}
@@ -1030,9 +1075,9 @@ function isOver(){return G.phase==='roundover'||G.phase==='matchover';}
 function newMatch(o){
   const v=VARIANTS[o.variant];
   G={uid:1,online:!!o.online,mode:o.mode,target:o.mode==='blitz'?1:2,variant:o.variant,win:v.win,tro:v.tro,noEvo:o.noEvo,hide:o.online?false:o.hideHands,
-     levM:!!o.levM,levAtk:!!o.levAtk,names:o.names.slice(),decks:o.decks.slice(),wins:[0,0],round:0,log:[],players:[null,null],histCount:HIST.length};
+     levM:!!o.levM,levAtk:!!o.levAtk,names:o.names.slice(),avatars:(o.avatars||[ACC.p&&ACC.p.avatar||'','']).slice(0,2),decks:o.decks.slice(),wins:[0,0],round:0,log:[],players:[null,null],histCount:HIST.length};
   UNDO=[];
-  G.first=coin()?0:1;
+  G.first=coin()?0:1; G.flip=Date.now()+'-'+Math.floor(Math.random()*1e6);
   log(`${o.mode==='blitz'?'Match rapide (1 manche)':'Match simple (2 manches gagnantes)'} : ${G.names[0]} (${deckLabel(G.decks[0])}) contre ${G.names[1]} (${deckLabel(G.decks[1])}) · victoire à ${v.win} étoiles.`,'sys');
   log(`Pile ou face : ${G.names[G.first]} commence.`,'sys');
   startRound();
@@ -1385,6 +1430,7 @@ function render(){
   if(typeof DRAG!=='undefined'&&DRAG.on){DRAG.later=true;return;} // pas de rendu pendant un glisser (il est fait au lâcher)
   if(typeof hidePop==='function') hidePop();
   if(typeof checkReward==='function') checkReward();
+  if(typeof checkFlip==='function') setTimeout(checkFlip,0);
   const ha=$('#hacc'); if(ha&&typeof levelOf==='function'){const av=`<span class="havatar">${avatarHTML(ACC.p&&ACC.p.avatar)}</span>`;
     if(ACC.p){const L=levelOf(ACC.p.points);ha.className='hacc on';ha.innerHTML=`${av}<span class="hinfo"><span class="hname">${esc(ACC.p.name)}</span><span class="hlv"><b>Niv. ${L.lv}</b><span class="hbar"><i style="width:${Math.round(L.rest/L.need*100)}%"></i></span></span></span>`;}
     else{ha.className='hacc';ha.innerHTML=`${av}<span class="hguest">Compte invité</span>`;}}
@@ -1989,7 +2035,7 @@ function renderCombat(){
   return `${netBanner()}<div class="match2"><div class="tinfo tr">${m.info}</div>${oppHand(op)}<div class="board">
     <div class="ring r1"></div><div class="ring r2"></div>
     <div class="brow bench"><div class="bside">${pileDisc(op)}</div>${benchPair(op)}<div class="bside"></div></div>
-    <div class="brow champ"><div class="bside">${pileDeck(op)}</div>${champZone(op)}<div class="bside sinfo">${m.over?'':btnz}${mBar(op)}</div></div>
+    <div class="brow champ"><div class="bside">${pileDeck(op)}</div>${champZone(op)}<div class="bside sinfo">${m.over?'':btnz}${mBar(op,true)}</div></div>
     <div class="brow champ"><div class="bside sact">${m.over?mBar(me):mBar(me)+msg}</div>${champZone(me)}<div class="bside end">${pileDeck(me)}</div></div>
     <div class="brow bench"><div class="bside gearz">${gearHTML()}</div>${benchPair(me)}<div class="bside end">${pileDisc(me)}</div></div>
     ${over}</div>${mHand(hp)}</div>${ho}`;
@@ -2001,12 +2047,13 @@ function handOwner(){
   if(isOver()) return 0;
   return actingPlayer();
 }
-function mBar(p){
+function barAv(p){const k=G.avatars&&G.avatars[p],a=AVATARS.find(x=>x.k===k);
+  return `<span class="pbav">${a?`<i class="avc" style="background:${a.bg}">${a.e}</i>`:'<i class="avimg nr"></i>'}</span>`;}
+function mBar(p,right){
   const P=PL(p),k=G.decks[p],on=G.cur===p&&!isOver()&&G.phase!=='setup';
-  return `<div class="pbar ${on?'on':''}"><span class="nm">${esc(G.names[p])}</span>
-    ${p===G.first?'<span class="badge">1er</span>':'<span class="badge dim">2e</span>'}
+  return `<div class="pbar ${on?'on':''} ${right?'avr':''}">${right?'':barAv(p)}<span class="nm">${esc(G.names[p])}</span>
     ${G.target>1?`<span class="wins" title="Manches gagnées">${'●'.repeat(G.wins[p])}${'○'.repeat(Math.max(0,G.target-G.wins[p]))}</span>`:''}
-    <span class="st">✯ ${P.trophies}<small>/${G.win}</small></span></div>${P.piedFerme?`<div class="flags">${P.piedFerme?'<span class="flag">Pied ferme</span>':''}</div>`:''}`;
+    <span class="st">✯ ${P.trophies}<small>/${G.win}</small></span>${right?barAv(p):''}</div>${P.piedFerme?`<div class="flags">${P.piedFerme?'<span class="flag">Pied ferme</span>':''}</div>`:''}`;
 }
 // Le joueur p peut-il agir maintenant sur cet appareil (son tour, phase d'actions, rien en attente) ?
 function canPlayNow(p){return !!G&&G.phase==='actions'&&!G.pending.length&&!G.handoff&&p===G.cur&&mine_(p);}
@@ -2204,7 +2251,7 @@ function renderMatchModal(){
 function playerPanel(p,top){
   const P=PL(p),k=G.decks[p],active=G.cur===p&&!isOver();
   const info=`<div class="pinfo">
-    <span class="pname">${esc(G.names[p])}${G.online&&p===MY_SEAT?' <span class="muted">(vous)</span>':''}</span>${p===G.first?'<span class="badge">1er</span>':'<span class="badge dim">2e</span>'}
+    <span class="pname">${esc(G.names[p])}${G.online&&p===MY_SEAT?' <span class="muted">(vous)</span>':''}</span>
     <span class="chip" style="--tc:${deckColor(k)}">${deckLabel(k)}</span>
     ${G.target>1?`<span class="wins" title="Manches gagnées">${'●'.repeat(G.wins[p])}${'○'.repeat(Math.max(0,G.target-G.wins[p]))}</span>`:''}
     <span class="troph" title="Étoiles">✯ ${P.trophies}<small> / ${G.win}</small></span>
@@ -2554,7 +2601,7 @@ const H = {
   attack(kind){kind=kind==='spe'?'spe':'base';if(canAttack(kind))act(()=>doAttack(kind));},
   endturn(){act(endTurnNoAttack);},
   nextround(){act(nextRound);},
-  rematch(){const g=G;newMatch({decks:g.decks,names:g.names,mode:g.mode,variant:'std',hideHands:g.hide,online:g.online});render();},
+  rematch(){const g=G;newMatch({decks:g.decks,names:g.names,avatars:g.avatars,mode:g.mode,variant:'std',hideHands:g.hide,online:g.online});render();},
   newmatch(){if(G&&G.phase!=='matchover'&&!UI.confirmQuit){UI.confirmQuit=true;UI.gmenu=false;render();return;}UI.confirmQuit=false;UI.gmenu=false;UI.sheet=null;UI.mmodal=null;if(G&&G.online)netLeave();G=null;UNDO=[];window.scrollTo(0,0);render();},
   stayin(_,e,el){if(el&&el.classList.contains('modal-bg')&&e.target!==el)return;UI.confirmQuit=false;render();},
   sheet(uid){UI.sheet=+uid;render();},
@@ -2774,7 +2821,7 @@ function hostOnData(conn,msg){
       MY_SEAT=0; UI.tab='combat';
       const deck=DECK_ORDER.includes(msg.deck)?msg.deck:'seve';
       const name=String(msg.name||'Invité').slice(0,24);
-      newMatch({decks:[NET.myDeck||UI.pick[0],deck],names:[UI.names[0],name],mode:UI.mode,variant:'std',hideHands:false,online:true});
+      newMatch({decks:[NET.myDeck||UI.pick[0],deck],names:[UI.names[0],name],avatars:[ACC.p&&ACC.p.avatar||'',AVATARS.some(a=>a.k===msg.avatar)?msg.avatar:''],mode:UI.mode,variant:'std',hideHands:false,online:true});
       log(`${name} a rejoint la partie.`,'sys');
     } else log(`${G.names[1]} est de retour.`,'sys');
     render(); return;
@@ -2842,7 +2889,7 @@ function netJoin(code){
   peer.on('error',err=>{NET.err=netErr(err);if(!G){NET.role=null;}else NET.lost=true;render();});
   peer.on('open',()=>{
     const conn=peer.connect(PEER_PREFIX+code,{reliable:true,serialization:'json'}); NET.conn=conn;
-    conn.on('open',()=>{NET.lost=false;NET.lastSeen=Date.now();NET.status='Connecté, en attente de l\'hôte…';if(!NET.myDeck)NET.myDeck=resolveDeck(0);conn.send({t:'hello',name:UI.names[0],deck:NET.myDeck});render();});
+    conn.on('open',()=>{NET.lost=false;NET.lastSeen=Date.now();NET.status='Connecté, en attente de l\'hôte…';if(!NET.myDeck)NET.myDeck=resolveDeck(0);conn.send({t:'hello',name:UI.names[0],deck:NET.myDeck,avatar:ACC.p&&ACC.p.avatar||''});render();});
     conn.on('data',raw=>{
       if(!raw||typeof raw!=='object') return;
       NET.lastSeen=Date.now(); if(NET.lost){NET.lost=false;render();}
