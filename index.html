@@ -723,7 +723,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.33.1';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.33.2';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1756,7 +1756,7 @@ function achHTML(p){
   return `<div class="achs">${shown.map(a=>{const v=Math.min(achVal(a,p),a.n),ok=v>=a.n;
   const done=ACHIEVEMENTS.filter(x=>x.k===a.k&&achVal(x,p)>=x.n).length;
   const tiers=ACHIEVEMENTS.filter(x=>x.k===a.k), open=UI.achOpen===a.k;
-  const list=open?`<div class="achlist">${tiers.slice(0,Math.min(tiers.length,done+1)).map((x,ti)=>{const v=Math.min(achVal(x,p),x.n),o=v>=x.n;return `<div class="achl ${o?'ok':''}"><span class="lbadge">${achBadge(a.k,o||done?ti+1:0)}</span><span class="ltit">${x.t}${o?'':`<small class="lrew">Récompense : ${achReward(ti)} ${COIN}</small>`}</span><span class="lval">${o?'Obtenu':`${v}/${x.n}`}</span></div>`;}).join('')}</div>`:'';
+  const list=open?`<div class="achlist">${tiers.slice(0,Math.min(tiers.length,done+1)).map((x,ti)=>{const v=Math.min(achVal(x,p),x.n),o=v>=x.n;return `<div class="achl ${o?'ok':''}"><span class="lbadge">${achBadge(a.k,ti+1)}</span><span class="ltit">${x.t}${o?'':`<small class="lrew">Récompense : ${achReward(ti)} ${COIN}</small>`}</span><span class="lval">${o?'Obtenu':`${v}/${x.n}`}</span></div>`;}).join('')}</div>`:'';
   return `<div class="ach ${ok?'ok':''} ${open?'open':''}" data-a="achopen:${a.k}">${achBadge(a.k,done)}<span class="ainfo"><span class="atit">${a.t}</span><span class="abar"><i style="width:${Math.round(v/a.n*100)}%"></i></span></span><span class="aval">${ok?'Obtenu':`${v}/${a.n}`}</span><span class="achev">▾</span></div>${list}`;}).join('')}</div>`;}
 const COIN='<span class="coin" aria-hidden="true">🪙</span>';
 function accField(key,label,type){const v=UI.af[key]||'',pw=type==='password',show=pw&&UI.af.show;
