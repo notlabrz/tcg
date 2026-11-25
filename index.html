@@ -726,6 +726,14 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 .pbw.on .pbav{box-shadow:0 0 0 2px var(--accent),0 3px 8px #0008}.pbav .avc{font-size:20px}
 .pbw .pbar{align-self:center!important;min-width:0;margin-left:-12px;padding-left:15px!important}.pbw.r .pbar{margin:0 -12px 0 0;padding:3px 15px 3px 5px!important}
 .board .sinfo .pbw{align-self:flex-end}
+.aitiles{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+.aitile{position:relative;padding:14px 16px 14px 20px;border-radius:16px;background:linear-gradient(110deg,color-mix(in srgb,var(--tc) 22%,var(--panel)) 0,var(--panel) 60%);border:1px solid var(--line);overflow:hidden;text-align:left}
+.aitile::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--tc)}
+.aihead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ailv{font-size:20px}.airew{font-size:14px;color:var(--muted);white-space:nowrap}.airew b{color:var(--text)}
+.aideck{margin:6px 0 10px;font-size:13.5px;color:var(--muted)}.aideck b{color:var(--text);font-size:14px}
+.aigo{width:100%;padding:10px;font-size:15px}
+.aitile.done{opacity:.75}.aidone{font-size:14px;color:var(--good,#3fb950);font-weight:700}
 </style>
 </head>
 <body>
@@ -748,7 +756,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.34.2';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.35.0';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1079,7 +1087,7 @@ function isOver(){return G.phase==='roundover'||G.phase==='matchover';}
 function newMatch(o){
   const v=VARIANTS[o.variant];
   G={uid:1,online:!!o.online,mode:o.mode,target:o.mode==='blitz'?1:2,variant:o.variant,win:v.win,tro:v.tro,noEvo:o.noEvo,hide:o.online?false:o.hideHands,
-     levM:!!o.levM,levAtk:!!o.levAtk,names:o.names.slice(),avatars:(o.avatars||[ACC.p&&ACC.p.avatar||'','']).slice(0,2),decks:o.decks.slice(),wins:[0,0],round:0,log:[],players:[null,null],histCount:HIST.length};
+     levM:!!o.levM,levAtk:!!o.levAtk,ai:o.ai||null,names:o.names.slice(),avatars:(o.avatars||[ACC.p&&ACC.p.avatar||'','']).slice(0,2),decks:o.decks.slice(),wins:[0,0],round:0,log:[],players:[null,null],histCount:HIST.length};
   UNDO=[];
   G.first=coin()?0:1; G.flip=Date.now()+'-'+Math.floor(Math.random()*1e6);
   log(`${o.mode==='blitz'?'Match rapide (1 manche)':'Match simple (2 manches gagnantes)'} : ${G.names[0]} (${deckLabel(G.decks[0])}) contre ${G.names[1]} (${deckLabel(G.decks[1])}) · victoire à ${v.win} étoiles.`,'sys');
@@ -1428,6 +1436,172 @@ function endRound(w,reason){
 function nextRound(){G.first=1-G.lastWinner;startRound();}
 
 /* =========================================================
+   IA : matchs solo journaliers
+   L'IA joue avec exactement les mêmes règles (mêmes fonctions) que les joueurs.
+   Pour réfléchir, elle rejoue des coups sur des copies de la partie (simulation).
+   ========================================================= */
+const AI_LEVELS=[
+  {k:'debutant',n:'Débutant',coins:1,pts:20},
+  {k:'facile',n:'Facile',coins:2,pts:30},
+  {k:'inter',n:'Intermédiaire',coins:5,pts:40},
+  {k:'expert',n:'Expert',coins:10,pts:50}];
+function parisDay(){const n=parisParts(new Date());return `${n.year}-${n.month}-${n.day}`;}
+// Deck de l'IA : change chaque jour, différent pour chaque niveau
+function aiDeckOfDay(i){const [y,m,d]=parisDay().split('-').map(Number);const idx=Math.floor(Date.UTC(y,m-1,d)/864e5);return DECK_ORDER[(idx+i*2)%DECK_ORDER.length];}
+function aiDone(k){return !!(ACC.p&&ACC.p.ai_day===parisDay()&&(ACC.p.ai_done||[]).includes(k));}
+function untilMidnight(){const n=parisParts(new Date()),s=86400-(+n.hour*3600+ +n.minute*60+ +n.second);return `${Math.floor(s/3600)} h ${String(Math.floor(s%3600/60)).padStart(2,'0')}`;}
+
+// ---- simulation : exécute fn sur une copie de la partie, puis remet tout en place ----
+function gclone(g){return JSON.parse(JSON.stringify(g));}
+function simRun(state,fn){const g0=G,h=HIST.length;G=state;try{return fn();}finally{G=g0;HIST.length=h;}}
+function aiActor(){if(isOver())return -1;if(G.phase!=='actions')return -2;return actingPlayer();}
+
+// Tous les coups possibles pour le joueur qui doit agir
+function aiMoves(){
+  const pd=G.pending[0];
+  if(pd){
+    if(pd.kind==='replace'||pd.kind==='target') return pd.options.map(u=>({t:'pk',u}));
+    if(pd.kind==='deckpick') return pd.cards.length?pd.cards.map(id=>({t:'rf',id})):[{t:'rf',id:null}];
+    if(pd.kind==='discard') return [{t:'disc'}];
+    return [];
+  }
+  if(G.phase!=='actions') return [];
+  const out=[],P=cp();
+  P.hand.forEach(h=>handActions(h).forEach(a=>{
+    if(!a.ok) return;
+    if(a.key==='pose') out.push({t:'pose',u:h.uid});
+    else if(!a.targets) out.push({t:'spell',u:h.uid});
+    else if(a.targets==='deck') [...new Set(P.deck.filter(x=>C(x).cat==='creature'&&C(x).size==='P'))].forEach(id=>out.push({t:'rf',u:h.uid,id}));
+    else a.targets.forEach(tu=>out.push({t:'tg',u:h.uid,what:a.key==='evolve'?'evolve':a.key==='item'?'item':h.id,tu}));
+  }));
+  swapTargets().forEach(u=>out.push({t:'swap',u}));
+  if(canAttack('base')) out.push({t:'atk',k:'base'});
+  if(canAttack('spe')) out.push({t:'atk',k:'spe'});
+  out.push({t:'end'});
+  return out;
+}
+function cardVal(id){const c=C(id);return c.cat==='creature'?c.atk+c.def+(c.size==='P'?3:0):4;}
+function aiApply(m){
+  const pd=G.pending[0];
+  if(m.t==='pk'){G.pending.shift();if(pd.kind==='replace')promote(pd.p,m.u);else if(pd.what==='swap')doSwap(m.u);else execTarget(pd,m.u);}
+  else if(m.t==='rf'){if(pd&&pd.kind==='deckpick'){G.pending.shift();doRenfort(pd.handUid,m.id);}else doRenfort(m.u,m.id);}
+  else if(m.t==='disc'){G.pending.shift();const P=PL(pd.p);P.hand.slice().sort((a,b)=>cardVal(a.id)-cardVal(b.id)).slice(0,pd.n).forEach(h=>{P.discard.push(P.hand.splice(P.hand.indexOf(h),1)[0].id);});}
+  else if(m.t==='pose') doPose(m.u);
+  else if(m.t==='spell') doSpell(m.u,null);
+  else if(m.t==='tg') execTarget({what:m.what,handUid:m.u},m.tu);
+  else if(m.t==='swap') doSwap(m.u);
+  else if(m.t==='atk') doAttack(m.k);
+  else if(m.t==='end') endTurnNoAttack();
+  if(!isOver()&&G.phase==='actions') flow();
+}
+
+// ---- évaluation d'une position du point de vue du joueur me ----
+function cval(c){const k=C(c.id);return Math.max(0,curDef(c)-(c.burn||0))*2.2+baseAtk(c)*3+(c.item?1.5:0)+(k.spe?1:0)+(k.ab?1.5:0);}
+// Dégâts que le champion de ap peut infliger au champion de dp lors de son prochain tour
+function potDmg(ap,dp){
+  const A=PL(ap),D=PL(dp),a=A.champion,d=D.champion; if(!a||!d) return 0;
+  if(a.stunUntil&&a.stunUntil>=G.turn+(G.cur===ap?0:1)) return 0;
+  const ka=C(a.id),kd=C(d.id),sp=ka.spe;
+  const red=armor(d)+(D.piedFerme?CONFIG.piedFerme:0)+(d.garde||0);
+  const base=baseAtk(a)+(A.elan&&G.cur===ap?CONFIG.elan:0)+(kd.weak===ka.type?CONFIG.weakBonus:0)-red;
+  let spe=base;
+  if(sp){const kw=sp.kw;
+    if(kw==='charge'||kw==='assaut') spe=base+sp.x; else if(kw==='pari') spe=base+sp.x*.5;
+    else if(kw==='acharnement') spe=base+(d.dmg>0?sp.x:0); else if(kw==='recherche'||kw==='etreinte'||kw==='etourdissement') spe=base-1;}
+  return Math.max(0,base,spe);
+}
+function aiEval(me,o){
+  o=o||{};
+  if(isOver()) return G.lastWinner===me?1e6:-1e6;
+  const op_=1-me,M=PL(me),O=PL(op_);
+  let v=(M.trophies-O.trophies)*40+((M.trophies/G.win)**2-(O.trophies/G.win)**2)*90;
+  mine(me).forEach(c=>v+=cval(c)); mine(op_).forEach(c=>v-=cval(c));
+  v+=(M.hand.length-O.hand.length)*2.5;
+  if(!M.bench.length) v-=8; if(!O.bench.length) v+=8;
+  if(o.noThreat) return v;
+  const killV=dp=>{const d=PL(dp).champion;if(!d)return 0;const t=G.tro[C(d.id).size],P2=PL(1-dp);
+    return t*40+cval(d)+(P2.trophies+t>=G.win||!PL(dp).bench.length?500:0);};
+  const mk=M.champion&&O.champion&&potDmg(me,op_)>=curDef(O.champion);
+  const ok=M.champion&&O.champion&&potDmg(op_,me)>=curDef(M.champion);
+  if(G.cur===me){if(mk)v+=killV(op_)*.9;if(ok)v-=killV(me)*.35;}
+  else {if(ok)v-=killV(me)*.9;if(mk)v+=killV(op_)*.35;}
+  return v;
+}
+// Choisit, parmi des coups, celui dont la position obtenue est la meilleure selon valFn
+function simBest(moves,valFn,noise){
+  let best=null,bv=-Infinity;
+  for(const m of moves){const v=simRun(gclone(G),()=>{aiApply(m);return valFn();})+(noise?(Math.random()*2-1)*noise:0);if(v>bv){bv=v;best=m;}}
+  return best;
+}
+// Termine le tour de seat simplement : meilleure attaque possible (ou fin du tour), et règle les choix en attente
+function aiFinish(seat,o){
+  for(let i=0;i<14;i++){
+    const a=aiActor(); if(a<0) return;
+    const pd=G.pending[0];
+    if(a!==seat&&!pd) return;
+    const who=a, ms=pd?aiMoves():aiMoves().filter(m=>m.t==='atk'||m.t==='end');
+    if(!ms.length) return;
+    aiApply(ms.length===1?ms[0]:simBest(ms,()=>aiEval(who,o)));
+  }
+}
+// Tour adverse simulé (niveau intermédiaire), sans connaître sa main
+function aiOppTurn(o){
+  PL(o).hand=[]; shuffle(PL(o).deck);
+  for(let i=0;i<10;i++){
+    if(aiActor()!==o) break;
+    aiApply(simBest(aiMoves(),()=>{aiFinish(o);return aiEval(o);}));
+  }
+  for(let i=0;i<6&&G.pending.length&&aiActor()>=0;i++){const w=aiActor();aiApply(simBest(aiMoves(),()=>aiEval(w)));}
+}
+function aiValue(seat,level){
+  if(level==='facile') return ()=>{aiFinish(seat,{noThreat:true});return aiEval(seat,{noThreat:true});};
+  if(level==='inter') return ()=>{aiFinish(seat);return aiEval(seat);};
+  // expert : termine son tour au mieux (comme l'intermédiaire), puis imagine la riposte adverse
+  return ()=>{for(let i=0;i<8&&aiActor()===seat;i++)aiApply(simBest(aiMoves(),aiValue(seat,'inter')));
+    aiFinish(seat);if(aiActor()===1-seat)aiOppTurn(1-seat);return aiEval(seat);};
+}
+const AI_NOISE={facile:14,inter:4,expert:1.5};
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+// Coup choisi par l'IA (seat) dans la position actuelle
+function aiChoose(seat,level){
+  const ms=aiMoves(); if(!ms.length) return null; if(ms.length===1) return ms[0];
+  if(level==='debutant'){
+    if(G.pending.length) return pick(ms);
+    const atk=ms.filter(m=>m.t==='atk'), play=ms.filter(m=>m.t!=='atk'&&m.t!=='end');
+    if(play.length&&Math.random()<.55) return pick(play);
+    if(atk.length&&Math.random()<.85) return pick(atk);
+    return {t:'end'};
+  }
+  const base=gclone(G); base.log=[];
+  // l'IA ne connaît ni la main ni l'ordre du deck adverse, ni l'ordre de son propre deck
+  return simRun(base,()=>{shuffle(PL(seat).deck);shuffle(PL(1-seat).deck);PL(1-seat).hand=[];return simBest(ms,aiValue(seat,level),AI_NOISE[level]);});
+}
+// Préparation : choisit son champion de départ
+function aiSetup(seat,level){
+  const P=PL(seat),c=P.hand.filter(h=>C(h.id).cat==='creature'&&C(h.id).size==='P');
+  if(!c.length) return;
+  const h=level==='debutant'?pick(c):c.slice().sort((a,b)=>(C(b.id).def+C(b.id).atk*1.2)-(C(a.id).def+C(a.id).atk*1.2))[0];
+  G.setupSel[seat]=[h.uid]; setupConfirm(seat);
+}
+// Moteur : l'IA joue un coup à la fois, avec un petit délai pour qu'on voie ce qu'elle fait
+let AI_T=null;
+function aiNeeds(){if(!G||!G.ai)return false;const s=G.ai.seat;
+  if(G.phase==='setup') return !PL(s).champion;
+  return !isOver()&&G.phase==='actions'&&actingPlayer()===s;}
+function aiSchedule(){
+  if(AI_T||!aiNeeds()) return;
+  AI_T=setTimeout(()=>{AI_T=null;if(!aiNeeds())return;
+    if(document.getElementById('coinflip')||(typeof DRAG!=='undefined'&&DRAG.on)) return aiSchedule();
+    aiStep();render();},G.phase==='setup'?600:800);
+}
+function aiStep(){
+  const s=G.ai.seat,lv=G.ai.level;
+  if(G.phase==='setup') return aiSetup(s,lv);
+  const m=aiChoose(s,lv); if(!m) return;
+  aiApply(m);
+}
+
+/* =========================================================
    RENDU
    ========================================================= */
 function render(){
@@ -1435,6 +1609,7 @@ function render(){
   if(typeof hidePop==='function') hidePop();
   if(typeof checkReward==='function') checkReward();
   if(typeof checkFlip==='function') setTimeout(checkFlip,0);
+  if(typeof aiSchedule==='function') setTimeout(aiSchedule,0);
   const ha=$('#hacc'); if(ha&&typeof levelOf==='function'){const av=`<span class="havatar">${avatarHTML(ACC.p&&ACC.p.avatar)}</span>`;
     if(ACC.p){const L=levelOf(ACC.p.points);ha.className='hacc on';ha.innerHTML=`${av}<span class="hinfo"><span class="hname">${esc(ACC.p.name)}</span><span class="hlv"><b>Niv. ${L.lv}</b><span class="hbar"><i style="width:${Math.round(L.rest/L.need*100)}%"></i></span></span></span>`;}
     else{ha.className='hacc';ha.innerHTML=`${av}<span class="hguest">Compte invité</span>`;}}
@@ -1770,6 +1945,10 @@ function checkReward(){
   if(!SB||!ACC.p||!G||!G.online||G.phase!=='matchover') return;
   const key=[G.start,G.round,G.names.join('|')].join(':'); if(ACC.rewarded.has(key)) return; ACC.rewarded.add(key);
   const hit=(G.maxHit&&G.maxHit[MY_SEAT])||0; if(hit>(ACC.p.best_hit||0)) SB.rpc('record_hit',{p_n:hit}).then(({data,error})=>{if(!error&&data){setProfile(data);render();}});
+  // Match journalier contre l'IA : récompense du niveau (1 fois par jour), ne compte pas dans les victoires
+  if(G.ai){ if(G.lastWinner!==MY_SEAT||aiDone(G.ai.level)) return; const L=AI_LEVELS.find(x=>x.k===G.ai.level), before=levelOf(ACC.p.points).lv;
+    SB.rpc('claim_ai',{p_level:G.ai.level}).then(({data,error})=>{if(error)return;setProfile(data);const lv=levelOf(data.points).lv;
+      toast(`${L.n} validé : +${L.coins} pièce${s_(L.coins)} · +${L.pts} points`+(lv>before?` · Niveau ${lv} !`:''));render();}); return; }
   if(G.lastWinner!==MY_SEAT){SB.rpc('record_loss',{p_match:key}).then(({data,error})=>{if(!error&&data){setProfile(data);render();}});return;}
   const before=levelOf(ACC.p.points).lv;
   SB.rpc('record_win',{p_match:key}).then(({data,error})=>{if(error)return;setProfile(data);const lv=levelOf(data.points).lv;
@@ -1971,7 +2150,7 @@ function modeChips(){
 }
 function renderSetup(){
   const nav=UI.nav.combat, err=NET.err?`<div class="box" style="border-color:var(--bad);margin-bottom:16px;color:#ffb3b3">${esc(NET.err)}</div>`:'';
-  const reg=HIST.length?`<div class="box" style="margin-top:16px">${registryHTML()}</div>`:'';
+  const reg='';
   // écrans d'attente du jeu en ligne
   if(NET.role==='host') return `<div class="page ctr vcenter">${err}<div class="box sbox wbox"><h3 class="xo">Code du match</h3>
       <div class="bigcode">${NET.code||'…'}</div>
@@ -2003,7 +2182,16 @@ function renderSetup(){
       <div class="box sbox"><h3 class="xo">Code du match</h3>
         <input id="netcode" class="codein" maxlength="4" autocomplete="off" autocapitalize="characters" value="${esc(UI.joinCode||'')}">
         <div class="setact" style="margin-top:14px"><button class="primary xo" data-a="netjoin">Rejoindre le match</button></div></div></div>`;
-  if(path==='solo') return `<div class="page ctr vcenter">${navHead('combat','Solo')}${imenu([['go:combat:solo:event','evenement','Événement',true],['go:combat:solo:journalier','journalier','Journalier',true],['go:combat:solo:ecran','ecran','Écran partagé']])}${reg}</div>`;
+  if(path==='solo') return `<div class="page ctr vcenter">${navHead('combat','Solo')}${imenu([['go:combat:solo:event','evenement','Événement',true],['go:combat:solo:journalier','journalier','Journalier'],['go:combat:solo:ecran','ecran','Écran partagé']])}${reg}</div>`;
+  if(path==='solo/journalier'){
+    if(!ACC.p) return `<div class="page ctr">${navHead('combat','Journalier')}<div class="box sbox"><p class="muted cap">Connecte-toi à ton compte (Paramètres › Compte) pour affronter l'IA et gagner les récompenses du jour.</p></div></div>`;
+    fixPicks();
+    const tiles=AI_LEVELS.map((L,i)=>{const done=aiDone(L.k),dk=aiDeckOfDay(i);
+      return `<div class="aitile ${done?'done':''}" style="--tc:${deckColor(dk)}"><div class="aihead"><span class="ailv xo">${L.n}</span><span class="airew">${COIN} <b>${L.coins}</b> · <b>${L.pts}</b> pts</span></div>
+        <div class="aideck">Deck de l'IA : <b class="xo">${deckLabel(dk)}</b></div>
+        ${done?`<div class="aidone">✓ Validé · revient dans ${untilMidnight()}</div>`:`<button class="primary xo aigo" data-a="aiplay:${L.k}">Affronter</button>`}</div>`;}).join('');
+    return `<div class="page ctr">${navHead('combat','Journalier')}<div class="box sbox"><h3 class="xo">Ton deck</h3>${deckChoice(0)}<p class="mcap">Match simple · 2 manches gagnantes</p></div><div class="aitiles">${tiles}</div></div>`;
+  }
   if(path==='solo/ecran'){
     return `<div class="page ctr">${navHead('combat','Écran partagé')}
       <div class="box sbox"><h3 class="xo">Paramètres du match</h3>${modeChips().replace('<p class="mcap">',`<label class="chk"><input type="checkbox" ${UI.hideHands?'checked':''} data-opt="hideHands"><span class="xo">Cacher les mains</span></label><p class="mcap">`)}</div>
@@ -2013,7 +2201,7 @@ function renderSetup(){
   UI.nav.combat=[]; return renderSetup();
 }
 function netBanner(){
-  if(!G||!G.online) return '';
+  if(!G||!G.online||G.ai) return '';
   let msg='',btn='';
   if(NET.role==='host'&&!NET.conn) msg=`Adversaire déconnecté. Il peut revenir avec le code <b>${esc(NET.code)}</b> (« Rejoindre »).`;
   if(NET.role==='guest'&&NET.lost){msg='Connexion avec l\'hôte perdue.';btn='<button class="primary" data-a="netretry">Se reconnecter</button>';}
@@ -2168,7 +2356,8 @@ function midParts(){
   }
   else if(G.phase==='matchover'){
     main=`<div class="banner">🏆 <b>${esc(G.names[G.lastWinner])}</b> ${G.mode==='blitz'?'remporte le match rapide !':`remporte le match ${G.wins[0]}–${G.wins[1]} !`}</div>`;
-    btns=`<button class="primary" data-a="rematch">Rejouer ce duel</button><button data-a="newmatch">${G.online?'Quitter la partie':'Changer de decks'}</button>`;
+    btns=G.ai?(G.lastWinner===MY_SEAT?`<button class="primary" data-a="aiback">Retour au journalier</button>`:`<button class="primary" data-a="rematch">Réessayer</button><button data-a="aiback">Quitter</button>`)
+      :`<button class="primary" data-a="rematch">Rejouer ce duel</button><button data-a="newmatch">${G.online?'Quitter la partie':'Changer de decks'}</button>`;
   }
   if(G.phase==='setup'){info=head;main=main.replace(head,'');}
   return {info,main,btns,undo,over:G.phase==='roundover'||G.phase==='matchover'};
@@ -2249,7 +2438,7 @@ function renderMatchModal(){
   const dp=/^disc(\d)$/.exec(UI.mmodal||'');
   const body=dp?`<h3 class="xo" style="margin-top:0;text-align:center">Cimetière de ${esc(G.names[+dp[1]])}</h3>${PL(+dp[1]).discard.length?`<div class="dpick cemet">${PL(+dp[1]).discard.slice().reverse().map(id=>cardHTML(id,{cls:'mini click',attrs:`data-a="bigc:${id}"`})).join('')}</div>`:'<p class="muted" style="text-align:center">Vide.</p>'}`
     :UI.mmodal==='rules'?rulesRecap()
-    :`<h3 style="margin-top:0">Historique du match</h3><div class="log" style="max-height:none">${G?G.log.slice().reverse().map(l=>`<div class="l ${l.cls}">${esc(l.msg)}</div>`).join(''):''}</div><div style="margin-top:16px">${registryHTML()}</div>`;
+    :`<h3 style="margin-top:0">Historique du match</h3><div class="log" style="max-height:none">${G?G.log.slice().reverse().map(l=>`<div class="l ${l.cls}">${esc(l.msg)}</div>`).join(''):''}</div>`;
   return `<div class="modal-bg" data-a="closemm"><div class="modal mmodal"><button class="mclose ghost" data-a="closemm">✕</button>${body}</div></div>`;
 }
 function playerPanel(p,top){
@@ -2377,7 +2566,8 @@ function midBar(){
   }
   else if(G.phase==='matchover'){
     main=`<span class="banner">🏆 <b>${esc(G.names[G.lastWinner])}</b> ${G.mode==='blitz'?'remporte le match rapide !':`remporte le match ${G.wins[0]}–${G.wins[1]} !`}</span>`;
-    btns=`<button class="primary" data-a="rematch">Rejouer ce duel</button><button data-a="newmatch">${G.online?'Quitter la partie':'Changer de decks'}</button>`;
+    btns=G.ai?(G.lastWinner===MY_SEAT?`<button class="primary" data-a="aiback">Retour au journalier</button>`:`<button class="primary" data-a="rematch">Réessayer</button><button data-a="aiback">Quitter</button>`)
+      :`<button class="primary" data-a="rematch">Rejouer ce duel</button><button data-a="newmatch">${G.online?'Quitter la partie':'Changer de decks'}</button>`;
   }
   return `<div class="mid"><div class="midtxt">${main}</div><div class="midbtns">${btns}${undo}</div></div>`;
 }
@@ -2496,6 +2686,11 @@ const H = {
   start(){saveNames();UI.confirmQuit=false;fixPicks();const o=ownedDecks(),rnd=()=>o[Math.floor(Math.random()*o.length)];
     newMatch({decks:UI.pick.map((k,i)=>UI.rand[i]?rnd():k),names:UI.names,mode:UI.mode,variant:'std',hideHands:UI.hideHands});render();},
   ready(){G.handoff=false;render();},
+  aiplay(k){const i=AI_LEVELS.findIndex(x=>x.k===k);if(!ACC.p||i<0||aiDone(k))return;fixPicks();if(NET.role)netLeave();
+    MY_SEAT=0;UI.confirmQuit=false;UI.flipSeen=null;
+    newMatch({ai:{level:k,seat:1},decks:[resolveDeck(0),aiDeckOfDay(i)],names:[ACC.p.name,'IA '+AI_LEVELS[i].n],avatars:[ACC.p.avatar||'',''],mode:'match',variant:'std',hideHands:false,online:true});
+    window.scrollTo(0,0);render();},
+  aiback(){G=null;UNDO=[];MY_SEAT=null;UI.tab='combat';UI.nav.combat=['solo','journalier'];window.scrollTo(0,0);render();},
   ssel(uid){setupToggle(+uid);render();},
   // préparation par glisser-déposer : choisit ce ✯ comme champion et valide
   setdrop(uid){uid=+uid;if(!G||G.phase!=='setup')return;const seat=seatOfHand(uid);if(seat<0||PL(seat).champion)return;
@@ -2605,7 +2800,7 @@ const H = {
   attack(kind){kind=kind==='spe'?'spe':'base';if(canAttack(kind))act(()=>doAttack(kind));},
   endturn(){act(endTurnNoAttack);},
   nextround(){act(nextRound);},
-  rematch(){const g=G;newMatch({decks:g.decks,names:g.names,avatars:g.avatars,mode:g.mode,variant:'std',hideHands:g.hide,online:g.online});render();},
+  rematch(){const g=G;newMatch({ai:g.ai,decks:g.decks,names:g.names,avatars:g.avatars,mode:g.mode,variant:'std',hideHands:g.hide,online:g.online});render();},
   newmatch(){if(G&&G.phase!=='matchover'&&!UI.confirmQuit){UI.confirmQuit=true;UI.gmenu=false;render();return;}UI.confirmQuit=false;UI.gmenu=false;UI.sheet=null;UI.mmodal=null;if(G&&G.online)netLeave();G=null;UNDO=[];window.scrollTo(0,0);render();},
   stayin(_,e,el){if(el&&el.classList.contains('modal-bg')&&e.target!==el)return;UI.confirmQuit=false;render();},
   sheet(uid){UI.sheet=+uid;render();},
@@ -2635,6 +2830,7 @@ function execTarget(pd,uid){
 const GAME_ACTIONS=new Set(['ssel','setupok','setdrop','play','drop','pk','rf','swap','swapsel','attack','endturn','cancel','undo','nextround','rematch']);
 function dispatch(a,args,e,el){
   if(a==='play'||a==='swap'||a==='swapsel'||a==='setdrop'||a==='attack'||a==='endturn'||a==='drop') UI.sheet=null;
+  if(G&&G.ai&&GAME_ACTIONS.has(a)){hostExec(0,a,args);return;}  // contre l'IA : on ne joue que pour soi
   if(G&&G.online&&GAME_ACTIONS.has(a)){
     if(NET.role==='guest'){ if(NET.conn&&NET.conn.open) NET.conn.send({t:'act',a,args}); return; }
     if(NET.role==='host'){ hostExec(0,a,args); return; }
