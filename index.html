@@ -734,6 +734,11 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 .aideck{margin:6px 0 10px;font-size:13.5px;color:var(--muted)}.aideck b{color:var(--text);font-size:14px}
 .aigo{width:100%;padding:10px;font-size:15px}
 .aitile.done{opacity:.75}.aidone{font-size:14px;color:var(--good,#3fb950);font-weight:700}
+.mbtn.aiph{border-radius:18px;background:linear-gradient(135deg,#2a3142,#161b25);box-shadow:inset 0 0 0 2px #3a4357;display:flex;align-items:center;justify-content:center}
+.mbtn.aiph span{font-size:clamp(26px,8vw,40px);color:#fff;letter-spacing:.02em}
+.aipage{text-align:left}.aipage .aihead{margin-bottom:16px}.aipage .ailv{font-size:26px}.aipage .aigo{margin-top:6px}.aipage .aidone{text-align:center;margin-top:6px}
+.mbtn.aiph{position:relative}.mbtn.aiph.done{filter:grayscale(1) brightness(.6);cursor:default}
+.mbtn.aiph .aitm{position:absolute;left:50%;bottom:9%;transform:translateX(-50%);font-size:15px;font-weight:700;color:#fff;background:#0009;padding:2px 10px;border-radius:999px}
 </style>
 </head>
 <body>
@@ -756,7 +761,7 @@ body.dragmode{user-select:none;-webkit-user-select:none}
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.35.0';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.36.1';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1449,6 +1454,7 @@ function parisDay(){const n=parisParts(new Date());return `${n.year}-${n.month}-
 // Deck de l'IA : change chaque jour, différent pour chaque niveau
 function aiDeckOfDay(i){const [y,m,d]=parisDay().split('-').map(Number);const idx=Math.floor(Date.UTC(y,m-1,d)/864e5);return DECK_ORDER[(idx+i*2)%DECK_ORDER.length];}
 function aiDone(k){return !!(ACC.p&&ACC.p.ai_day===parisDay()&&(ACC.p.ai_done||[]).includes(k));}
+function msToMidnight(){const n=parisParts(new Date());return (86400-(+n.hour*3600+ +n.minute*60+ +n.second))*1000;}
 function untilMidnight(){const n=parisParts(new Date()),s=86400-(+n.hour*3600+ +n.minute*60+ +n.second);return `${Math.floor(s/3600)} h ${String(Math.floor(s%3600/60)).padStart(2,'0')}`;}
 
 // ---- simulation : exécute fn sur une copie de la partie, puis remet tout en place ----
@@ -1553,19 +1559,22 @@ function aiOppTurn(o){
   }
   for(let i=0;i<6&&G.pending.length&&aiActor()>=0;i++){const w=aiActor();aiApply(simBest(aiMoves(),()=>aiEval(w)));}
 }
-function aiValue(seat,level){
-  if(level==='facile') return ()=>{aiFinish(seat,{noThreat:true});return aiEval(seat,{noThreat:true});};
-  if(level==='inter') return ()=>{aiFinish(seat);return aiEval(seat);};
-  // expert : termine son tour au mieux (comme l'intermédiaire), puis imagine la riposte adverse
-  return ()=>{for(let i=0;i<8&&aiActor()===seat;i++)aiApply(simBest(aiMoves(),aiValue(seat,'inter')));
+// Façons de juger un coup : naïve (ne pense pas à la riposte), complète (anticipe la menace adverse),
+// profonde (joue tout son tour puis imagine la riposte — trop forte pour l'instant, non utilisée)
+function aiValue(seat,style){
+  if(style==='naive') return ()=>{aiFinish(seat,{noThreat:true});return aiEval(seat,{noThreat:true});};
+  if(style==='full') return ()=>{aiFinish(seat);return aiEval(seat);};
+  return ()=>{for(let i=0;i<8&&aiActor()===seat;i++)aiApply(simBest(aiMoves(),aiValue(seat,'full')));
     aiFinish(seat);if(aiActor()===1-seat)aiOppTurn(1-seat);return aiEval(seat);};
 }
-const AI_NOISE={facile:14,inter:4,expert:1.5};
+// Réglage des niveaux : part de coups au hasard (erreurs), façon de juger, imprécision
+const AI_PROFILE={facile:{err:.6,style:'naive',noise:25},inter:{err:.12,style:'naive',noise:8},expert:{err:0,style:'full',noise:3}};
 function pick(a){return a[Math.floor(Math.random()*a.length)];}
 // Coup choisi par l'IA (seat) dans la position actuelle
 function aiChoose(seat,level){
   const ms=aiMoves(); if(!ms.length) return null; if(ms.length===1) return ms[0];
-  if(level==='debutant'){
+  const pf=AI_PROFILE[level];
+  if(level==='debutant'||Math.random()<pf.err){
     if(G.pending.length) return pick(ms);
     const atk=ms.filter(m=>m.t==='atk'), play=ms.filter(m=>m.t!=='atk'&&m.t!=='end');
     if(play.length&&Math.random()<.55) return pick(play);
@@ -1574,7 +1583,7 @@ function aiChoose(seat,level){
   }
   const base=gclone(G); base.log=[];
   // l'IA ne connaît ni la main ni l'ordre du deck adverse, ni l'ordre de son propre deck
-  return simRun(base,()=>{shuffle(PL(seat).deck);shuffle(PL(1-seat).deck);PL(1-seat).hand=[];return simBest(ms,aiValue(seat,level),AI_NOISE[level]);});
+  return simRun(base,()=>{shuffle(PL(seat).deck);shuffle(PL(1-seat).deck);PL(1-seat).hand=[];return simBest(ms,aiValue(seat,pf.style),pf.noise);});
 }
 // Préparation : choisit son champion de départ
 function aiSetup(seat,level){
@@ -2033,6 +2042,8 @@ function giftNext(){if(!ACC.p||!ACC.p.gift_at)return 0;const n=parisParts(new Da
 function giftHTML(){const nx=giftNext();
   return `<div class="dgroup"><h3 class="xo grp">Cadeaux quotidiens</h3><div class="gift"><div class="gitems"><span>${COIN} <b>${GIFT.coins}</b></span><span>${JETON} <b>${GIFT.tokens}</b></span></div>
     ${nx?`<button class="off giftbtn" disabled><span id="gifttimer" class="mono">${fmtLeft(nx-Date.now())}</span></button>`:`<button class="primary xo giftbtn" data-a="claimgift">Récupérer</button>`}</div></div>`;}
+// minuteur des niveaux validés : à minuit (heure de Paris) ils se débloquent
+setInterval(()=>{const a=document.querySelectorAll('.aitm');if(!a.length)return;if([...a].some(x=>!aiDone(x.dataset.k)))return render();a.forEach(x=>x.textContent=fmtLeft(msToMidnight()));},1000);
 setInterval(()=>{const t=$('#gifttimer');if(!t)return;const nx=giftNext();if(!nx)render();else t.textContent=fmtLeft(nx-Date.now());},1000);
 function renderShop(){
   const head=navHead('params','Shop');
@@ -2183,14 +2194,15 @@ function renderSetup(){
         <input id="netcode" class="codein" maxlength="4" autocomplete="off" autocapitalize="characters" value="${esc(UI.joinCode||'')}">
         <div class="setact" style="margin-top:14px"><button class="primary xo" data-a="netjoin">Rejoindre le match</button></div></div></div>`;
   if(path==='solo') return `<div class="page ctr vcenter">${navHead('combat','Solo')}${imenu([['go:combat:solo:event','evenement','Événement',true],['go:combat:solo:journalier','journalier','Journalier'],['go:combat:solo:ecran','ecran','Écran partagé']])}${reg}</div>`;
-  if(path==='solo/journalier'){
+  if(path==='solo/journalier'||nav[0]==='solo'&&nav[1]==='journalier'&&AI_LEVELS.some(x=>x.k===nav[2])){
     if(!ACC.p) return `<div class="page ctr">${navHead('combat','Journalier')}<div class="box sbox"><p class="muted cap">Connecte-toi à ton compte (Paramètres › Compte) pour affronter l'IA et gagner les récompenses du jour.</p></div></div>`;
+    if(path==='solo/journalier') return `<div class="page ctr vcenter">${navHead('combat','Journalier')}<div class="imenu">${AI_LEVELS.map(L=>{const d=aiDone(L.k);return `<button class="mbtn aiph b-ai-${L.k} ${d?'done':''}" ${d?'disabled':`data-a="go:combat:solo:journalier:${L.k}"`} aria-label="${L.n}${d?' (validé)':''}"><span class="xo">${L.n}</span>${d?`<small class="aitm mono" data-k="${L.k}">${fmtLeft(msToMidnight())}</small>`:''}</button>`;}).join('')}</div></div>`;
     fixPicks();
-    const tiles=AI_LEVELS.map((L,i)=>{const done=aiDone(L.k),dk=aiDeckOfDay(i);
-      return `<div class="aitile ${done?'done':''}" style="--tc:${deckColor(dk)}"><div class="aihead"><span class="ailv xo">${L.n}</span><span class="airew">${COIN} <b>${L.coins}</b> · <b>${L.pts}</b> pts</span></div>
-        <div class="aideck">Deck de l'IA : <b class="xo">${deckLabel(dk)}</b></div>
-        ${done?`<div class="aidone">✓ Validé · revient dans ${untilMidnight()}</div>`:`<button class="primary xo aigo" data-a="aiplay:${L.k}">Affronter</button>`}</div>`;}).join('');
-    return `<div class="page ctr">${navHead('combat','Journalier')}<div class="box sbox"><h3 class="xo">Ton deck</h3>${deckChoice(0)}<p class="mcap">Match simple · 2 manches gagnantes</p></div><div class="aitiles">${tiles}</div></div>`;
+    const L=AI_LEVELS.find(x=>x.k===nav[2]),done=aiDone(L.k);
+    return `<div class="page ctr">${navHead('combat','Journalier')}<div class="box sbox aipage">
+      <div class="aihead"><span class="ailv xo">${L.n}</span><span class="airew">${COIN} <b>${L.coins}</b> · <b>${L.pts}</b> points</span></div>
+      ${deckChoice(0)}<p class="mcap">Match rapide · 1 manche gagnante</p>
+      ${done?`<div class="aidone">✓ Validé · revient dans ${untilMidnight()}</div>`:`<button class="primary xo aigo" data-a="aiplay:${L.k}">Lancer le match</button>`}</div></div>`;
   }
   if(path==='solo/ecran'){
     return `<div class="page ctr">${navHead('combat','Écran partagé')}
@@ -2688,9 +2700,9 @@ const H = {
   ready(){G.handoff=false;render();},
   aiplay(k){const i=AI_LEVELS.findIndex(x=>x.k===k);if(!ACC.p||i<0||aiDone(k))return;fixPicks();if(NET.role)netLeave();
     MY_SEAT=0;UI.confirmQuit=false;UI.flipSeen=null;
-    newMatch({ai:{level:k,seat:1},decks:[resolveDeck(0),aiDeckOfDay(i)],names:[ACC.p.name,'IA '+AI_LEVELS[i].n],avatars:[ACC.p.avatar||'',''],mode:'match',variant:'std',hideHands:false,online:true});
+    newMatch({ai:{level:k,seat:1},decks:[resolveDeck(0),aiDeckOfDay(i)],names:[ACC.p.name,'IA '+AI_LEVELS[i].n],avatars:[ACC.p.avatar||'',''],mode:'blitz',variant:'std',hideHands:false,online:true});
     window.scrollTo(0,0);render();},
-  aiback(){G=null;UNDO=[];MY_SEAT=null;UI.tab='combat';UI.nav.combat=['solo','journalier'];window.scrollTo(0,0);render();},
+  aiback(){const G0=G;G=null;UNDO=[];MY_SEAT=null;UI.tab='combat';UI.nav.combat=['solo','journalier',G0&&G0.ai&&!aiDone(G0.ai.level)?G0.ai.level:''].filter(Boolean);window.scrollTo(0,0);render();},
   ssel(uid){setupToggle(+uid);render();},
   // préparation par glisser-déposer : choisit ce ✯ comme champion et valide
   setdrop(uid){uid=+uid;if(!G||G.phase!=='setup')return;const seat=seatOfHand(uid);if(seat<0||PL(seat).champion)return;
