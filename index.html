@@ -774,6 +774,12 @@ body.noscroll{overflow:hidden;overscroll-behavior:none;position:fixed;inset:0;wi
 body.noscroll .imenu .mbtn{max-width:min(460px,calc((100dvh - 330px) / 4 * 3.555))}
 .obacks i.slv{border-color:#0007}
 .aipage .aihead.box{padding:14px 16px}.aipage .aihead .airew{padding:9px 14px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+.aipage .aihead .ailv{font-size:23px}
+.xpi{display:inline-flex;align-items:center;justify-content:center;min-width:1.5em;height:1.15em;padding:0 .25em;border-radius:.3em;background:linear-gradient(135deg,#7c5cff,#3b8ff0);color:#fff;font-size:.72em;font-style:italic;font-weight:900;letter-spacing:.02em;vertical-align:.12em;box-shadow:inset 0 -1px 0 #0004}
+.cosgrid .cosv{height:92px;display:flex;align-items:center;justify-content:center}
+.coin3d.metal .cface::after{content:'';position:absolute;inset:0;border-radius:50%;background:linear-gradient(125deg,#fff0 30%,#ffffff59 45%,#fff0 60%);pointer-events:none}
+.aipage .airew .rwl{display:grid;grid-template-columns:30px auto;align-items:center;column-gap:6px}
+.aipage .airew .rwi{display:flex;justify-content:center;align-items:center}.aipage .airew .rwi .xpi{vertical-align:0;font-size:.8em}.aipage .airew .rwi .coin{margin:0}
 </style>
 </head>
 <body>
@@ -796,7 +802,7 @@ body.noscroll .imenu .mbtn{max-width:min(460px,calc((100dvh - 330px) / 4 * 3.555
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.38.1';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.39.1';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1023,11 +1029,28 @@ const DECK_COIN={vague:'wave',seve:'sprout',feu:'flame',eau:'drop',elec:'bolt',r
 // Sleeves (dos des cartes) : couleur du deck + son logo
 function hexMix(a,b,t){const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));const x=p(a),y=p(b);return '#'+x.map((v,i)=>Math.round(v+(y[i]-v)*t).toString(16).padStart(2,'0')).join('');}
 const SLV={};
-function sleeveCSS(k){if(SLV[k])return SLV[k];const c=deckColor(k),lt=hexMix(c,'#ffffff',.55);
-  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 98" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${hexMix(c,'#000000',.35)}"/><stop offset="1" stop-color="${hexMix(c,'#000000',.78)}"/></linearGradient><pattern id="p" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="3" height="7" fill="#fff" opacity=".06"/></pattern></defs><rect width="70" height="98" fill="url(#g)"/><rect width="70" height="98" fill="url(#p)"/><rect x="4.5" y="4.5" width="61" height="89" rx="5" fill="none" stroke="${lt}" stroke-opacity=".55" stroke-width="1.2"/><circle cx="35" cy="49" r="15.5" fill="#00000055" stroke="${lt}" stroke-opacity=".8" stroke-width="1.4"/><g transform="translate(25 39) scale(.8333)" fill="${lt}" color="${lt}">${COIN_IC[DECK_COIN[k]||'drop']}</g></svg>`;
+// Pièces et sleeves vendues au Shop (en plus de celles des decks)
+const STAR_P='<path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/>';
+const COSMETICS=[
+  {k:'piece_argent',cat:'coin',n:'Pièce argent',price:150,c:'#b9c3cd'},
+  {k:'piece_or',cat:'coin',n:'Pièce or',price:250,c:'#e2b33c'},
+  {k:'piece_amethyste',cat:'coin',n:'Pièce améthyste',price:400,c:'#8b5cf6'},
+  {k:'sleeve_argent',cat:'sleeve',n:'Sleeves argent',price:150,g1:'#e3e8ed',g2:'#6c7682',lt:'#ffffff'},
+  {k:'sleeve_or',cat:'sleeve',n:'Sleeves or',price:250,g1:'#f6d77f',g2:'#7f540c',lt:'#fff3c9'},
+  {k:'sleeve_nebuleuse',cat:'sleeve',n:'Sleeves nébuleuse',price:400,g1:'#3d2b95',g2:'#0a0a22',lt:'#d4c8ff',neb:true}];
+const COS=k=>COSMETICS.find(x=>x.k===k);
+function sleeveCSS(k){if(SLV[k])return SLV[k];
+  let g1,g2,lt,ic,extra='';const cs=COS(k);
+  if(cs){g1=cs.g1;g2=cs.g2;lt=cs.lt;ic=STAR_P;
+    if(cs.neb) extra='<circle cx="18" cy="70" r="26" fill="#e0559b" opacity=".22"/><circle cx="56" cy="24" r="22" fill="#3fb4ff" opacity=".18"/>'+[[9,14],[58,10],[20,33],[61,44],[12,86],[48,80],[30,92],[64,70],[40,8],[6,55]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="${i%3?.6:1}" fill="#fff" opacity=".85"/>`).join('');}
+  else{const c=deckColor(k);g1=hexMix(c,'#000000',.35);g2=hexMix(c,'#000000',.78);lt=hexMix(c,'#ffffff',.55);ic=COIN_IC[DECK_COIN[k]||'drop'];}
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 98" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${g1}"/><stop offset="1" stop-color="${g2}"/></linearGradient><pattern id="p" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="3" height="7" fill="#fff" opacity="${cs&&!cs.neb?'.12':'.06'}"/></pattern></defs><rect width="70" height="98" fill="url(#g)"/>${extra}<rect width="70" height="98" fill="url(#p)"/><rect x="4.5" y="4.5" width="61" height="89" rx="5" fill="none" stroke="${lt}" stroke-opacity=".6" stroke-width="1.2"/><circle cx="35" cy="49" r="15.5" fill="#00000055" stroke="${lt}" stroke-opacity=".85" stroke-width="1.4"/><g transform="translate(25 39) scale(.8333)" fill="${lt}" color="${lt}">${ic}</g></svg>`;
   return SLV[k]=`background:url("data:image/svg+xml,${encodeURIComponent(svg)}") center/cover no-repeat`;}
 function backHTML(p,cls){return `<div class="${cls} back slv" style='${sleeveCSS(G.decks[p])}'></div>`;}
-function coinFaces(k){return `<div class="cface front"><svg viewBox="0 0 24 24" fill="currentColor">${COIN_IC[DECK_COIN[k]||'drop']}</svg></div><div class="cface back"><span>✯</span></div>`;}
+function coinFaces(k){const ic=COS(k)?'<text x="12" y="16.3" text-anchor="middle" font-family="\'Exo 2\',sans-serif" font-weight="900" font-style="italic" font-size="10.5">DC</text>':COIN_IC[DECK_COIN[k]||'drop'];
+  return `<div class="cface front"><svg viewBox="0 0 24 24" fill="currentColor">${ic}</svg></div><div class="cface back"><span>✯</span></div>`;}
+function coinColor(k){const cs=COS(k);return cs?cs.c:deckColor(k);}
+function coinStill(k,cls){return `<div class="dkcoin ${cls||''}"><div class="coin3d still ${COS(k)?'metal':''}" style="--cc:${coinColor(k)}">${coinFaces(k)}</div></div>`;}
 // Affiche une fois par match le lancer de pièce : chaque joueur voit la pièce de son propre deck
 function checkFlip(){
   if(!G||!G.flip||UI.flipSeen===G.flip||UI.tab!=='combat'||document.getElementById('coinflip')) return;
@@ -1718,7 +1741,7 @@ function deckTile(k,action,on){
 function deckIdHTML(k){const t=TYPES[DECKS[k].type],c=deckColor(k);
   return `<div class="box dkid"><div class="dkit"><span class="dkl">Type</span><div class="dkv"><span class="dktype xo" style="color:${t.color};border-color:${t.color}">${t.name}</span></div></div>
     <div class="dkit"><span class="dkl">Sleeves</span><div class="dkv"><div class="dkslv" style='${sleeveCSS(k)}'></div></div></div>
-    <div class="dkit"><span class="dkl">Pièce</span><div class="dkv"><div class="dkcoin"><div class="coin3d still" style="--cc:${c}">${coinFaces(k)}</div></div></div></div></div>`;}
+    <div class="dkit"><span class="dkl">Pièce</span><div class="dkv">${coinStill(k)}</div></div></div>`;}
 function deckCompoHTML(k){
   const list=DECKS[k].list;
   const groups=[['Combattants ✯',id=>C(id).size==='P'],['Combattants ✯✯',id=>C(id).size==='M'],['Combattants ✯✯✯',id=>C(id).size==='G'],
@@ -2045,6 +2068,7 @@ function achHTML(p){
   const list=open?`<div class="achlist">${tiers.slice(0,Math.min(tiers.length,done+1)).map((x,ti)=>{const v=Math.min(achVal(x,p),x.n),o=v>=x.n;return `<div class="achl ${o?'ok':''}"><span class="lbadge">${achBadge(a.k,ti+1)}</span><span class="ltit">${x.t}${o?'':`<small class="lrew">Récompense : ${achReward(ti)} ${COIN}</small>`}</span><span class="lval">${o?'Obtenu':`${v}/${x.n}`}</span></div>`;}).join('')}</div>`:'';
   return `<div class="ach ${ok?'ok':''} ${open?'open':''}" data-a="achopen:${a.k}">${achBadge(a.k,done)}<span class="ainfo"><span class="atit">${a.t}</span><span class="abar"><i style="width:${Math.round(v/a.n*100)}%"></i></span></span><span class="aval">${ok?'Obtenu':`${v}/${a.n}`}</span><span class="achev">▾</span></div>${list}`;}).join('')}</div>`;}
 const COIN='<span class="coin" aria-hidden="true">🪙</span>';
+const XPI='<i class="xpi xo" aria-hidden="true">XP</i>';
 function accField(key,label,type){const v=UI.af[key]||'',pw=type==='password',show=pw&&UI.af.show;
   return `<label class="nfield accf"><span class="xo">${label}</span><span class="accin"><input data-af="${key}" type="${show?'text':type||'text'}" value="${esc(v)}" ${pw?'autocomplete="new-password" autocapitalize="off"':'maxlength="12" autocapitalize="characters" autocomplete="username"'} spellcheck="false">${pw?`<button type="button" class="eye ghost" data-a="afshow" aria-label="${show?'Masquer':'Afficher'} le mot de passe">${show?'Masquer':'Voir'}</button>`:''}</span></label>`;}
 // Mot de passe : 6 caractères min., au moins un chiffre et une majuscule
@@ -2116,8 +2140,12 @@ function renderShop(){
   const avs=`<div class="dgroup"><h3 class="xo grp">Photos de profil</h3>${sale.length?`<div class="avgrid">
     ${sale.map(a=>{const ask=UI.buyAsk==='av'+a.k,ok=c>=AVATAR_PRICE;
       return `<div class="avit"><span class="shopav">${avatarHTML(a.k)}</span><button class="${ask?'primary':ok?'buy':'off'} xo" data-a="buyav:${a.k}" data-buy="av${a.k}" ${ok?'':'disabled'}>${ask?'Confirmer':`${AVATAR_PRICE} ${COIN}`}</button></div>`;}).join('')}</div>`:'<p class="muted cap" style="margin:0 0 6px">Tu as toutes les photos !</p>'}</div>`;
+  const owned=ACC.p.cosmetics||[];
+  const cosSec=(cat,title,none)=>{const l=COSMETICS.filter(x=>x.cat===cat&&!owned.includes(x.k));
+    return `<div class="dgroup"><h3 class="xo grp">${title}</h3>${l.length?`<div class="avgrid cosgrid">${l.map(x=>{const ask=UI.buyAsk==='cos'+x.k,ok=c>=x.price;
+      return `<div class="avit cosit"><div class="cosv" title="${x.n}">${cat==='coin'?coinStill(x.k):`<div class="dkslv" style='${sleeveCSS(x.k)}'></div>`}</div><button class="${ask?'primary':ok?'buy':'off'} xo" data-a="buycos:${x.k}" data-buy="cos${x.k}" ${ok?'':'disabled'}>${ask?'Confirmer':`${x.price} ${COIN}`}</button></div>`;}).join('')}</div>`:`<p class="muted cap" style="margin:0 0 6px">${none}</p>`}</div>`;};
   return `<div class="page ctr"><div class="ptop"><h2>Shop</h2><div class="right wallet">${COIN} <b>${c}</b></div></div><button class="backbtn" data-a="back:params"><span class="bchev">‹</span> Retour</button>
-    ${giftHTML()}${tokens}${avs}${left.length?`<div class="dgroup" id="shopdecks"><h3 class="xo grp">Decks</h3>${left.map(item).join('')}</div>`:'<div class="box sbox"><p class="muted cap">Tu as déjà tous les decks !</p></div>'}${accMsg()}</div>`;
+    ${giftHTML()}${tokens}${cosSec('coin','Pièces','Tu as toutes les pièces !')}${cosSec('sleeve','Sleeves','Tu as toutes les sleeves !')}${avs}${left.length?`<div class="dgroup" id="shopdecks"><h3 class="xo grp">Decks</h3>${left.map(item).join('')}</div>`:'<div class="box sbox"><p class="muted cap">Tu as déjà tous les decks !</p></div>'}${accMsg()}</div>`;
 }
 /* =========================================================
    HOME · packs (série 1)
@@ -2250,7 +2278,7 @@ function renderSetup(){
     fixPicks();
     const L=AI_LEVELS.find(x=>x.k===nav[2]),done=aiDone(L.k);
     return `<div class="page ctr aipage">${navHead('combat','Journalier')}
-      <div class="box aihead"><span class="ailv xo">${L.n}</span><div class="airew"><span class="airt">Récompenses</span><span>${COIN} <b>${L.coins}</b> pièce${s_(L.coins)}</span><span><b>${L.pts}</b> points</span></div></div>
+      <div class="box aihead"><span class="ailv xo">${L.n}</span><div class="airew"><span class="airt">Récompenses</span><span class="rwl"><span class="rwi">${COIN}</span><span><b>${L.coins}</b> pièce${s_(L.coins)}</span></span><span class="rwl"><span class="rwi">${XPI}</span><span><b>${L.pts}</b> points</span></span></div></div>
       <div class="box sbox aideckbox"><h3 class="xo">Ton deck</h3>${deckChoice(0)}<p class="mcap">Match rapide · 1 manche gagnante</p></div>
       ${done?`<div class="aidone">✓ Validé · revient dans ${untilMidnight()}</div>`:`<button class="primary xo aigo" data-a="aiplay:${L.k}">Lancer le match</button>`}</div>`;
   }
@@ -2856,6 +2884,8 @@ const H = {
     accRun(async()=>{const r=await SB.rpc('buy_tokens',{p_n:n});if(r.error)throw r.error;setProfile(r.data);UI.tokQ=null;toast(`+${n} jeton${s_(n)}`);});},
   buyav(k){if(!ACC.p||!AVATARS.some(a=>a.k===k))return;if(UI.buyAsk!=='av'+k){UI.buyAsk='av'+k;return render();}UI.buyAsk=null;
     accRun(async()=>{const r=await SB.rpc('buy_avatar',{p_av:k});if(r.error)throw r.error;setProfile(r.data);toast('Photo de profil débloquée !');});},
+  buycos(k){const x=COS(k);if(!ACC.p||!x)return;if(UI.buyAsk!=='cos'+k){UI.buyAsk='cos'+k;return render();}UI.buyAsk=null;
+    accRun(async()=>{const r=await SB.rpc('buy_cosmetic',{p_k:k});if(r.error)throw r.error;setProfile(r.data);toast(`${x.n} débloquée${x.cat==='sleeve'?'s':''} !`);});},
   setav(k){if(!ACC.p)return;UI.avPick=false;UI.avSel=null;if((ACC.p.avatar||'base')===k){return render();}accRun(async()=>{const r=await SB.rpc('set_avatar',{p_av:k==='base'?null:k});if(r.error)throw r.error;setProfile(r.data);});},
   swapsel(){if(G.phase!=='actions'||G.pending.length)return;const t=swapTargets();if(!t.length)return;G.pending.push({kind:'target',what:'swap',p:G.cur,options:t});render();},
   swap(uid){if(G.phase!=='actions'||G.pending.length||!swapOk(+uid))return;act(()=>doSwap(+uid));},
