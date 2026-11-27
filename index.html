@@ -780,6 +780,25 @@ body.noscroll .imenu .mbtn{max-width:min(460px,calc((100dvh - 330px) / 4 * 3.555
 .coin3d.metal .cface::after{content:'';position:absolute;inset:0;border-radius:50%;background:linear-gradient(125deg,#fff0 30%,#ffffff59 45%,#fff0 60%);pointer-events:none}
 .aipage .airew .rwl{display:grid;grid-template-columns:30px auto;align-items:center;column-gap:6px}
 .aipage .airew .rwi{display:flex;justify-content:center;align-items:center}.aipage .airew .rwi .xpi{vertical-align:0;font-size:.8em}.aipage .airew .rwi .coin{margin:0}
+.mbtn.ph{border-radius:18px;background:linear-gradient(135deg,#252c3a,#151a23);box-shadow:inset 0 0 0 2px #333b4c;display:flex;align-items:center;padding-left:9%}
+.mbtn.ph span{font-size:clamp(20px,6.2vw,32px);color:#fff;text-align:left}
+.mydkbox .mydkhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.mydkbox .mydkhead button{padding:9px 16px;font-size:14.5px}
+.mydks{display:flex;flex-direction:column;gap:10px}
+.dtile.mydk{display:flex;align-items:center;gap:12px;text-align:left;padding:10px 12px;width:100%}
+.mydkslv{flex:0 0 auto;width:34px;height:48px;border-radius:5px;box-shadow:0 0 0 1px #0008}
+.mydkt{display:flex;flex-direction:column;gap:2px;min-width:0}.mydkt small{color:var(--muted);font-size:12.5px}.mydkt .warn{color:#f0883e}
+.dked .dkname{display:flex;flex-direction:column;gap:6px;text-align:left}.dked .dkname input{font-size:17px;padding:10px 12px}
+.dkh{font-size:10.5px;color:var(--muted);opacity:.8}
+.dkpick{background:none;border:0;padding:0;cursor:pointer}.dkpick:hover{background:none}
+.dkcount{display:flex;justify-content:space-between;align-items:center;font-size:17px}.dkcount b{font-size:18px}.dkcount b.full{color:var(--accent)}
+.dkwarn{color:#f0883e;font-size:13.5px;margin:6px 0 0}
+.dkadd{position:relative}.dkadd.max{opacity:.45}.dkadd .dkn{position:absolute;top:-6px;right:-4px;z-index:2;background:#0c0f15;border:1px solid var(--line);color:#fff;font-weight:700;font-size:11.5px;padding:1px 6px;border-radius:9px}
+.dkbar{position:sticky;bottom:calc(136px + env(safe-area-inset-bottom));z-index:20;display:flex;gap:10px;justify-content:center;padding:10px;margin:6px -6px 0;background:#0d1016e6;border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(6px)}
+.dkbar button{padding:11px 20px;font-size:15px}
+.cospickgrid{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin:6px 0}
+.cospk{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;border-radius:14px;background:none;border:2px solid transparent;min-width:84px}.cospk:hover{background:none}
+.cospk.on{border-color:var(--accent)}.cospk small{font-size:12px;color:var(--muted)}
+.dkok{color:var(--good,#3fb950);font-size:13.5px;margin:6px 0 0;font-weight:600}
 </style>
 </head>
 <body>
@@ -802,7 +821,7 @@ body.noscroll .imenu .mbtn{max-width:min(460px,calc((100dvh - 330px) / 4 * 3.555
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.39.1';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.40.1';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1032,6 +1051,8 @@ const SLV={};
 // Pièces et sleeves vendues au Shop (en plus de celles des decks)
 const STAR_P='<path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/>';
 const COSMETICS=[
+  {k:'piece_base',cat:'coin',n:'Pièce de base',c:'#8793a8',base:true},
+  {k:'sleeve_base',cat:'sleeve',n:'Sleeves de base',g1:'#3d4659',g2:'#11151d',lt:'#aab6cb',base:true},
   {k:'piece_argent',cat:'coin',n:'Pièce argent',price:150,c:'#b9c3cd'},
   {k:'piece_or',cat:'coin',n:'Pièce or',price:250,c:'#e2b33c'},
   {k:'piece_amethyste',cat:'coin',n:'Pièce améthyste',price:400,c:'#8b5cf6'},
@@ -1039,7 +1060,7 @@ const COSMETICS=[
   {k:'sleeve_or',cat:'sleeve',n:'Sleeves or',price:250,g1:'#f6d77f',g2:'#7f540c',lt:'#fff3c9'},
   {k:'sleeve_nebuleuse',cat:'sleeve',n:'Sleeves nébuleuse',price:400,g1:'#3d2b95',g2:'#0a0a22',lt:'#d4c8ff',neb:true}];
 const COS=k=>COSMETICS.find(x=>x.k===k);
-function sleeveCSS(k){if(SLV[k])return SLV[k];
+function sleeveCSS(k){const sk=sleeveK(k);if(sk!==k)return sleeveCSS(sk);if(SLV[k])return SLV[k];
   let g1,g2,lt,ic,extra='';const cs=COS(k);
   if(cs){g1=cs.g1;g2=cs.g2;lt=cs.lt;ic=STAR_P;
     if(cs.neb) extra='<circle cx="18" cy="70" r="26" fill="#e0559b" opacity=".22"/><circle cx="56" cy="24" r="22" fill="#3fb4ff" opacity=".18"/>'+[[9,14],[58,10],[20,33],[61,44],[12,86],[48,80],[30,92],[64,70],[40,8],[6,55]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="${i%3?.6:1}" fill="#fff" opacity=".85"/>`).join('');}
@@ -1047,10 +1068,10 @@ function sleeveCSS(k){if(SLV[k])return SLV[k];
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 98" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${g1}"/><stop offset="1" stop-color="${g2}"/></linearGradient><pattern id="p" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="3" height="7" fill="#fff" opacity="${cs&&!cs.neb?'.12':'.06'}"/></pattern></defs><rect width="70" height="98" fill="url(#g)"/>${extra}<rect width="70" height="98" fill="url(#p)"/><rect x="4.5" y="4.5" width="61" height="89" rx="5" fill="none" stroke="${lt}" stroke-opacity=".6" stroke-width="1.2"/><circle cx="35" cy="49" r="15.5" fill="#00000055" stroke="${lt}" stroke-opacity=".85" stroke-width="1.4"/><g transform="translate(25 39) scale(.8333)" fill="${lt}" color="${lt}">${ic}</g></svg>`;
   return SLV[k]=`background:url("data:image/svg+xml,${encodeURIComponent(svg)}") center/cover no-repeat`;}
 function backHTML(p,cls){return `<div class="${cls} back slv" style='${sleeveCSS(G.decks[p])}'></div>`;}
-function coinFaces(k){const ic=COS(k)?'<text x="12" y="16.3" text-anchor="middle" font-family="\'Exo 2\',sans-serif" font-weight="900" font-style="italic" font-size="10.5">DC</text>':COIN_IC[DECK_COIN[k]||'drop'];
+function coinFaces(k){k=coinK(k);const ic=COS(k)?'<text x="12" y="16.3" text-anchor="middle" font-family="\'Exo 2\',sans-serif" font-weight="900" font-style="italic" font-size="10.5">DC</text>':COIN_IC[DECK_COIN[k]||'drop'];
   return `<div class="cface front"><svg viewBox="0 0 24 24" fill="currentColor">${ic}</svg></div><div class="cface back"><span>✯</span></div>`;}
-function coinColor(k){const cs=COS(k);return cs?cs.c:deckColor(k);}
-function coinStill(k,cls){return `<div class="dkcoin ${cls||''}"><div class="coin3d still ${COS(k)?'metal':''}" style="--cc:${coinColor(k)}">${coinFaces(k)}</div></div>`;}
+function coinColor(k){k=coinK(k);const cs=COS(k);return cs?cs.c:deckColor(k);}
+function coinStill(k,cls){k=coinK(k);return `<div class="dkcoin ${cls||''}"><div class="coin3d still ${COS(k)?'metal':''}" style="--cc:${coinColor(k)}">${coinFaces(k)}</div></div>`;}
 // Affiche une fois par match le lancer de pièce : chaque joueur voit la pièce de son propre deck
 function checkFlip(){
   if(!G||!G.flip||UI.flipSeen===G.flip||UI.tab!=='combat'||document.getElementById('coinflip')) return;
@@ -1059,7 +1080,7 @@ function checkFlip(){
   const txt=G.online?(mine?'Tu commences':'L\'adversaire commence'):`${esc(G.names[G.first])} commence`;
   const el=document.createElement('div');el.id='coinflip';el.className='cflip';
   el.innerHTML=`<style>@keyframes cfspin{from{transform:rotateX(0)}to{transform:rotateX(${360*6+(mine?0:180)}deg)}}</style>
-    <div class="cftoss"><div class="coin3d" style="--cc:${deckColor(k)}">${Array.from({length:13},(_,i)=>`<i class="cedge" style="transform:translateZ(${i-6}px)"></i>`).join('')}${coinFaces(k)}</div></div><div class="cfshadow"></div><div class="cfmsg xo">${txt}</div>`;
+    <div class="cftoss"><div class="coin3d ${COS(coinK(k))?'metal':''}" style="--cc:${coinColor(k)}">${Array.from({length:13},(_,i)=>`<i class="cedge" style="transform:translateZ(${i-6}px)"></i>`).join('')}${coinFaces(k)}</div></div><div class="cfshadow"></div><div class="cfmsg xo">${txt}</div>`;
   document.body.appendChild(el);
   let gone=false;const close=()=>{if(gone)return;gone=true;el.classList.add('out');setTimeout(()=>el.remove(),350);};
   setTimeout(()=>el.addEventListener('click',close),2000);setTimeout(close,3800);
@@ -1157,7 +1178,7 @@ function isOver(){return G.phase==='roundover'||G.phase==='matchover';}
 function newMatch(o){
   const v=VARIANTS[o.variant];
   G={uid:1,online:!!o.online,mode:o.mode,target:o.mode==='blitz'?1:2,variant:o.variant,win:v.win,tro:v.tro,noEvo:o.noEvo,hide:o.online?false:o.hideHands,
-     levM:!!o.levM,levAtk:!!o.levAtk,ai:o.ai||null,names:o.names.slice(),avatars:(o.avatars||[ACC.p&&ACC.p.avatar||'','']).slice(0,2),decks:o.decks.slice(),wins:[0,0],round:0,log:[],players:[null,null],histCount:HIST.length};
+     levM:!!o.levM,levAtk:!!o.levAtk,ai:o.ai||null,deckDefs:matchDeckDefs(o.decks),names:o.names.slice(),avatars:(o.avatars||[ACC.p&&ACC.p.avatar||'','']).slice(0,2),decks:o.decks.slice(),wins:[0,0],round:0,log:[],players:[null,null],histCount:HIST.length};
   UNDO=[];
   G.first=coin()?0:1; G.flip=Date.now()+'-'+Math.floor(Math.random()*1e6);
   log(`${o.mode==='blitz'?'Match rapide (1 manche)':'Match simple (2 manches gagnantes)'} : ${G.names[0]} (${deckLabel(G.decks[0])}) contre ${G.names[1]} (${deckLabel(G.decks[1])}) · victoire à ${v.win} étoiles.`,'sys');
@@ -1680,6 +1701,7 @@ function aiStep(){
    ========================================================= */
 function render(){
   if(typeof DRAG!=='undefined'&&DRAG.on){DRAG.later=true;return;} // pas de rendu pendant un glisser (il est fait au lâcher)
+  if(G&&G.deckDefs) regDeckDefs(G.deckDefs); // decks perso des joueurs de la partie
   if(typeof hidePop==='function') hidePop();
   if(typeof checkReward==='function') checkReward();
   if(typeof checkFlip==='function') setTimeout(checkFlip,0);
@@ -1694,7 +1716,7 @@ function render(){
   const inMatch=UI.tab==='combat'&&!!G; document.body.classList.toggle('inmatch',inMatch);
   { const n=UI.nav.combat.join('/'); document.body.classList.toggle('noscroll',UI.tab==='combat'&&!G&&['','solo','versus','solo/journalier','versus/prive'].includes(n)); }
   if(!inMatch){UI.gmenu=false;UI.sheet=null;if(UI.mmodal)UI.mmodal=null;}
-  $('#modal').innerHTML = UI.avPick&&UI.tab==='params'&&ACC.p?`<div class="modal-bg" data-a="avclose"><div class="modal avpick"><h3 class="xo">Photo de profil</h3><div class="avcircles">${[{k:'',n:'Base'},...AVATARS.filter(a=>(ACC.p.avatars||[]).includes(a.k))].map(a=>{const cur=(ACC.p.avatar||'')===a.k,sel=(UI.avSel??(ACC.p.avatar||''))===a.k;
+  $('#modal').innerHTML = UI.cosPick&&UI.ded&&UI.tab==='cartes'?cosPickModal():UI.avPick&&UI.tab==='params'&&ACC.p?`<div class="modal-bg" data-a="avclose"><div class="modal avpick"><h3 class="xo">Photo de profil</h3><div class="avcircles">${[{k:'',n:'Base'},...AVATARS.filter(a=>(ACC.p.avatars||[]).includes(a.k))].map(a=>{const cur=(ACC.p.avatar||'')===a.k,sel=(UI.avSel??(ACC.p.avatar||''))===a.k;
     return `<button class="avcir ${sel?'sel':''} ${cur?'cur':''}" data-a="avsel:${a.k||'base'}" aria-label="${a.n}"><span class="shopav">${a.k?avatarHTML(a.k):AVATAR_SVG}</span></button>`;}).join('')}</div>
     ${UI.avSel!=null&&UI.avSel!==(ACC.p.avatar||'')?`<button class="primary xo avok" data-a="setav:${UI.avSel||'base'}">Changer la photo de profil</button>`:''}</div></div>`:UI.pack?renderPackOpen():(UI.packAsk||UI.packOpening)&&UI.tab==='home'?renderPackAsk():UI.logoutAsk&&UI.tab==='params'?`<div class="modal-bg" data-a="logoutno"><div class="modal qmodal"><h3 class="xo">Se déconnecter ?</h3><div class="qbtns"><button data-a="logoutno">Non</button><button class="primary xo" data-a="acclogout">Oui</button></div></div></div>`:UI.detail?renderDetail(UI.detail):UI.colf&&UI.tab==='cartes'?renderColFilters():UI.exportText!==null?renderExport():UI.confirmQuit&&inMatch?renderQuitModal():inMatch&&G.pending[0]&&G.pending[0].kind==='deckpick'&&mine_(G.pending[0].p)?renderDeckpick():UI.bigc&&UI.mmodal&&inMatch?cardView(UI.bigc,'','closebig'):UI.mmodal&&inMatch?renderMatchModal():UI.sheet&&inMatch?renderSheet():'';
   if(inMatch) sizeBoard();
@@ -1753,15 +1775,121 @@ function deckCompoHTML(k){
     return `<h3>${title} <span class="muted">(${n})</span></h3><div class="grid compact c4">${items.map(([id,c])=>cardHTML(id,{count:c,cls:'click'+(ownsCard(id)?'':' nown'),attrs:`data-a="detail:${id}"`})).join('')}</div>`;
   }).join('');
 }
+
+/* =========================================================
+   DECKS PERSONNALISÉS (« Mes decks »)
+   Enregistrés dans le profil (custom_decks) ; chacun devient un deck jouable
+   sous la clé u_<id>. Le deck d'un adversaire en ligne arrive sous la clé o_<id>.
+   ========================================================= */
+const CUSTOM_MAX=10, CUSTOM_SIZE=30, CUSTOM_COPIES=3;
+const DK_GROUPS=[['Combattants ✯',id=>C(id).size==='P'],['Combattants ✯✯',id=>C(id).size==='M'],['Combattants ✯✯✯',id=>C(id).size==='G'],
+  ['Atouts',id=>C(id).cat==='sort'],['Objets',id=>C(id).cat==='objet']];
+// Type du deck : le type le plus représenté parmi ses combattants (à égalité : celui de la carte la plus forte)
+function autoType(list){
+  const cnt={},best={};
+  list.forEach(([id,n])=>{const c=C(id);if(c.cat!=='creature'||c.type==='neutre')return;
+    cnt[c.type]=(cnt[c.type]||0)+n;best[c.type]=Math.max(best[c.type]||0,({P:1,M:2,G:3}[c.size]||0)*100+(c.atk||0)+(c.def||0));});
+  const ts=Object.keys(cnt); if(!ts.length) return 'neutre';
+  return ts.sort((a,b)=>cnt[b]-cnt[a]||best[b]-best[a])[0];
+}
+function customDef(d){
+  const list=Object.entries(d.cards||{}).filter(([id,n])=>CARDS[id]&&+n>0).map(([id,n])=>[id,Math.min(CUSTOM_COPIES,+n)]);
+  return {name:String(d.name||'Mon deck').replace(/[<>&"'`]/g,'').slice(0,24)||'Mon deck',type:autoType(list),group:'perso',custom:true,list,
+    coin:COS(d.coin)&&!COS(d.coin).base?d.coin:null,sleeve:COS(d.sleeve)&&!COS(d.sleeve).base?d.sleeve:null};
+}
+function syncCustom(){
+  Object.keys(DECKS).forEach(k=>{if(DECKS[k].mine)delete DECKS[k];});
+  ((ACC.p&&ACC.p.custom_decks)||[]).forEach(d=>{DECKS['u_'+d.id]=Object.assign(customDef(d),{mine:true});});
+}
+const myCustomKeys=()=>((ACC.p&&ACC.p.custom_decks)||[]).map(d=>'u_'+d.id).filter(k=>DECKS[k]);
+const deckSize=k=>DECKS[k].list.reduce((t,[,n])=>t+n,0);
+// Un deck n'est jouable que s'il contient au moins un combattant ✯ (sinon impossible de choisir un champion)
+const hasStarter=list=>list.some(([id])=>C(id).cat==='creature'&&C(id).size==='P');
+// Un deck perso n'est jouable qu'avec exactement 30 cartes, dont au moins un combattant ✯
+const listOk=list=>list.reduce((t,[,n])=>t+n,0)===CUSTOM_SIZE&&hasStarter(list);
+const deckPlayable=k=>!!DECKS[k]&&(!DECKS[k].custom||listOk(DECKS[k].list));
+function playDecks(){return ownedDecks().concat(ACC.p?myCustomKeys().filter(deckPlayable):[]);}
+// Exemplaires possédés d'une carte (decks préconstruits possédés + cartes des boosters)
+function ownedQty(id){if(!ACC.p)return CUSTOM_COPIES;let n=+((ACC.p.cards||{})[id])||0;ownedDecks().forEach(k=>DECKS[k].list.forEach(([c,q])=>{if(c===id)n+=q;}));return n;}
+// Pièce / sleeves d'un deck perso (rien de choisi = modèle de base)
+const coinK=k=>DECKS[k]&&DECKS[k].custom?(DECKS[k].coin||'piece_base'):k;
+const sleeveK=k=>DECKS[k]&&DECKS[k].custom?(DECKS[k].sleeve||'sleeve_base'):k;
+// Échange en ligne : on transmet la composition de son deck perso
+function exportDef(k){const d=DECKS[k];return d&&d.custom?{name:d.name,list:d.list,coin:d.coin,sleeve:d.sleeve}:null;}
+function importDef(x){
+  if(!x||!Array.isArray(x.list)||x.list.length>CUSTOM_SIZE) return null;
+  const cards={};let tot=0;
+  for(const e of x.list){if(!Array.isArray(e))return null;const [id,n]=e;if(!CARDS[id]||!(n>=1&&n<=CUSTOM_COPIES))return null;cards[id]=(cards[id]||0)+n;tot+=n;}
+  if(tot>CUSTOM_SIZE||Object.values(cards).some(n=>n>CUSTOM_COPIES)) return null;
+  const d=customDef({name:x.name,cards,coin:x.coin,sleeve:x.sleeve});
+  return listOk(d.list)?d:null;
+}
+function regDeckDefs(defs){for(const k in defs||{}) if(!DECKS[k]&&/^[uo]_[a-z0-9]{8}$/.test(k)){const d=importDef(defs[k]);if(d)DECKS[k]=d;}}
+function matchDeckDefs(keys){const o={};keys.forEach(k=>{const x=exportDef(k);if(x)o[k]=x;});return o;}
+
+/* ---- éditeur ---- */
+const rid=()=>Array.from({length:8},()=>'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random()*36)]).join('');
+function dedFrom(d){return {id:d.id,name:d.name,cards:Object.assign({},d.cards||{}),coin:d.coin||null,sleeve:d.sleeve||null};}
+function dedList(){return Object.entries(UI.ded.cards).filter(([,n])=>n>0);}
+function dedTotal(){return dedList().reduce((t,[,n])=>t+n,0);}
+function dedDirty(){const s=(ACC.p.custom_decks||[]).find(d=>d.id===UI.ded.id);
+  if(!s) return true; const a=dedFrom(s),b=UI.ded; const norm=c=>JSON.stringify(Object.entries(c).filter(([,n])=>n>0).sort());
+  return a.name!==b.name||a.coin!==b.coin||a.sleeve!==b.sleeve||norm(a.cards)!==norm(b.cards);}
+function renderMesDecks(){
+  if(!ACC.p) return `<div class="page ctr">${navHead('cartes','Mes decks')}<div class="box sbox"><p class="muted cap">Connecte-toi à ton compte (Paramètres › Compte) pour créer tes propres decks avec les cartes de ta collection.</p></div></div>`;
+  const ks=myCustomKeys(), n=ks.length;
+  const tiles=ks.map(k=>{const d=DECKS[k],sz=deckSize(k),ok=deckPlayable(k);
+    return `<button class="dtile mydk" style="--tc:${deckColor(k)}" data-a="go:cartes:decks:mes:${k.slice(2)}"><span class="mydkslv" style='${sleeveCSS(k)}'></span><span class="mydkt"><span class="dt-name xo">${esc(d.name)}</span><small>${TYPES[d.type].name} · ${sz}/${CUSTOM_SIZE} cartes${ok?'':' · <b class="warn">incomplet</b>'}</small></span></button>`;}).join('');
+  return `<div class="page ctr">${navHead('cartes','Mes decks')}
+    <div class="box sbox mydkbox"><div class="mydkhead"><span class="muted">${n} / ${CUSTOM_MAX} decks</span><button class="primary xo" data-a="newdeck" ${n>=CUSTOM_MAX?'disabled':''}>+ Créer un deck</button></div>
+    ${n?`<div class="dtiles mydks">${tiles}</div>`:'<p class="muted cap" style="margin:6px 0 0">Tu n\'as pas encore de deck. Crée le tien avec les cartes de ta collection !</p>'}</div></div>`;
+}
+function renderDeckEditor(id){
+  if(!ACC.p) return renderMesDecks();
+  if(!UI.ded||UI.ded.id!==id){const s=(ACC.p.custom_decks||[]).find(d=>d.id===id);if(!s){UI.nav.cartes=['decks','mes'];return renderMesDecks();}UI.ded=dedFrom(s);}
+  const D=UI.ded,list=dedList(),tot=dedTotal(),type=autoType(list),t=TYPES[type],full=tot>=CUSTOM_SIZE;
+  const saved=(ACC.p.custom_decks||[]).some(d=>d.id===D.id),dirty=dedDirty();
+  const cos=(cat,cur)=>{const k=cur||(cat==='coin'?'piece_base':'sleeve_base');return cat==='coin'?coinStill(k):`<div class="dkslv" style='${sleeveCSS(k)}'></div>`;};
+  const ident=`<div class="box dkid"><div class="dkit"><span class="dkl">Type</span><div class="dkv"><span class="dktype xo" style="color:${t.color};border-color:${t.color}">${t.name}</span></div><small class="dkh">automatique</small></div>
+    <div class="dkit"><span class="dkl">Sleeves</span><button class="dkv dkpick" data-a="cospick:sleeve">${cos('sleeve',D.sleeve)}</button><small class="dkh">toucher pour changer</small></div>
+    <div class="dkit"><span class="dkl">Pièce</span><button class="dkv dkpick" data-a="cospick:coin">${cos('coin',D.coin)}</button><small class="dkh">toucher pour changer</small></div></div>`;
+  const inDeck=DK_GROUPS.map(([title,f])=>{const it=list.filter(([id])=>f(id)).sort((a,b)=>C(a[0]).name.localeCompare(C(b[0]).name));if(!it.length)return'';
+    return `<h3>${title} <span class="muted">(${it.reduce((s,[,n])=>s+n,0)})</span></h3><div class="grid compact c4">${it.map(([id,n])=>cardHTML(id,{count:n,cls:'click dkc',attrs:`data-a="dkrem:${id}" title="Retirer un exemplaire"`})).join('')}</div>`;}).join('');
+  const pool=Object.keys(CARDS).filter(id=>ownedQty(id)>0);
+  const coll=DK_GROUPS.map(([title,f])=>{const it=pool.filter(f).sort((a,b)=>C(a).name.localeCompare(C(b).name));if(!it.length)return'';
+    return `<h3>${title}</h3><div class="grid compact c4">${it.map(id=>{const n=D.cards[id]||0,mx=Math.min(CUSTOM_COPIES,ownedQty(id)),can=n<mx&&!full;
+      return `<div class="dkadd ${can?'':'max'}">${cardHTML(id,{cls:'click',attrs:can?`data-a="dkadd:${id}" title="Ajouter un exemplaire"`:''})}<span class="dkn">${n}/${mx}</span></div>`;}).join('')}</div>`;}).join('');
+  const miss=[];if(tot<CUSTOM_SIZE)miss.push(`encore ${CUSTOM_SIZE-tot} carte${s_(CUSTOM_SIZE-tot)}`);if(!hasStarter(list))miss.push('au moins 1 combattant ✯');
+  const warn=miss.length?`<p class="dkwarn">Pour jouer ce deck : ${miss.join(' et ')}.</p>`:'<p class="dkok">✓ Deck complet, prêt à jouer.</p>';
+  return `<div class="page ctr dked">${navHead('cartes',saved?'Modifier le deck':'Nouveau deck')}
+    <div class="box sbox dkname"><label class="dkl" for="dkname">Nom du deck</label><input id="dkname" maxlength="24" value="${esc(D.name)}" autocomplete="off"></div>
+    ${ident}
+    <div class="box sbox"><div class="dkcount"><span class="xo">Cartes du deck</span><b class="${full?'full':''}">${tot} / ${CUSTOM_SIZE}</b></div>${warn}
+      ${list.length?`<p class="mcap" style="margin:4px 0 0">Touche une carte pour en retirer un exemplaire.</p>${inDeck}`:'<p class="muted cap" style="margin:6px 0 0">Ton deck est vide : ajoute des cartes depuis ta collection ci-dessous.</p>'}</div>
+    <div class="box sbox"><h3 class="xo grp" style="margin-top:0">Ta collection</h3><p class="mcap" style="margin-top:0">Touche une carte pour l'ajouter (${CUSTOM_COPIES} exemplaires maximum, dans la limite de ceux que tu possèdes).</p>${coll}</div>
+    <div class="dkbar"><button class="ghost" data-a="dkdel" data-buy="dkdel">${UI.buyAsk==='dkdel'?'Confirmer la suppression':saved?'Supprimer':'Annuler'}</button><button class="primary xo" data-a="dksave" ${dirty&&D.name.trim()?'':'disabled'}>Enregistrer</button></div>
+  </div>`;
+}
+function cosPickModal(){
+  if(!UI.cosPick||!UI.ded) return '';
+  const cat=UI.cosPick,cur=(cat==='coin'?UI.ded.coin:UI.ded.sleeve)||'';
+  const opts=COSMETICS.filter(x=>x.cat===cat&&(x.base||(ACC.p.cosmetics||[]).includes(x.k)));
+  return `<div class="modal-bg" data-a="cosclose"><div class="modal avpick"><h3 class="xo">${cat==='coin'?'Pièce':'Sleeves'} du deck</h3><div class="cospickgrid">${opts.map(x=>{const on=(x.base?'':x.k)===cur;
+    return `<button class="cospk ${on?'on':''}" data-a="cosset:${x.k}" aria-label="${x.n}">${cat==='coin'?coinStill(x.k):`<div class="dkslv" style='${sleeveCSS(x.k)}'></div>`}<small>${x.base?'Base':x.n.replace(/^(Pièce|Sleeves) /,'')}</small></button>`;}).join('')}</div>
+    ${opts.length<2?`<p class="mcap">Achète des ${cat==='coin'?'pièces':'sleeves'} au Shop pour personnaliser ton deck.</p>`:''}</div></div>`;
+}
 function renderCartes(){
   const nav=UI.nav.cartes;
   if(!nav.length||nav[0]==='collection') return renderCollection();
-  if(nav[0]==='decks'&&nav.length===1){
+  if(nav[0]==='decks'&&nav.length===1){UI.ded=null;
+    return `<div class="page ctr vcenter">${navHead('cartes','Decks')}<div class="imenu"><button class="mbtn ph b-mesdecks" data-a="go:cartes:decks:mes"><span class="xo">Mes decks</span></button><button class="mbtn ph b-precon" data-a="go:cartes:decks:pre"><span class="xo">Decks préconstruits</span></button></div></div>`;}
+  if(nav[0]==='decks'&&nav[1]==='mes'){if(nav.length===2){UI.ded=null;return renderMesDecks();}return renderDeckEditor(nav[2]);}
+  if(nav[0]==='decks'&&nav[1]==='pre'&&nav.length===2){
     const fold=UI.dfold||{};
-    const tiles=DECK_GROUPS.map(([g,t])=>`<div class="dgroup dfg ${fold[g]?'folded':''}"><button class="dfold" data-a="dfold:${g}" aria-label="${fold[g]?'Afficher':'Masquer'} la liste">▾</button><h3 class="xo grp">${t}</h3>${fold[g]?'':`<div class="dtiles">${DECK_ORDER.filter(k=>DECKS[k].group===g).map(k=>deckTile(k,`go:cartes:decks:${k}`)).join('')}</div>`}</div>`).join('');
-    return `<div class="page ctr">${navHead('cartes','Decks')}${tiles}</div>`;
+    const tiles=DECK_GROUPS.map(([g,t])=>`<div class="dgroup dfg ${fold[g]?'folded':''}"><button class="dfold" data-a="dfold:${g}" aria-label="${fold[g]?'Afficher':'Masquer'} la liste">▾</button><h3 class="xo grp">${t}</h3>${fold[g]?'':`<div class="dtiles">${DECK_ORDER.filter(k=>DECKS[k].group===g).map(k=>deckTile(k,`go:cartes:decks:pre:${k}`)).join('')}</div>`}</div>`).join('');
+    return `<div class="page ctr">${navHead('cartes','Decks préconstruits')}${tiles}</div>`;
   }
-  const k=nav[1];
+  const k=nav[2];if(!DECKS[k]){UI.nav.cartes=['decks'];return renderCartes();}
   const dbtn=ACC.p?(ownsDeck(k)?'<button class="off dkbuy xo" disabled>Possédé</button>':`<button class="primary xo dkbuy" data-a="shopdecks">Acheter dans le shop</button>`):'';
   return `<div class="page ctr">${navHead('cartes',`<span style="color:${deckColor(k)}">${deckLabel(k)}</span>`)}${dbtn?`<div style="margin-bottom:14px">${dbtn}</div>`:''}${deckIdHTML(k)}${deckCompoHTML(k)}</div>`;
 }
@@ -1985,11 +2113,11 @@ let SB=null;
 const ACC={ready:false, off:false, user:null, p:null, busy:false, err:'', rewarded:new Set()};
 const isLogged=()=>!!ACC.p;
 function ownedDecks(){return ACC.p?DECK_ORDER.filter(k=>ACC.p.decks.includes(k)):DECK_ORDER.slice();}
-const ownsDeck=k=>!ACC.p||ACC.p.decks.includes(k);
+const ownsDeck=k=>!ACC.p||ACC.p.decks.includes(k)||!!(DECKS[k]&&DECKS[k].mine);
 let OWNC=null;
 function ownsCard(id){if(!ACC.p)return true;if(!OWNC){OWNC=new Set();ownedDecks().forEach(k=>DECKS[k].list.forEach(([c])=>OWNC.add(c)));Object.keys(ACC.p.cards||{}).forEach(c=>OWNC.add(c));}return OWNC.has(id);}
-function setProfile(p){ACC.p=p||null;OWNC=null;fixPicks();}
-function fixPicks(){const o=ownedDecks();if(!o.length)return;for(let i=0;i<2;i++){if(!o.includes(UI.pick[i]))UI.pick[i]=o[0];}
+function setProfile(p){ACC.p=p||null;OWNC=null;syncCustom();fixPicks();}
+function fixPicks(){const o=playDecks();if(!o.length)return;for(let i=0;i<2;i++){if(!o.includes(UI.pick[i]))UI.pick[i]=o[0];}
   if(ACC.p&&/^JOUEUR\d$/.test(UI.names[0]||''))UI.names[0]=ACC.p.name;}
 // Niveaux : 500 points du niveau 1 au 2, puis +50 à chaque niveau (550, 600…)
 function levelOf(pts){let lv=1,need=ECO.lvlBase,rest=pts||0;while(rest>=need){rest-=need;lv++;need+=ECO.lvlStep;}return {lv,rest,need};}
@@ -2141,7 +2269,7 @@ function renderShop(){
     ${sale.map(a=>{const ask=UI.buyAsk==='av'+a.k,ok=c>=AVATAR_PRICE;
       return `<div class="avit"><span class="shopav">${avatarHTML(a.k)}</span><button class="${ask?'primary':ok?'buy':'off'} xo" data-a="buyav:${a.k}" data-buy="av${a.k}" ${ok?'':'disabled'}>${ask?'Confirmer':`${AVATAR_PRICE} ${COIN}`}</button></div>`;}).join('')}</div>`:'<p class="muted cap" style="margin:0 0 6px">Tu as toutes les photos !</p>'}</div>`;
   const owned=ACC.p.cosmetics||[];
-  const cosSec=(cat,title,none)=>{const l=COSMETICS.filter(x=>x.cat===cat&&!owned.includes(x.k));
+  const cosSec=(cat,title,none)=>{const l=COSMETICS.filter(x=>x.cat===cat&&!x.base&&!owned.includes(x.k));
     return `<div class="dgroup"><h3 class="xo grp">${title}</h3>${l.length?`<div class="avgrid cosgrid">${l.map(x=>{const ask=UI.buyAsk==='cos'+x.k,ok=c>=x.price;
       return `<div class="avit cosit"><div class="cosv" title="${x.n}">${cat==='coin'?coinStill(x.k):`<div class="dkslv" style='${sleeveCSS(x.k)}'></div>`}</div><button class="${ask?'primary':ok?'buy':'off'} xo" data-a="buycos:${x.k}" data-buy="cos${x.k}" ${ok?'':'disabled'}>${ask?'Confirmer':`${x.price} ${COIN}`}</button></div>`;}).join('')}</div>`:`<p class="muted cap" style="margin:0 0 6px">${none}</p>`}</div>`;};
   return `<div class="page ctr"><div class="ptop"><h2>Shop</h2><div class="right wallet">${COIN} <b>${c}</b></div></div><button class="backbtn" data-a="back:params"><span class="bchev">‹</span> Retour</button>
@@ -2223,10 +2351,12 @@ function cleanName(v){return String(v||'').toUpperCase().replace(/[^\p{L}\p{N}]/
 function nameField(i){
   if(ACC.p&&UI.nav.combat[0]==='versus'){UI.names[i]=ACC.p.name;return '';}
   return `<label class="nfield"><span class="xo">Nom</span><input id="nm${i}" value="${esc(UI.names[i])}" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>`;}
-function resolveDeck(i){const o=ownedDecks();return UI.rand[i]?o[Math.floor(Math.random()*o.length)]:UI.pick[i];}
+function resolveDeck(i){const o=playDecks();return UI.rand[i]?o[Math.floor(Math.random()*o.length)]:UI.pick[i];}
 function deckChooser(i){
   const cur=UI.rand[i]?null:UI.pick[i], base=UI.nav.combat.join(':');
-  const tiles=DECK_GROUPS.map(([g,t])=>`<div class="dgroup"><h3 class="xo grp">${t}</h3><div class="dtiles">${DECK_ORDER.filter(k=>DECKS[k].group===g).map(k=>deckTile(k,`go:combat:${base}:${k}`,k===cur)).join('')}</div></div>`).join('');
+  const mine=ACC.p?myCustomKeys().filter(deckPlayable):[];
+  const tiles=(mine.length?`<div class="dgroup"><h3 class="xo grp">Mes decks</h3><div class="dtiles">${mine.map(k=>deckTile(k,`go:combat:${base}:${k}`,k===cur)).join('')}</div></div>`:'')
+    +DECK_GROUPS.map(([g,t])=>`<div class="dgroup"><h3 class="xo grp">${t}</h3><div class="dtiles">${DECK_ORDER.filter(k=>DECKS[k].group===g).map(k=>deckTile(k,`go:combat:${base}:${k}`,k===cur)).join('')}</div></div>`).join('');
   return `<div class="page ctr">${navHead('combat','Choix du deck')}<p class="muted" style="margin-top:0">Touchez un deck pour voir sa composition et le choisir.</p>${tiles}
 </div>`;
 }
@@ -2876,6 +3006,20 @@ const H = {
   avsel(k){UI.avSel=k==='base'?'':k;render();},
   avclose(_,e,el){if(e.target!==el)return;UI.avPick=false;render();},
   shopdecks(){H.go('params','shop');requestAnimationFrame(()=>{const e=document.getElementById('shopdecks'),hd=document.querySelector('header');if(e)window.scrollTo(0,e.getBoundingClientRect().top+window.scrollY-(hd?hd.offsetHeight:0)-12);});},
+  newdeck(){if(!ACC.p||(ACC.p.custom_decks||[]).length>=CUSTOM_MAX)return;const n=(ACC.p.custom_decks||[]).length;
+    UI.ded={id:rid(),name:'Mon deck '+(n+1),cards:{},coin:null,sleeve:null};UI.nav.cartes=['decks','mes',UI.ded.id];window.scrollTo(0,0);render();},
+  dkadd(id){const D=UI.ded;if(!D||!CARDS[id])return;const n=D.cards[id]||0;if(n>=Math.min(CUSTOM_COPIES,ownedQty(id))||dedTotal()>=CUSTOM_SIZE)return;D.cards[id]=n+1;render();},
+  dkrem(id){const D=UI.ded;if(!D||!D.cards[id])return;D.cards[id]--;if(!D.cards[id])delete D.cards[id];render();},
+  cospick(cat){if(!UI.ded)return;UI.cosPick=cat;render();},
+  cosclose(_,e,el){if(e.target!==el)return;UI.cosPick=null;render();},
+  cosset(k){const x=COS(k);if(!UI.ded||!x)return;UI.ded[x.cat==='coin'?'coin':'sleeve']=x.base?null:k;UI.cosPick=null;render();},
+  dksave(){const D=UI.ded;if(!ACC.p||!D)return;const name=D.name.replace(/[<>&"'`]/g,'').trim().slice(0,24);if(!name){toast('Donne un nom à ton deck');return;}
+    const cards={};dedList().forEach(([id,n])=>cards[id]=n);
+    accRun(async()=>{const r=await SB.rpc('save_deck',{p_deck:{id:D.id,name,cards,coin:D.coin,sleeve:D.sleeve}});if(r.error)throw r.error;setProfile(r.data);UI.ded=null;toast('Deck enregistré !');});},
+  dkdel(){const D=UI.ded;if(!ACC.p||!D)return;const saved=(ACC.p.custom_decks||[]).some(d=>d.id===D.id);
+    if(!saved){UI.ded=null;UI.nav.cartes=['decks','mes'];return render();}
+    if(UI.buyAsk!=='dkdel'){UI.buyAsk='dkdel';return render();}UI.buyAsk=null;
+    accRun(async()=>{const r=await SB.rpc('delete_deck',{p_id:D.id});if(r.error)throw r.error;setProfile(r.data);UI.ded=null;UI.nav.cartes=['decks','mes'];toast('Deck supprimé');});},
   dfold(g){UI.dfold=UI.dfold||{};UI.dfold[g]=!UI.dfold[g];render();},
   achopen(k){UI.achOpen=UI.achOpen===k?null:k;render();},
   claimgift(){if(!ACC.p||giftNext())return;accRun(async()=>{const r=await SB.rpc('claim_gift');if(r.error)throw r.error;setProfile(r.data);toast(`Cadeau récupéré : +${GIFT.coins} pièce · +${GIFT.tokens} jeton`);});},
@@ -3047,7 +3191,7 @@ document.addEventListener('change',e=>{if(e.target.closest('[data-col]')){colUpd
   if(k){const [key,v]=k.dataset.colchk.split(':'),a=UI.col[key],i=a.indexOf(v);if(k.checked&&i<0)a.push(v);if(!k.checked&&i>=0)a.splice(i,1);
     const g=$('#colgrid');if(g)g.innerHTML=colGridHTML();const c=$('#fcount');if(c)c.innerHTML=colCountTxt();return;}const o=e.target.closest('[data-opt]');if(o)UI[o.dataset.opt]=o.checked;});
 function colUpdate(e){const el=e.target.closest('[data-col]');if(!el)return false;UI.col[el.dataset.col]=el.value;const g=$('#colgrid');if(g)g.innerHTML=colGridHTML();const c=$('#fcount');if(c)c.innerHTML=colCountTxt();return true;}
-document.addEventListener('input',e=>{if(e.target.dataset&&e.target.dataset.af){const el=e.target,k=el.dataset.af;if(k==='name'){const v=cleanName(el.value);if(v!==el.value)el.value=v;}UI.af[k]=el.value;return;}if(/^nm[01]$/.test(e.target.id||'')){const el=e.target,v=cleanName(el.value);if(v!==el.value){const pos=Math.min(v.length,el.selectionStart||v.length);el.value=v;try{el.setSelectionRange(pos,pos);}catch(_){}}return;}if(colUpdate(e))return;const n=e.target.closest('[data-note]');if(n&&HIST[+n.dataset.note])HIST[+n.dataset.note].notes=n.value;});
+document.addEventListener('input',e=>{if(e.target.id==='dkname'&&UI.ded){UI.ded.name=e.target.value;const b=document.querySelector('[data-a="dksave"]');if(b)b.disabled=!(e.target.value.trim()&&dedDirty());return;}if(e.target.dataset&&e.target.dataset.af){const el=e.target,k=el.dataset.af;if(k==='name'){const v=cleanName(el.value);if(v!==el.value)el.value=v;}UI.af[k]=el.value;return;}if(/^nm[01]$/.test(e.target.id||'')){const el=e.target,v=cleanName(el.value);if(v!==el.value){const pos=Math.min(v.length,el.selectionStart||v.length);el.value=v;try{el.setSelectionRange(pos,pos);}catch(_){}}return;}if(colUpdate(e))return;const n=e.target.closest('[data-note]');if(n&&HIST[+n.dataset.note])HIST[+n.dataset.note].notes=n.value;});
 // Fenêtre Filtres ouverte : la collection derrière ne bouge pas
 document.addEventListener('wheel',e=>{if(UI.colf&&UI.tab==='cartes')e.preventDefault();},{passive:false});
 document.addEventListener('touchmove',e=>{if(UI.colf&&UI.tab==='cartes')e.preventDefault();},{passive:false});
@@ -3111,7 +3255,9 @@ function hostOnData(conn,msg){
     NET.conn=conn; NET.lastSeen=Date.now();
     if(!G){
       MY_SEAT=0; UI.tab='combat';
-      const deck=DECK_ORDER.includes(msg.deck)?msg.deck:'seve';
+      let deck=DECK_ORDER.includes(msg.deck)?msg.deck:'seve';
+      // deck perso de l'invité : on vérifie sa composition et on l'enregistre pour la partie
+      if(/^u_[a-z0-9]{8}$/.test(String(msg.deck))){const d=importDef(msg.deckDef);if(d){deck='o_'+msg.deck.slice(2);DECKS[deck]=d;}}
       const name=String(msg.name||'Invité').slice(0,24);
       newMatch({decks:[NET.myDeck||UI.pick[0],deck],names:[UI.names[0],name],avatars:[ACC.p&&ACC.p.avatar||'',AVATARS.some(a=>a.k===msg.avatar)?msg.avatar:''],mode:UI.mode,variant:'std',hideHands:false,online:true});
       log(`${name} a rejoint la partie.`,'sys');
@@ -3181,7 +3327,7 @@ function netJoin(code){
   peer.on('error',err=>{NET.err=netErr(err);if(!G){NET.role=null;}else NET.lost=true;render();});
   peer.on('open',()=>{
     const conn=peer.connect(PEER_PREFIX+code,{reliable:true,serialization:'json'}); NET.conn=conn;
-    conn.on('open',()=>{NET.lost=false;NET.lastSeen=Date.now();NET.status='Connecté, en attente de l\'hôte…';if(!NET.myDeck)NET.myDeck=resolveDeck(0);conn.send({t:'hello',name:UI.names[0],deck:NET.myDeck,avatar:ACC.p&&ACC.p.avatar||''});render();});
+    conn.on('open',()=>{NET.lost=false;NET.lastSeen=Date.now();NET.status='Connecté, en attente de l\'hôte…';if(!NET.myDeck)NET.myDeck=resolveDeck(0);conn.send({t:'hello',name:UI.names[0],deck:NET.myDeck,deckDef:exportDef(NET.myDeck),avatar:ACC.p&&ACC.p.avatar||''});render();});
     conn.on('data',raw=>{
       if(!raw||typeof raw!=='object') return;
       NET.lastSeen=Date.now(); if(NET.lost){NET.lost=false;render();}
