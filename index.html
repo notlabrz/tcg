@@ -799,6 +799,20 @@ body.noscroll .imenu .mbtn{max-width:min(460px,calc((100dvh - 330px) / 4 * 3.555
 .cospk{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;border-radius:14px;background:none;border:2px solid transparent;min-width:84px}.cospk:hover{background:none}
 .cospk.on{border-color:var(--accent)}.cospk small{font-size:12px;color:var(--muted)}
 .dkok{color:var(--good,#3fb950);font-size:13.5px;margin:6px 0 0;font-weight:600}
+.mydk.mynew{justify-content:center;min-height:70px;background:none;border:2px dashed #4a5366;box-shadow:none;color:var(--muted)}
+.mydk.mynew span{font-size:17px}.mydk.mynew:hover{border-color:var(--accent);color:var(--text)}
+.dked .dkname{margin-bottom:12px}.dked .dkname input{text-transform:uppercase}
+.dslots{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
+.dslot{aspect-ratio:5/7;padding:3px;border-radius:6px;display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;text-align:left;
+  background:linear-gradient(160deg,color-mix(in srgb,var(--tc) 32%,#1a1f29),#141821);border:1.5px solid var(--tc);min-width:0;overflow:hidden}
+.dslot:hover{background:linear-gradient(160deg,color-mix(in srgb,var(--tc) 42%,#1a1f29),#141821)}
+.dslot .sn{font-size:9px;line-height:1.12;font-weight:700;color:#fff;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;word-break:break-word}
+.dslot .ss{font-size:8.5px;color:color-mix(in srgb,var(--tc) 70%,#fff);white-space:nowrap}
+.dslot.empty{border:1.5px dashed #3c4456;background:#141821;align-items:center;justify-content:center}.dslot.empty span{font-size:20px;color:#5c667a;font-weight:300}
+.modal.dbsheet{max-width:620px;padding:0;display:flex;flex-direction:column;max-height:92dvh;overflow:hidden}
+.dbsheet .dbhead{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}.dbsheet .dbhead span{font-size:16px;flex:1;text-align:left;white-space:nowrap}
+.dbsheet .dbhead b{font-size:17px}.dbsheet .dbhead b.full{color:var(--accent)}.dbsheet .dbhead button{padding:8px 16px;font-size:14px}
+.dbsheet .mscroll{overflow:auto;padding:12px 14px 18px;-webkit-overflow-scrolling:touch}
 </style>
 </head>
 <body>
@@ -821,7 +835,7 @@ body.noscroll .imenu .mbtn{max-width:min(460px,calc((100dvh - 330px) / 4 * 3.555
 /* =========================================================
    RÉGLAGES (section 2 des règles) — à modifier ici
    ========================================================= */
-const APP_VERSION = 'v1.40.1';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
+const APP_VERSION = 'v1.41.0';   // numéro de version : à augmenter à chaque mise en ligne (affiché en bas de Paramètres)
 const CONFIG = {
   actionsPerTurn: 3,
   startHand: 6,
@@ -1051,7 +1065,7 @@ const SLV={};
 // Pièces et sleeves vendues au Shop (en plus de celles des decks)
 const STAR_P='<path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/>';
 const COSMETICS=[
-  {k:'piece_base',cat:'coin',n:'Pièce de base',c:'#8793a8',base:true},
+  {k:'piece_base',cat:'coin',n:'Pièce de base',c:'#3f4a5e',base:true},
   {k:'sleeve_base',cat:'sleeve',n:'Sleeves de base',g1:'#3d4659',g2:'#11151d',lt:'#aab6cb',base:true},
   {k:'piece_argent',cat:'coin',n:'Pièce argent',price:150,c:'#b9c3cd'},
   {k:'piece_or',cat:'coin',n:'Pièce or',price:250,c:'#e2b33c'},
@@ -1716,9 +1730,11 @@ function render(){
   const inMatch=UI.tab==='combat'&&!!G; document.body.classList.toggle('inmatch',inMatch);
   { const n=UI.nav.combat.join('/'); document.body.classList.toggle('noscroll',UI.tab==='combat'&&!G&&['','solo','versus','solo/journalier','versus/prive'].includes(n)); }
   if(!inMatch){UI.gmenu=false;UI.sheet=null;if(UI.mmodal)UI.mmodal=null;}
-  $('#modal').innerHTML = UI.cosPick&&UI.ded&&UI.tab==='cartes'?cosPickModal():UI.avPick&&UI.tab==='params'&&ACC.p?`<div class="modal-bg" data-a="avclose"><div class="modal avpick"><h3 class="xo">Photo de profil</h3><div class="avcircles">${[{k:'',n:'Base'},...AVATARS.filter(a=>(ACC.p.avatars||[]).includes(a.k))].map(a=>{const cur=(ACC.p.avatar||'')===a.k,sel=(UI.avSel??(ACC.p.avatar||''))===a.k;
+  const _ms=$('#modal .mscroll'),_mst=_ms?_ms.scrollTop:0;
+  $('#modal').innerHTML = UI.dbuild&&UI.ded&&UI.tab==='cartes'?deckBuilderModal():UI.cosPick&&UI.ded&&UI.tab==='cartes'?cosPickModal():UI.avPick&&UI.tab==='params'&&ACC.p?`<div class="modal-bg" data-a="avclose"><div class="modal avpick"><h3 class="xo">Photo de profil</h3><div class="avcircles">${[{k:'',n:'Base'},...AVATARS.filter(a=>(ACC.p.avatars||[]).includes(a.k))].map(a=>{const cur=(ACC.p.avatar||'')===a.k,sel=(UI.avSel??(ACC.p.avatar||''))===a.k;
     return `<button class="avcir ${sel?'sel':''} ${cur?'cur':''}" data-a="avsel:${a.k||'base'}" aria-label="${a.n}"><span class="shopav">${a.k?avatarHTML(a.k):AVATAR_SVG}</span></button>`;}).join('')}</div>
     ${UI.avSel!=null&&UI.avSel!==(ACC.p.avatar||'')?`<button class="primary xo avok" data-a="setav:${UI.avSel||'base'}">Changer la photo de profil</button>`:''}</div></div>`:UI.pack?renderPackOpen():(UI.packAsk||UI.packOpening)&&UI.tab==='home'?renderPackAsk():UI.logoutAsk&&UI.tab==='params'?`<div class="modal-bg" data-a="logoutno"><div class="modal qmodal"><h3 class="xo">Se déconnecter ?</h3><div class="qbtns"><button data-a="logoutno">Non</button><button class="primary xo" data-a="acclogout">Oui</button></div></div></div>`:UI.detail?renderDetail(UI.detail):UI.colf&&UI.tab==='cartes'?renderColFilters():UI.exportText!==null?renderExport():UI.confirmQuit&&inMatch?renderQuitModal():inMatch&&G.pending[0]&&G.pending[0].kind==='deckpick'&&mine_(G.pending[0].p)?renderDeckpick():UI.bigc&&UI.mmodal&&inMatch?cardView(UI.bigc,'','closebig'):UI.mmodal&&inMatch?renderMatchModal():UI.sheet&&inMatch?renderSheet():'';
+  {const m=$('#modal .mscroll');if(m&&_mst)m.scrollTop=_mst;}
   if(inMatch) sizeBoard();
   fitArt();
   if(NET.role==='host'&&G&&G.online) netBroadcast();
@@ -1829,7 +1845,7 @@ function matchDeckDefs(keys){const o={};keys.forEach(k=>{const x=exportDef(k);if
 
 /* ---- éditeur ---- */
 const rid=()=>Array.from({length:8},()=>'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random()*36)]).join('');
-function dedFrom(d){return {id:d.id,name:d.name,cards:Object.assign({},d.cards||{}),coin:d.coin||null,sleeve:d.sleeve||null};}
+function dedFrom(d){return {id:d.id,name:String(d.name).toUpperCase(),cards:Object.assign({},d.cards||{}),coin:d.coin||null,sleeve:d.sleeve||null};}
 function dedList(){return Object.entries(UI.ded.cards).filter(([,n])=>n>0);}
 function dedTotal(){return dedList().reduce((t,[,n])=>t+n,0);}
 function dedDirty(){const s=(ACC.p.custom_decks||[]).find(d=>d.id===UI.ded.id);
@@ -1841,35 +1857,45 @@ function renderMesDecks(){
   const tiles=ks.map(k=>{const d=DECKS[k],sz=deckSize(k),ok=deckPlayable(k);
     return `<button class="dtile mydk" style="--tc:${deckColor(k)}" data-a="go:cartes:decks:mes:${k.slice(2)}"><span class="mydkslv" style='${sleeveCSS(k)}'></span><span class="mydkt"><span class="dt-name xo">${esc(d.name)}</span><small>${TYPES[d.type].name} · ${sz}/${CUSTOM_SIZE} cartes${ok?'':' · <b class="warn">incomplet</b>'}</small></span></button>`;}).join('');
   return `<div class="page ctr">${navHead('cartes','Mes decks')}
-    <div class="box sbox mydkbox"><div class="mydkhead"><span class="muted">${n} / ${CUSTOM_MAX} decks</span><button class="primary xo" data-a="newdeck" ${n>=CUSTOM_MAX?'disabled':''}>+ Créer un deck</button></div>
-    ${n?`<div class="dtiles mydks">${tiles}</div>`:'<p class="muted cap" style="margin:6px 0 0">Tu n\'as pas encore de deck. Crée le tien avec les cartes de ta collection !</p>'}</div></div>`;
+    <div class="box sbox mydkbox"><div class="mydkhead"><span class="muted">${n} / ${CUSTOM_MAX} decks</span></div>
+    <div class="dtiles mydks">${tiles}${n<CUSTOM_MAX?`<button class="dtile mydk mynew" data-a="newdeck"><span class="xo">+ Créer un deck</span></button>`:''}</div></div></div>`;
 }
 function renderDeckEditor(id){
   if(!ACC.p) return renderMesDecks();
   if(!UI.ded||UI.ded.id!==id){const s=(ACC.p.custom_decks||[]).find(d=>d.id===id);if(!s){UI.nav.cartes=['decks','mes'];return renderMesDecks();}UI.ded=dedFrom(s);}
-  const D=UI.ded,list=dedList(),tot=dedTotal(),type=autoType(list),t=TYPES[type],full=tot>=CUSTOM_SIZE;
+  const D=UI.ded,list=dedList(),tot=dedTotal(),t=TYPES[autoType(list)],full=tot>=CUSTOM_SIZE;
   const saved=(ACC.p.custom_decks||[]).some(d=>d.id===D.id),dirty=dedDirty();
   const cos=(cat,cur)=>{const k=cur||(cat==='coin'?'piece_base':'sleeve_base');return cat==='coin'?coinStill(k):`<div class="dkslv" style='${sleeveCSS(k)}'></div>`;};
-  const ident=`<div class="box dkid"><div class="dkit"><span class="dkl">Type</span><div class="dkv"><span class="dktype xo" style="color:${t.color};border-color:${t.color}">${t.name}</span></div><small class="dkh">automatique</small></div>
-    <div class="dkit"><span class="dkl">Sleeves</span><button class="dkv dkpick" data-a="cospick:sleeve">${cos('sleeve',D.sleeve)}</button><small class="dkh">toucher pour changer</small></div>
-    <div class="dkit"><span class="dkl">Pièce</span><button class="dkv dkpick" data-a="cospick:coin">${cos('coin',D.coin)}</button><small class="dkh">toucher pour changer</small></div></div>`;
-  const inDeck=DK_GROUPS.map(([title,f])=>{const it=list.filter(([id])=>f(id)).sort((a,b)=>C(a[0]).name.localeCompare(C(b[0]).name));if(!it.length)return'';
-    return `<h3>${title} <span class="muted">(${it.reduce((s,[,n])=>s+n,0)})</span></h3><div class="grid compact c4">${it.map(([id,n])=>cardHTML(id,{count:n,cls:'click dkc',attrs:`data-a="dkrem:${id}" title="Retirer un exemplaire"`})).join('')}</div>`;}).join('');
-  const pool=Object.keys(CARDS).filter(id=>ownedQty(id)>0);
-  const coll=DK_GROUPS.map(([title,f])=>{const it=pool.filter(f).sort((a,b)=>C(a).name.localeCompare(C(b).name));if(!it.length)return'';
-    return `<h3>${title}</h3><div class="grid compact c4">${it.map(id=>{const n=D.cards[id]||0,mx=Math.min(CUSTOM_COPIES,ownedQty(id)),can=n<mx&&!full;
-      return `<div class="dkadd ${can?'':'max'}">${cardHTML(id,{cls:'click',attrs:can?`data-a="dkadd:${id}" title="Ajouter un exemplaire"`:''})}<span class="dkn">${n}/${mx}</span></div>`;}).join('')}</div>`;}).join('');
+  const ident=`<div class="box dkid"><div class="dkit"><span class="dkl">Type</span><div class="dkv"><span class="dktype xo" style="color:${t.color};border-color:${t.color}">${t.name}</span></div></div>
+    <div class="dkit"><span class="dkl">Sleeves</span><button class="dkv dkpick" data-a="cospick:sleeve" aria-label="Changer les sleeves">${cos('sleeve',D.sleeve)}</button></div>
+    <div class="dkit"><span class="dkl">Pièce</span><button class="dkv dkpick" data-a="cospick:coin" aria-label="Changer la pièce">${cos('coin',D.coin)}</button></div></div>`;
   const miss=[];if(tot<CUSTOM_SIZE)miss.push(`encore ${CUSTOM_SIZE-tot} carte${s_(CUSTOM_SIZE-tot)}`);if(!hasStarter(list))miss.push('au moins 1 combattant ✯');
   const warn=miss.length?`<p class="dkwarn">Pour jouer ce deck : ${miss.join(' et ')}.</p>`:'<p class="dkok">✓ Deck complet, prêt à jouer.</p>';
   return `<div class="page ctr dked">${navHead('cartes',saved?'Modifier le deck':'Nouveau deck')}
-    <div class="box sbox dkname"><label class="dkl" for="dkname">Nom du deck</label><input id="dkname" maxlength="24" value="${esc(D.name)}" autocomplete="off"></div>
+    <div class="box sbox dkname"><label class="dkl" for="dkname">Nom du deck</label><input id="dkname" maxlength="24" value="${esc(D.name)}" autocomplete="off" autocapitalize="characters"></div>
     ${ident}
     <div class="box sbox"><div class="dkcount"><span class="xo">Cartes du deck</span><b class="${full?'full':''}">${tot} / ${CUSTOM_SIZE}</b></div>${warn}
-      ${list.length?`<p class="mcap" style="margin:4px 0 0">Touche une carte pour en retirer un exemplaire.</p>${inDeck}`:'<p class="muted cap" style="margin:6px 0 0">Ton deck est vide : ajoute des cartes depuis ta collection ci-dessous.</p>'}</div>
-    <div class="box sbox"><h3 class="xo grp" style="margin-top:0">Ta collection</h3><p class="mcap" style="margin-top:0">Touche une carte pour l'ajouter (${CUSTOM_COPIES} exemplaires maximum, dans la limite de ceux que tu possèdes).</p>${coll}</div>
+      <p class="mcap" style="margin:4px 0 8px">Touche un emplacement pour ajouter ou retirer des cartes.</p>${slotsHTML('dbopen')}</div>
     <div class="dkbar"><button class="ghost" data-a="dkdel" data-buy="dkdel">${UI.buyAsk==='dkdel'?'Confirmer la suppression':saved?'Supprimer':'Annuler'}</button><button class="primary xo" data-a="dksave" ${dirty&&D.name.trim()?'':'disabled'}>Enregistrer</button></div>
   </div>`;
 }
+// Cartes de la collection qu'on peut ajouter au deck
+function dkCollHTML(){const D=UI.ded,full=dedTotal()>=CUSTOM_SIZE,pool=Object.keys(CARDS).filter(id=>ownedQty(id)>0);
+  return DK_GROUPS.map(([title,f])=>{const it=pool.filter(f).sort((a,b)=>C(a).name.localeCompare(C(b).name));if(!it.length)return'';
+    return `<h3>${title}</h3><div class="grid compact c4">${it.map(id=>{const n=D.cards[id]||0,mx=Math.min(CUSTOM_COPIES,ownedQty(id)),can=n<mx&&!full;
+      return `<div class="dkadd ${can?'':'max'}">${cardHTML(id,{cls:'click',attrs:can?`data-a="dkadd:${id}" title="Ajouter un exemplaire"`:''})}<span class="dkn">${n}/${mx}</span></div>`;}).join('')}</div>`;}).join('');}
+// Aperçu du deck : 30 emplacements (cartes triées, puis emplacements vides avec un +)
+function slotCards(){const o=[];DK_GROUPS.forEach(([,f])=>dedList().filter(([id])=>f(id)).sort((a,b)=>C(a[0]).name.localeCompare(C(b[0]).name)).forEach(([id,n])=>{for(let i=0;i<n;i++)o.push(id);}));return o;}
+function slotHTML(id,act){
+  if(!id) return `<button class="dslot empty" data-a="${act==='dbopen'?'dbopen':'dbnop'}" aria-label="Emplacement libre"><span>+</span></button>`;
+  const c=C(id),col=c.cat==='creature'?TYPES[c.type].color:c.cat==='sort'?'#a371f7':'#8b949e';
+  return `<button class="dslot" style="--tc:${col}" data-a="${act==='dbopen'?'dbopen':'dkrem:'+id}" title="${esc(c.name)}"><span class="sn">${esc(c.name)}</span><span class="ss">${c.cat==='creature'?STARS[c.size]:c.cat==='sort'?'Atout':'Objet'}</span></button>`;}
+function slotsHTML(act){const cs=slotCards();return `<div class="dslots">${Array.from({length:CUSTOM_SIZE},(_,i)=>slotHTML(cs[i],act)).join('')}</div>`;}
+// Fenêtre de construction : les 30 emplacements en haut, la collection en dessous
+function deckBuilderModal(){const tot=dedTotal();
+  return `<div class="modal-bg" data-a="dbclose"><div class="modal dbsheet"><div class="dbhead"><span class="xo">Cartes du deck</span><b class="${tot>=CUSTOM_SIZE?'full':''}">${tot} / ${CUSTOM_SIZE}</b><button class="primary xo" data-a="dbdone">Terminé</button></div>
+    <div class="mscroll"><p class="mcap" style="margin:0 0 8px">Touche une carte du deck pour la retirer.</p>${slotsHTML('dbrem')}
+    <h3 class="xo grp">Ta collection</h3><p class="mcap" style="margin-top:0">Touche une carte pour l'ajouter (${CUSTOM_COPIES} exemplaires maximum, dans la limite de ceux que tu possèdes).</p>${dkCollHTML()}</div></div></div>`;}
 function cosPickModal(){
   if(!UI.cosPick||!UI.ded) return '';
   const cat=UI.cosPick,cur=(cat==='coin'?UI.ded.coin:UI.ded.sleeve)||'';
@@ -3007,9 +3033,13 @@ const H = {
   avclose(_,e,el){if(e.target!==el)return;UI.avPick=false;render();},
   shopdecks(){H.go('params','shop');requestAnimationFrame(()=>{const e=document.getElementById('shopdecks'),hd=document.querySelector('header');if(e)window.scrollTo(0,e.getBoundingClientRect().top+window.scrollY-(hd?hd.offsetHeight:0)-12);});},
   newdeck(){if(!ACC.p||(ACC.p.custom_decks||[]).length>=CUSTOM_MAX)return;const n=(ACC.p.custom_decks||[]).length;
-    UI.ded={id:rid(),name:'Mon deck '+(n+1),cards:{},coin:null,sleeve:null};UI.nav.cartes=['decks','mes',UI.ded.id];window.scrollTo(0,0);render();},
+    UI.ded={id:rid(),name:'MON DECK '+(n+1),cards:{},coin:null,sleeve:null};UI.nav.cartes=['decks','mes',UI.ded.id];window.scrollTo(0,0);render();},
   dkadd(id){const D=UI.ded;if(!D||!CARDS[id])return;const n=D.cards[id]||0;if(n>=Math.min(CUSTOM_COPIES,ownedQty(id))||dedTotal()>=CUSTOM_SIZE)return;D.cards[id]=n+1;render();},
   dkrem(id){const D=UI.ded;if(!D||!D.cards[id])return;D.cards[id]--;if(!D.cards[id])delete D.cards[id];render();},
+  dbopen(){if(!UI.ded)return;UI.dbuild=true;render();},
+  dbdone(){UI.dbuild=false;render();},
+  dbclose(_,e,el){if(e.target!==el)return;UI.dbuild=false;render();},
+  dbnop(){},
   cospick(cat){if(!UI.ded)return;UI.cosPick=cat;render();},
   cosclose(_,e,el){if(e.target!==el)return;UI.cosPick=null;render();},
   cosset(k){const x=COS(k);if(!UI.ded||!x)return;UI.ded[x.cat==='coin'?'coin':'sleeve']=x.base?null:k;UI.cosPick=null;render();},
@@ -3191,7 +3221,7 @@ document.addEventListener('change',e=>{if(e.target.closest('[data-col]')){colUpd
   if(k){const [key,v]=k.dataset.colchk.split(':'),a=UI.col[key],i=a.indexOf(v);if(k.checked&&i<0)a.push(v);if(!k.checked&&i>=0)a.splice(i,1);
     const g=$('#colgrid');if(g)g.innerHTML=colGridHTML();const c=$('#fcount');if(c)c.innerHTML=colCountTxt();return;}const o=e.target.closest('[data-opt]');if(o)UI[o.dataset.opt]=o.checked;});
 function colUpdate(e){const el=e.target.closest('[data-col]');if(!el)return false;UI.col[el.dataset.col]=el.value;const g=$('#colgrid');if(g)g.innerHTML=colGridHTML();const c=$('#fcount');if(c)c.innerHTML=colCountTxt();return true;}
-document.addEventListener('input',e=>{if(e.target.id==='dkname'&&UI.ded){UI.ded.name=e.target.value;const b=document.querySelector('[data-a="dksave"]');if(b)b.disabled=!(e.target.value.trim()&&dedDirty());return;}if(e.target.dataset&&e.target.dataset.af){const el=e.target,k=el.dataset.af;if(k==='name'){const v=cleanName(el.value);if(v!==el.value)el.value=v;}UI.af[k]=el.value;return;}if(/^nm[01]$/.test(e.target.id||'')){const el=e.target,v=cleanName(el.value);if(v!==el.value){const pos=Math.min(v.length,el.selectionStart||v.length);el.value=v;try{el.setSelectionRange(pos,pos);}catch(_){}}return;}if(colUpdate(e))return;const n=e.target.closest('[data-note]');if(n&&HIST[+n.dataset.note])HIST[+n.dataset.note].notes=n.value;});
+document.addEventListener('input',e=>{if(e.target.id==='dkname'&&UI.ded){const el=e.target,u=el.value.toUpperCase();if(u!==el.value){const p=el.selectionStart;el.value=u;try{el.setSelectionRange(p,p);}catch(_){}}UI.ded.name=u;const b=document.querySelector('[data-a="dksave"]');if(b)b.disabled=!(e.target.value.trim()&&dedDirty());return;}if(e.target.dataset&&e.target.dataset.af){const el=e.target,k=el.dataset.af;if(k==='name'){const v=cleanName(el.value);if(v!==el.value)el.value=v;}UI.af[k]=el.value;return;}if(/^nm[01]$/.test(e.target.id||'')){const el=e.target,v=cleanName(el.value);if(v!==el.value){const pos=Math.min(v.length,el.selectionStart||v.length);el.value=v;try{el.setSelectionRange(pos,pos);}catch(_){}}return;}if(colUpdate(e))return;const n=e.target.closest('[data-note]');if(n&&HIST[+n.dataset.note])HIST[+n.dataset.note].notes=n.value;});
 // Fenêtre Filtres ouverte : la collection derrière ne bouge pas
 document.addEventListener('wheel',e=>{if(UI.colf&&UI.tab==='cartes')e.preventDefault();},{passive:false});
 document.addEventListener('touchmove',e=>{if(UI.colf&&UI.tab==='cartes')e.preventDefault();},{passive:false});
